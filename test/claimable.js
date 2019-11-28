@@ -23,9 +23,9 @@ contract('Claimable', async (accounts) => {
     it('should initialize and set a correct owner', async () => {
       claimable = await Claimable.new();
 
-      let txHash = claimable.transactionHash;
-      let result = await truffleAssert.createTransactionResult(claimable, txHash);
-      
+      const txHash = claimable.transactionHash;
+      const result = await truffleAssert.createTransactionResult(claimable, txHash);
+
       assert.equal(await claimable.owner.call(), OWNER);
 
       assert.equal(result.logs.length, 1);

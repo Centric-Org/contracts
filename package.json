@@ -1,0 +1,34 @@
+{
+  "name": "URise",
+  "version": "1.0.0",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "private-network": "ganache-cli",
+    "test": "truffle test",
+    "compile": "truffle compile",
+    "validate-tests": "eslint test/*.js test/helpers/*.js --fix",
+    "validate-sol": "solium --dir contracts --fix"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bignumber.js": "^9.0.0",
+    "dotenv": "^8.1.0",
+    "eslint-config-google": "^0.14.0",
+    "ganache-cli": "^6.7.0",
+    "solidity-coverage": "^0.6.7",
+    "truffle": "^5.0.40",
+    "truffle-assertions": "^0.9.2",
+    "truffle-flattener": "^1.4.2",
+    "truffle-hdwallet-provider": "^1.0.17",
+    "web3": "^1.2.1"
+  },
+  "devDependencies": {
+    "solium": "^1.2.5",
+    "eslint": "^6.5.1"
+  }
+}

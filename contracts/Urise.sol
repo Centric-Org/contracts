@@ -99,7 +99,7 @@ contract Urise is UriseToken {
         return currentPrice;
     }
 
-    function updateQuarantineWalletAddress(address _newWallet) external onlyOwner returns(bool _isSuccess) {
+    function updateQuarantineWalletAddress(address _newWallet) external onlyContractOwner returns(bool _isSuccess) {
         require (_newWallet != quarantineWalletAddress, "CANNOT_APPROVE_CURRENT_WALLET");
         require (_newWallet != address(0), "INVALID_NEW_WALLET_ADDRESS");
     	  quarantineWalletAddress = _newWallet;
@@ -137,7 +137,7 @@ contract Urise is UriseToken {
      * Then one block each hour - to always have blocks for year ahead, using doRise method
      * _monthBlocks - hours in month, should be between 28*24 and 31*24
      */
-    function doCreateBlocks(uint _monthBlocks) external onlyOwner returns(bool _isSuccess) {
+    function doCreateBlocks(uint _monthBlocks) external onlyContractOwner returns(bool _isSuccess) {
         require(futureGrowthRate != 0, "WRONG_FUTURE_GROWTH_RATE");
         require(_monthBlocks >= 28*24 && _monthBlocks <= 31*24, "WRONG_MONTH_BLOCKS");
         for (uint _blockOfMonth = 1; _blockOfMonth <= 24; _blockOfMonth++) {
@@ -147,7 +147,7 @@ contract Urise is UriseToken {
     }
 
     // _priceFactors - see comments for mapping futureGrowthRateToPriceFactors
-    function updateFutureGrowthRate(uint _newGrowthRate, uint[4] _priceFactors) external onlyOwner returns(bool _isSuccess) {
+    function updateFutureGrowthRate(uint _newGrowthRate, uint[4] _priceFactors) external onlyContractOwner returns(bool _isSuccess) {
         require (_newGrowthRate != 0, "CANNOT_APPROVE_ZERO_RATE");
         require (_newGrowthRate != futureGrowthRate, "CANNOT_APPROVE_CURRENT_RATE");
         require (_newGrowthRate < GROWTH_RATE_BASE, "WRONG_GROWTH_RATE");
@@ -175,7 +175,7 @@ contract Urise is UriseToken {
      */
 
     // _monthBlocks - hours in a given month, can be 28*24, 29*24, 30*24 or 31*24
-    function doRise(uint _monthBlocks) external onlyOwner returns(bool _isSuccess) {
+    function doRise(uint _monthBlocks) external onlyContractOwner returns(bool _isSuccess) {
         require(futureGrowthRate != 0, "WRONG_FUTURE_GROWTH_RATE");
         require(_monthBlocks >= 28*24 && _monthBlocks <= 31*24, "WRONG_MONTH_BLOCKS");
         uint _currentHour = (now / 1 hours);
@@ -251,7 +251,7 @@ contract Urise is UriseToken {
         return _stableToIssue;
     }
 
-    function burnQuarantined(uint _change) internal onlyOwner returns(uint _riseBurnt) {
+    function burnQuarantined(uint _change) internal onlyContractOwner returns(uint _riseBurnt) {
         uint _quarantined = balanceOf(quarantineWalletAddress);
         uint _riseToBurn = _quarantined.sub(_quarantined.mul(CHANGE_BASE).div(uint(1).mul(CHANGE_BASE).add(_change)).div(CHANGE_BASE));
         burnFrom(quarantineWalletAddress, _riseToBurn);

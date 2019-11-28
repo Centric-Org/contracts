@@ -1,49 +1,8 @@
 pragma solidity ^0.4.24;
 
 import "./SafeMath.sol";
+import './helpers/Claimable.sol';
 
-
-contract Ownable {
-  address private _owner;
-
-  event OwnershipTransferred(
-    address indexed previousOwner,
-    address indexed newOwner
-  );
-
-  constructor() internal {
-    _owner = msg.sender;
-    emit OwnershipTransferred(address(0), _owner);
-  }
-
-  function owner() public view returns(address) {
-    return _owner;
-  }
-
-  modifier onlyOwner() {
-    require(isOwner());
-    _;
-  }
-
-  function isOwner() public view returns(bool) {
-    return msg.sender == _owner;
-  }
-
-  function renounceOwnership() public onlyOwner {
-    emit OwnershipTransferred(_owner, address(0));
-    _owner = address(0);
-  }
-
-  function transferOwnership(address newOwner) public onlyOwner {
-    _transferOwnership(newOwner);
-  }
-
-  function _transferOwnership(address newOwner) internal {
-    require(newOwner != address(0));
-    emit OwnershipTransferred(_owner, newOwner);
-    _owner = newOwner;
-  }
-}
 
 interface ITRC20 {
     function totalSupply() external view returns (uint256);
@@ -74,7 +33,7 @@ interface ITRC20 {
     );
 }
 
-contract TRC20 is ITRC20, Ownable {
+contract TRC20 is ITRC20, Claimable {
     using SafeMath for uint256;
 
     mapping (address => uint256) private _balances;
@@ -211,7 +170,7 @@ contract TRC20Burnable is TRC20 {
         return _burnableStorage;
     }
 
-    function burnStorage(uint256 value) public onlyOwner {
+    function burnStorage(uint256 value) public onlyContractOwner {
         _burn(_burnableStorage, value);
     }
 
@@ -219,7 +178,7 @@ contract TRC20Burnable is TRC20 {
         _burn(msg.sender, value);
     }
 
-    function burnFrom(address from, uint256 value) public onlyOwner {
+    function burnFrom(address from, uint256 value) public onlyContractOwner {
         _burnFrom(from, value);
     }
 }
@@ -252,16 +211,16 @@ contract TRC20Detailed is TRC20 {
 
 contract TRC20Mintable is TRC20 {
 
-    function mint(address to, uint256 value) public onlyOwner returns (bool) {
+    function mint(address to, uint256 value) public onlyContractOwner returns (bool) {
         _mint(to, value);
         return true;
     }
 }
 
 
-contract RiseToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
+contract UriseToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
-    function transferForOwner(address from, address to, uint256 value) public onlyOwner returns (bool) {
+    function transferForOwner(address from, address to, uint256 value) public onlyContractOwner returns (bool) {
         require(from != address(0), "EMPTY_FROM");
         require(to != address(0), "EMPTY_TO");
         _transfer(from, to, value);

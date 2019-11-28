@@ -93,7 +93,7 @@ contract Urise is UriseToken {
      * EXTERNAL FUNCTIONS
      */
 
-    function getPrice() external view returns(uint _currentPrice) {
+    function getPrice() external returns(uint _currentPrice) {
         uint _currentHour = (now / 1 hours);
         currentPrice = hoursToBlock[_currentHour].risePrice;
         return currentPrice;

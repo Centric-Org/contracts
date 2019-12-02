@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "private-network": "ganache-cli",
+    "private-network": "ganache-cli --time 1970-01-01T00:00:00Z",
     "test": "truffle test",
     "compile": "truffle compile",
     "validate-tests": "eslint test/*.js test/helpers/*.js --fix",
@@ -28,7 +28,7 @@
     "web3": "^1.2.1"
   },
   "devDependencies": {
-    "solium": "^1.2.5",
-    "eslint": "^6.5.1"
+    "eslint": "^6.5.1",
+    "solium": "^1.2.5"
   }
 }

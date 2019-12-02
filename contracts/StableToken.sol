@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
 
-import "./SafeMath.sol";
+import './SafeMath.sol';
 import './helpers/Claimable.sol';
 
 
@@ -73,7 +73,7 @@ contract TRC20 is ITRC20, Claimable {
     }
 
     function approve(address spender, uint256 value) public returns (bool) {
-        require(spender != address(0), "EMPTY_SPENDER");
+        require(spender != address(0), 'EMPTY_SPENDER');
 
         _allowed[msg.sender][spender] = value;
         emit Approval(msg.sender, spender, value);
@@ -100,7 +100,7 @@ contract TRC20 is ITRC20, Claimable {
     public
     returns (bool)
     {
-        require(spender != address(0), "EMPTY_SPENDER");
+        require(spender != address(0), 'EMPTY_SPENDER');
 
         _allowed[msg.sender][spender] = (
         _allowed[msg.sender][spender].add(addedValue));
@@ -115,7 +115,7 @@ contract TRC20 is ITRC20, Claimable {
     public
     returns (bool)
     {
-        require(spender != address(0), "EMPTY_SPENDER");
+        require(spender != address(0), 'EMPTY_SPENDER');
 
         _allowed[msg.sender][spender] = (
         _allowed[msg.sender][spender].sub(subtractedValue));
@@ -124,7 +124,7 @@ contract TRC20 is ITRC20, Claimable {
     }
 
     function _transfer(address from, address to, uint256 value) internal {
-        require(to != address(0), "EMPTY_TO");
+        require(to != address(0), 'EMPTY_TO');
 
         _balances[from] = _balances[from].sub(value);
         _balances[to] = _balances[to].add(value);
@@ -132,7 +132,7 @@ contract TRC20 is ITRC20, Claimable {
     }
 
     function _mint(address account, uint256 value) internal {
-        require(account != address(0), "EMPTY_TO");
+        require(account != address(0), 'EMPTY_TO');
 
         _totalSupply = _totalSupply.add(value);
         _balances[account] = _balances[account].add(value);
@@ -140,7 +140,7 @@ contract TRC20 is ITRC20, Claimable {
     }
 
     function _burn(address account, uint256 value) internal {
-        require(account != address(0), "EMPTY_ACCOUNT");
+        require(account != address(0), 'EMPTY_ACCOUNT');
 
         _totalSupply = _totalSupply.sub(value);
         _balances[account] = _balances[account].sub(value);
@@ -225,37 +225,38 @@ contract StableToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     address public uriseContract;
     address private uriseContractOwner;
 
-    constructor(address _mintSaver, address _burnableStorage, address _uriseContractOwner)
+    constructor(address _mintSaver, address _burnableStorage)
         public
-        TRC20Detailed("TEST STABLE Token", "TEST STBL", 8)
+        TRC20Detailed('TEST STABLE Token', 'TEST STBL', 8)
         TRC20Burnable(_burnableStorage)
     {
         mint(_mintSaver, 0);
-        uriseContractOwner = _uriseContractOwner;
     }
 
     modifier onlyUrise() {
-        require(uriseContract != address(0), "URISE_NOT_SET");
-        require(msg.sender == uriseContract, "NOT_URISE");
+        require(uriseContract != address(0), 'URISE_NOT_SET');
+        require(msg.sender == uriseContract, 'NOT_URISE');
         _;
     }
 
     function updateRiseContract(address _newUriseContract) public onlyContractOwner returns(bool _isSuccess, address _uriseContract) {
-        require(_newUriseContract != address(0), "EMPTY_ADDRESS");
-        require(_newUriseContract != uriseContract, "SAME_ADDRESS");
+        require(_newUriseContract != address(0), 'EMPTY_ADDRESS');
+        require(_newUriseContract != uriseContract, 'SAME_ADDRESS');
         uriseContract = _newUriseContract;
+
+        uriseContractOwner = Claimable(_newUriseContract).owner();
         return (true, uriseContract);
     }
 
     function transferForOwner(address _from, address _to, uint256 _value) public onlyContractOwner returns (bool) {
-        require(_from != address(0), "EMPTY_FROM");
-        require(_to != address(0), "EMPTY_TO");
+        require(_from != address(0), 'EMPTY_FROM');
+        require(_to != address(0), 'EMPTY_TO');
         _transfer(_from, _to, _value);
         return true;
     }
 
     function getOwner() external returns(address _owner) {
-        require(msg.sender == uriseContractOwner, "CALLER_NOT_AUTHORIZED");
+        require(msg.sender == uriseContractOwner, 'CALLER_NOT_AUTHORIZED');
         return _owner;
     }
 

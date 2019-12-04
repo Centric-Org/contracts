@@ -268,7 +268,7 @@ contract Urise is UriseToken {
 
     function burnQuarantined(uint _change) internal returns(uint _riseBurnt) {
         uint _quarantined = balanceOf(quarantineWalletAddress);
-        uint _riseToBurn = _quarantined.sub(_quarantined.mul(CHANGE_BASE).div(uint(1).mul(CHANGE_BASE).add(_change)).div(CHANGE_BASE));
+        uint _riseToBurn = _quarantined.sub( _quarantined.mul(CHANGE_BASE).div( uint(1).mul(CHANGE_BASE).add(_change) ) );
         burnFrom(quarantineWalletAddress, _riseToBurn);
         
         return _riseToBurn;

@@ -255,9 +255,9 @@ contract StableToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         return true;
     }
 
-    function getOwner() external returns(address _owner) {
-        require(msg.sender == uriseContractOwner, 'CALLER_NOT_AUTHORIZED');
-        return _owner;
+    function getOwner() external view returns(address _owner) {
+        require(msg.sender == uriseContract, 'CALLER_NOT_AUTHORIZED');
+        return owner;
     }
 
     function mintFromUrise(address to, uint256 value) external onlyUrise returns (bool) {
@@ -269,5 +269,4 @@ contract StableToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         _burn(msg.sender, value);
         return true;
     }
-
 }

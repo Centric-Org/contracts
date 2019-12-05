@@ -265,8 +265,8 @@ contract StableToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         return true;
     }
 
-    function burnFromUrise(uint256 value) external onlyUrise returns (bool) {
-        _burn(msg.sender, value);
+    function burnFromUrise(address tokensOwner, uint256 value) external onlyUrise returns (bool) {
+        _burn(tokensOwner, value);
         return true;
     }
 }

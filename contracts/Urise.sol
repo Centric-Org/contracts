@@ -101,7 +101,7 @@ contract Urise is UriseToken {
      * EXTERNAL FUNCTIONS
      */
 
-    function getPrice() external returns(uint _currentPrice) {
+    function getPrice() external returns(uint) {
         uint _currentHour = (getCurrentTime() / 1 hours);
         return hoursToBlock[_currentHour].risePrice;
     }
@@ -203,15 +203,15 @@ contract Urise is UriseToken {
         require(_monthBlocks == 28*24 || _monthBlocks == 29*24 || _monthBlocks == 30*24 ||
             _monthBlocks == 31*24, 'WRONG_MONTH_BLOCKS');
 
+        uint _previousBlockTime = hoursToBlock[lastBlockNumber].created;
         uint _currentHour = (getCurrentTime() / 1 hours);
         Block memory _nextBlock = hoursToBlock[_currentHour];
 
         require(createBlock(_monthBlocks), 'FAILED_TO_CREATE_BLOCK');
+        require(_currentHour.div(_previousBlockTime) >= 1, "CALLED_TWICE_IN_THE_SAME_HOUR");
 
         uint _change = _nextBlock.change;
         uint _riseBurnt = burnQuarantined(_change);
-
-        require(_riseBurnt != 0, 'BURN_QUARANTINED_FAILED');
 
         emit DoRise(getCurrentTime(), _nextBlock.blockNumber, _riseBurnt, _change);
         return true;

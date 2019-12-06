@@ -11,9 +11,9 @@ contract UriseMock is Urise {
 
     function getCurrentTime () public view returns(uint256) {
         if(currentTime == 0) {
-          return 3600;
+            return 3600;
         } else {
-          return currentTime;
+            return currentTime;
         }
     }
 

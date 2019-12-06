@@ -632,7 +632,6 @@ contract('Urise', async (accounts) => {
       await uriseToken.createBlockMock(672);
 
       await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
 
       const result = await uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY});
 
@@ -655,7 +654,6 @@ contract('Urise', async (accounts) => {
       await uriseToken.createBlockMock(672);
 
       await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 100000, {from: SOMEBODY});
 
       const result = await uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY});
 
@@ -684,7 +682,6 @@ contract('Urise', async (accounts) => {
       await uriseToken.createBlockMock(672);
 
       await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
 
       const result = await uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY});
 
@@ -706,39 +703,10 @@ contract('Urise', async (accounts) => {
       await uriseToken.createBlockMock(672);
 
       await uriseToken.mint(SOMEBODY, 10);
-      await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
 
       await assertReverts(uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY}));
 
       assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), '10');
-      assert.equal((await uriseToken.balanceOf(quarantineAddress)).toString(), '0');
-      assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), '0');
-    });
-
-    it('should not be possible to switchToStable with wrong approval', async () => {
-      await uriseToken.updateFutureGrowthRate(101, [39050, 37703, 36446, 35270]);
-      await uriseToken.createBlockMock(672);
-
-      await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 40000, {from: SOMEBODY});
-
-      await assertReverts(uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY}));
-
-      assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), '100000');
-      assert.equal((await uriseToken.balanceOf(quarantineAddress)).toString(), '0');
-      assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), '0');
-    });
-
-    it('should not be possible to switchToStable with wrong approval', async () => {
-      await uriseToken.updateFutureGrowthRate(101, [39050, 37703, 36446, 35270]);
-      await uriseToken.createBlockMock(672);
-
-      await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 40000, {from: SOMEBODY});
-
-      await assertReverts(uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY}));
-
-      assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), '100000');
       assert.equal((await uriseToken.balanceOf(quarantineAddress)).toString(), '0');
       assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), '0');
     });
@@ -951,15 +919,16 @@ contract('Urise', async (accounts) => {
       await uriseToken.mint(SOMEBODY, 100000);
       await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
       await uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY});
+      await uriseToken.setCurrentTime(7201);
 
       const result = await uriseToken.doRise(720);
 
       assert.equal(result.logs.length, 3);
       assert.equal(result.logs[2].event, 'DoRise');
-      assert.equal(result.logs[2].args.time, 3600);
-      assert.equal(result.logs[2].args.blockNumber, 1);
+      assert.equal(result.logs[2].args.time, 7201);
+      assert.equal(result.logs[2].args.blockNumber, 2);
       assert.equal(result.logs[2].args.riseAmountBurnt, 15);
-      assert.equal(result.logs[2].args.change, 30000);
+      assert.equal(result.logs[2].args.change, 29991);
     });
 
     it('should not be possible to doRise with invalid futureGrowthRate but valid monthBlocks from owner', async () => {

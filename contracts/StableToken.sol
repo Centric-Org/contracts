@@ -6,7 +6,6 @@ import './TRC20.sol';
 contract StableToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
     address public uriseContract;
-    address private uriseContractOwner;
 
     constructor(address _mintSaver, address _burnableStorage)
         public
@@ -17,33 +16,16 @@ contract StableToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     }
 
     modifier onlyUrise() {
-        require(uriseContract != address(0), 'URISE_NOT_SET');
-        require(msg.sender == uriseContract, 'NOT_URISE');
+        require(msg.sender == uriseContract, 'CALLER_MUST_BE_URISE_CONTRACT_ONLY');
         _;
     }
 
-    function updateRiseContract(address _newUriseContract) 
-    public 
-    onlyContractOwner 
-    returns(bool _isSuccess, address _uriseContract) {
-        require(_newUriseContract != address(0), 'EMPTY_ADDRESS');
-        require(_newUriseContract != uriseContract, 'SAME_ADDRESS');
-        uriseContract = _newUriseContract;
-
-        uriseContractOwner = Claimable(_newUriseContract).owner();
-        return (true, uriseContract);
+    function setUriseContract(address _uriseContractAddress) external onlyContractOwner() {
+        require(uriseContract == address(0), 'URISE_CONTRACT_ADDRESS_IS_ALREADY_SET');
+        uriseContract = _uriseContractAddress;
     }
 
-    function transferForOwner(address _from, address _to, uint256 _value) 
-    public onlyContractOwner returns (bool) {
-        require(_from != address(0), 'EMPTY_FROM');
-        require(_to != address(0), 'EMPTY_TO');
-        _transfer(_from, _to, _value);
-        return true;
-    }
-
-    function getOwner() external view returns(address _owner) {
-        require(msg.sender == uriseContract, 'CALLER_NOT_AUTHORIZED');
+    function getOwner() external onlyUrise() view returns(address _owner) {
         return owner;
     }
 

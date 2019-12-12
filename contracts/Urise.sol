@@ -1,7 +1,6 @@
 pragma solidity 0.4.24;
 
-import './SafeMath.sol';
-import './UriseToken.sol';
+import './TRC20.sol';
 
 contract StableTokenInterface {
     function balanceOf(address who) external view returns (uint256);
@@ -10,12 +9,12 @@ contract StableTokenInterface {
     function burnFromUrise(uint256 value) public returns (bool);
 }
 
-contract Urise is UriseToken {
+contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     /**
      * STATE VARIABLES
      */
     address public stableContract;
-    address public quarantineWalletAddress;
+    uint256 public quarantineBalance;
     uint256 public lastBlockNumber;
 
     // percentage (fraction of 1, e.g.: 0.3)
@@ -28,7 +27,6 @@ contract Urise is UriseToken {
     uint256 public PRICE_BASE = 10000;
 
     struct Block {
-        uint256 blockNumber;   // hours, unix epoch time
         uint256 risePrice;     // USD price of URISE for the block
         uint256 growthRate;    // FutureGrowthRate value at the time of block creation
         //solium-disable-next-line max-len
@@ -61,29 +59,25 @@ contract Urise is UriseToken {
 
     event ConvertToStable(
         address converter,
-        uint256 amountConverted,
-        uint256 activeBlockNumber
+        uint256 amountConverted
     );
 
     event ConvertToRise(
         address converter,
-        uint256 amountConverted,
-        uint256 activeBlockNumber
+        uint256 amountConverted
     );
 
-    event MintStable(address receiver);
+    event MintStable(address receiver, uint256 amount);
 
     event BurnStable(uint256 amountBurnt);
-
-    event QuarantineWalletUpdated(address _oldWallet, address _newWallet);
-
-    event StableTokenAddressUpdated(address _oldAddress, address _newAddress);
 
     event FutureGrowthRateUpdated(uint256 _oldValue, uint256 _newValue,
     uint256[4] _newPriceFactors);
 
     event BlockCreated(uint256 _blockNumber, uint256 _risePrice,
     uint256 _futureGrowthRate, uint256 _change, uint256 _created);
+
+    event QuarantinBalanceBurnt(uint256 amount);
 
 
     constructor(address _mintSaver, address _burnableStorage, address _stableContract)
@@ -93,7 +87,6 @@ contract Urise is UriseToken {
     {
         mint(_mintSaver, 100000000000000000);   // 1 Billion
         stableContract = _stableContract;
-        quarantineWalletAddress = msg.sender;
 
         // set so to have the first created block as active
         lastBlockNumber = getCurrentTime() / 1 hours - 1;    
@@ -104,34 +97,13 @@ contract Urise is UriseToken {
      * EXTERNAL FUNCTIONS
      */
 
-    function getPrice() external returns(uint256) {
-        return hoursToBlock[lastBlockNumber].risePrice;
+    function getCurrentPrice() external view returns(uint256) {
+        return hoursToBlock[getCurrentTime().div(1 hours)].risePrice;
     }
-
-    function updateQuarantineWalletAddress(address _newWallet) 
-    external onlyContractOwner returns(bool _isSuccess) {
-        require (_newWallet != quarantineWalletAddress, 'CANNOT_APPROVE_CURRENT_WALLET');
-        require (_newWallet != address(0), 'QUARANTINE_WALLET_CANNOT_BE_SET_TO_ZERO');
-        
-        address _oldWallet = quarantineWalletAddress;
-        quarantineWalletAddress = _newWallet;
-
-        emit QuarantineWalletUpdated(_oldWallet, _newWallet);
-        return true;
+    
+    function getPrice(uint256 _hour) external view returns(uint256) {
+        return hoursToBlock[_hour].risePrice;
     }
-
-    function updateStableTokenAddress(address _newAddress) 
-    external onlyContractOwner returns(bool _isSuccess) {
-        require (_newAddress != quarantineWalletAddress, 'CANNOT_APPROVE_CURRENT_ADDRESS');
-        require (_newAddress != address(0), 'STABLE_TOKEN_CANNOT_BE_SET_TO_ZERO');
-        
-        address _oldAddress = stableContract;
-        stableContract = _newAddress;
-
-        emit StableTokenAddressUpdated(_oldAddress, _newAddress);
-        return true;
-    }
-
 
 /** 
  *  uint256 blockNumber;   // hours, unix epoch time
@@ -143,19 +115,17 @@ contract Urise is UriseToken {
 
     function getBlockData(uint256 _hoursEpoch) 
         external view
-        returns(uint256 _blockNumber, uint256 _risePrice, uint256 _growthRate, uint256 _change, uint256 _created) 
+        returns(uint256 _risePrice, uint256 _growthRate, uint256 _change, uint256 _created) 
         {
         require (_hoursEpoch > 0, 'EMPTY_HOURS_VALUE');
         require (_hoursEpoch <= (getCurrentTime() / 1 hours), 'HOURS_IN_FUTURE');
-        require (hoursToBlock[_hoursEpoch].blockNumber > 0, 'EMPTY_BLOCK');
-        
-        _blockNumber = hoursToBlock[_hoursEpoch].blockNumber;
+
         _risePrice = hoursToBlock[_hoursEpoch].risePrice;
         _growthRate = hoursToBlock[_hoursEpoch].growthRate;
         _change = hoursToBlock[_hoursEpoch].change;
         _created = hoursToBlock[_hoursEpoch].created;
 
-        return (_blockNumber, _risePrice, _growthRate, _change, _created);
+        return (_risePrice, _growthRate, _change, _created);
     }
 
     /** 
@@ -177,7 +147,7 @@ contract Urise is UriseToken {
 
     // _priceFactors - see comments for mapping futureGrowthRateToPriceFactors
     function updateFutureGrowthRate(uint256 _newGrowthRate, uint256[4] _priceFactors) 
-    external onlyContractOwner returns(bool _isSuccess) {
+    external onlyAdmin() returns(bool _isSuccess) {
         require (_newGrowthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
         require (_newGrowthRate != futureGrowthRate, 'CANNOT_APPROVE_CURRENT_RATE');
         require (_newGrowthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
@@ -198,41 +168,96 @@ contract Urise is UriseToken {
         return true;
     }
 
-    function getActiveBlockNumber() public view returns(uint256 _activeBlockNumber) {
-        _activeBlockNumber = hoursToBlock[lastBlockNumber].blockNumber;
-        return _activeBlockNumber;
-    }
-
-    /**
-     * INTERNAL FUNCTIONS
-     */
-
     // _monthBlocks - hours in a given month, can be 28*24, 29*24, 30*24 or 31*24
-    function doRise(uint256 _monthBlocks) external onlyContractOwner returns(bool _isSuccess) {
+    function doRise(uint256 _monthBlocks) external onlyAdmin() returns(bool _isSuccess) {
         require(futureGrowthRate != 0, 'WRONG_FUTURE_GROWTH_RATE');
         require(_monthBlocks == 28*24 || _monthBlocks == 29*24 || _monthBlocks == 30*24 ||
             _monthBlocks == 31*24, 'WRONG_MONTH_BLOCKS');
-
-        uint256 _previousBlockTime = hoursToBlock[lastBlockNumber].created;
-        uint256 _currentHour = (getCurrentTime() / 1 hours);
-
+        require(getCurrentHour().sub(hoursToBlock[lastBlockNumber].created) >= 1,
+            'BLOCK_IS_ALREADY_CREATED_IN_THIS_HOUR');
         require(createBlock(_monthBlocks), 'FAILED_TO_CREATE_BLOCK');
-        require(_currentHour.sub(_previousBlockTime) >= 1, 'CALLED_TWICE_IN_THE_SAME_HOUR');
 
-        Block memory _newBlock = hoursToBlock[lastBlockNumber];
-
-        uint256 _change = _newBlock.change;
+        uint256 _change = hoursToBlock[lastBlockNumber].change;
         uint256 _riseBurnt = burnQuarantined(_change);
 
-        emit DoRise(getCurrentTime(), _newBlock.blockNumber, _riseBurnt, _change);
+        emit DoRise(getCurrentTime(), lastBlockNumber, _riseBurnt, _change);
         return true;
     }
 
+    function switchToRise(uint256 _stableAmount, address _riseRecipient) 
+    external returns(bool _isSuccess) {
+        require(hoursToBlock[getCurrentHour()].risePrice != 0,
+            'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
+
+        require(StableTokenInterface(stableContract).balanceOf(msg.sender) >= _stableAmount,
+            'INSUFFICIENT_STABLE_BALANCE');
+
+        require(StableTokenInterface(stableContract).burnFromUrise(_stableAmount),
+            'BURNING_STABLE_FAILED');
+
+        emit BurnStable(_stableAmount);
+
+        uint256 _riseToDequarantine =
+            (_stableAmount.mul(PRICE_BASE)).div(hoursToBlock[getCurrentHour()].risePrice);
+
+        quarantineBalance = quarantineBalance.sub(_riseToDequarantine);
+        require(this.transfer(_riseRecipient, _riseToDequarantine),
+            'SWITCH_TO_URISE_FAILED');
+
+        emit ConvertToRise(msg.sender, _stableAmount);
+        return true;
+    }
+
+    function switchToStable(uint256 _riseAmount, address _stableRecipient) 
+    external returns(uint256 _stables) {
+        require(balanceOf(msg.sender) >= _riseAmount, 'INSUFFICIENT_BALANCE');
+        require(hoursToBlock[getCurrentHour()].risePrice != 0,
+            'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
+
+        quarantineBalance = quarantineBalance.add(_riseAmount);
+        require(transfer(address(this), _riseAmount), 'URISE_TRANSFER_FAILED');
+
+        uint256 _stableToIssue =
+            (_riseAmount.mul(hoursToBlock[getCurrentHour()].risePrice)).div(PRICE_BASE);
+
+        require(StableTokenInterface(stableContract)
+            .mintFromUrise(_stableRecipient, _stableToIssue), 'STABLE_MINT_FAILED');
+
+        emit MintStable(_stableRecipient, _stableToIssue);
+        
+        emit ConvertToStable(msg.sender, _riseAmount);
+        return _stableToIssue;
+    }
+    
+    function withdrawLostTokens(uint256 _amount) external onlyContractOwner() returns(bool _success) {
+        require(_amount <= quarantineBalance.sub(balanceOf(address(this))));
+        
+        quarantineBalance = quarantineBalance.sub(_amount);
+        this.transfer(msg.sender, _amount);
+        
+        return true;
+    }
+    
+    function getCurrentHour() public view returns (uint256) {
+        return getCurrentTime().div(1 hours);
+    }
+
+    function burnQuarantined(uint256 _change) internal returns(uint256 _riseBurnt) {
+        uint256 _quarantined = quarantineBalance;
+        uint256 _riseToBurn = _quarantined.sub(_quarantined.mul(CHANGE_BASE).div(
+            uint256(1).mul(CHANGE_BASE).add(_change)));
+            
+        quarantineBalance = quarantineBalance.sub(_riseToBurn);
+        this.burn(_riseToBurn);
+        
+        emit QuarantinBalanceBurnt(_riseToBurn);
+        return _riseToBurn;
+    }
+    
     function createBlock(uint256 _monthBlocks) internal returns(bool _isSuccess) {
         uint256 _lastPrice = hoursToBlock[lastBlockNumber].risePrice;
         if (_lastPrice == 0) _lastPrice = PRICE_BASE;
         uint256 _nextBlockNumber = lastBlockNumber.add(1);
-        require(hoursToBlock[_nextBlockNumber].blockNumber == 0, 'CANT_REPLACE_BLOCK');
         
         uint256 _risePriceFactor;
         if (_monthBlocks == 28*24) _risePriceFactor =
@@ -252,7 +277,6 @@ contract Urise is UriseToken {
         uint256 _created = getCurrentTime() / 1 hours;
 
         hoursToBlock[_nextBlockNumber] = Block({
-            blockNumber: _nextBlockNumber,
             risePrice: _risePrice,
             growthRate: futureGrowthRate,
             change: _change,
@@ -263,64 +287,6 @@ contract Urise is UriseToken {
         
         emit BlockCreated(_nextBlockNumber, _risePrice, futureGrowthRate, _change, _created);
         return true;
-    }
-
-
-    /**
-    * INTERNAL FUNCTIONS
-    */
-
-    function switchToRise(uint256 _stableAmount, address _riseRecipient) 
-    external returns(bool _isSuccess) {
-        require(msg.sender == StableTokenInterface(stableContract).getOwner(),
-            'STABLE_OWNER_ONLY');
-
-        require(StableTokenInterface(stableContract).balanceOf(msg.sender) >= _stableAmount,
-            'INSUFFICIENT_STABLE_BALANCE');
-
-        require(StableTokenInterface(stableContract).burnFromUrise(_stableAmount),
-            'BURNING_STABLE_FAILED');
-
-        emit BurnStable(_stableAmount);
-      
-        uint256 _riseToDequarantine = 
-            (_stableAmount.mul(PRICE_BASE)).div(hoursToBlock[lastBlockNumber].risePrice);
-
-        require(transferFrom(quarantineWalletAddress, _riseRecipient, _riseToDequarantine),
-            'SWITCH_TO_URISE_FAILED');
-
-        uint256 _activeBlockNumber = getActiveBlockNumber();
-
-        emit ConvertToRise(msg.sender, _stableAmount, _activeBlockNumber);
-        return true;
-    }
-
-    function switchToStable(uint256 _riseAmount, address _stableRecipient) 
-    external returns(uint256 _stables) {
-        require(balanceOf(msg.sender) >= _riseAmount, 'INSUFFICIENT_BALANCE');
-        require(transfer(quarantineWalletAddress, _riseAmount), 'URISE_TRANSFER_FAILED');
-
-        uint256 _stableToIssue =
-            (_riseAmount.mul(hoursToBlock[lastBlockNumber].risePrice)).div(PRICE_BASE);
-
-        require(StableTokenInterface(stableContract)
-            .mintFromUrise(_stableRecipient, _stableToIssue), 'STABLE_MINT_FAILED');
-
-        emit MintStable(_stableRecipient);
-        
-        uint256 _activeBlockNumber = getActiveBlockNumber();
-
-        emit ConvertToStable(msg.sender, _riseAmount, _activeBlockNumber);
-        return _stableToIssue;
-    }
-
-    function burnQuarantined(uint256 _change) internal returns(uint256 _riseBurnt) {
-        uint256 _quarantined = balanceOf(quarantineWalletAddress);
-        uint256 _riseToBurn = _quarantined.sub(_quarantined.mul(CHANGE_BASE).div(
-            uint256(1).mul(CHANGE_BASE).add(_change)));
-        burnFrom(quarantineWalletAddress, _riseToBurn);
-        
-        return _riseToBurn;
     }
 
     // for testing purposes

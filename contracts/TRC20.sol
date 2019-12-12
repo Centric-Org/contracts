@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import './SafeMath.sol';
-import './helpers/Claimable.sol';
+import './helpers/Administrable.sol';
 
 
 interface ITRC20 {
@@ -33,7 +33,7 @@ interface ITRC20 {
     );
 }
 
-contract TRC20 is ITRC20, Claimable {
+contract TRC20 is ITRC20, Administrable {
     using SafeMath for uint256;
 
     mapping (address => uint256) private _balances;

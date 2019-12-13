@@ -826,9 +826,10 @@ contract('Urise', async (accounts) => {
     });
   });
 
-  describe.only('switchToRise()', async () => {
+  describe('switchToRise()', async () => {
     beforeEach('set up stable contract', async () => {
       stableToken = await StableToken.new(OWNER, OWNER);
+      uriseToken = await Urise.new(OWNER, OWNER, stableToken.address);
       await stableToken.setUriseContract(uriseToken.address);
       await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
     });
@@ -838,16 +839,23 @@ contract('Urise', async (accounts) => {
       await uriseToken.doCreateBlocks(672);
       await uriseToken.setCurrentTime(72001);
       await uriseToken.doRise(672);
-      await uriseToken.switchToStable(1000, SOMEBODY, {from: SOMEBODY})
+      await uriseToken.switchToStable(1000, SOMEBODY, {from: SOMEBODY});
 
       assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), 1000);
       assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 1000);
       assert.equal((await uriseToken.quarantineBalance()).toString(), 1000);
-      assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), 1000);
+      assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), 1006);
 
-      const result = await uriseToken.switchToRise(900, SOMEBODY, {from: SOMEBODY});
+      const result = await uriseToken.switchToRise(1006, SOMEBODY, {from: SOMEBODY});
 
-      //assert.equal((await uriseToken.))
+      assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), 2000);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 0);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
+      assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), 0);
+
+      assert.equal(result.logs.length, 4);
+      assert.equal(result.logs[1].event, 'BurnStable');
+      assert.equal(result.logs[3].event, 'ConvertToRise');
     })
   });
 

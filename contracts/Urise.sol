@@ -6,7 +6,7 @@ contract StableTokenInterface {
     function balanceOf(address who) external view returns (uint256);
     function getOwner() external returns(address _owner);
     function mintFromUrise(address to, uint256 value) public returns (bool);
-    function burnFromUrise(uint256 value) public returns (bool);
+    function burnFromUrise(address tokensOwner, uint256 value) external returns (bool);
 }
 
 contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
@@ -192,7 +192,7 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         require(StableTokenInterface(stableContract).balanceOf(msg.sender) >= _stableAmount,
             'INSUFFICIENT_STABLE_BALANCE');
 
-        require(StableTokenInterface(stableContract).burnFromUrise(_stableAmount),
+        require(StableTokenInterface(stableContract).burnFromUrise(msg.sender, _stableAmount),
             'BURNING_STABLE_FAILED');
 
         emit BurnStable(_stableAmount);

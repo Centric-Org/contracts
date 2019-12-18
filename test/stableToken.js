@@ -21,111 +21,84 @@ contract('StableToken', async (accounts) => {
     await reverter.snapshot();
   });
 
-  describe('updateRiseContract()', async () => {
-    it('should be possible to update quarantine wallet address to a new one by owner', async () => {
+  describe('setUriseContract()', async () => {
+    it('should be possible to set urise contract address to a new one by owner', async () => {
       assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
-      await stableToken.updateRiseContract(uriseToken.address);
+      await stableToken.setUriseContract(uriseToken.address);
       assert.equal(await stableToken.uriseContract(), uriseToken.address);
     });
 
-    it('should not be possible to update quarantine wallet address to a new one not by owner', async () => {
+    it('should not be possible to set urise contract address to a new one not by owner', async () => {
       assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
-      await assertReverts(stableToken.updateRiseContract(uriseToken.address, {from: ANYBODY}));
-      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
-    });
-
-    it('should not be possible to update quarantine wallet address to a ADDRESS_NULL by owner', async () => {
-      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
-      await assertReverts(stableToken.updateRiseContract(ADDRESS_NULL));
+      await assertReverts(stableToken.setUriseContract(uriseToken.address, {from: ANYBODY}));
       assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
     });
 
-    it('should not be possible to update quarantine wallet address to a previous address by owner', async () => {
+    it('should not be possible to set urise contract address to a ADDRESS_NULL by owner', async () => {
       assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
-      await stableToken.updateRiseContract(uriseToken.address);
-      await assertReverts(stableToken.updateRiseContract(uriseToken.address));
+      await assertReverts(stableToken.setUriseContract(ADDRESS_NULL));
+      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
+    });
+
+    it('should not be possible to set urise contract address to a ADDRESS_NULL by not owner', async () => {
+      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
+      await assertReverts(stableToken.setUriseContract(ADDRESS_NULL, {from: ANYBODY}));
+      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
+    });
+
+    it('should be possible to set urise contract address to a new one by owner if it is already set', async () => {
+      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
+      await stableToken.setUriseContract(uriseToken.address);
+      assert.equal(await stableToken.uriseContract(), uriseToken.address);
+
+      await assertReverts(stableToken.setUriseContract(SOMEBODY));
+
       assert.equal(await stableToken.uriseContract(), uriseToken.address);
     });
 
-    it('should not be possible to update quarantine wallet address to a ADDRESS_NULL by not owner', async () => {
-      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
-      await assertReverts(stableToken.updateRiseContract(ADDRESS_NULL, {from: ANYBODY}));
-      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
+    describe('mintFromUrise()', async () => {
+      before('setUriseContract', async () => {
+        await stableToken.setUriseContract(SOMEBODY);
+      });
+
+      it('should be possible to mintFromUrise by urise contract address', async () => {
+        assert.equal((await stableToken.balanceOf(ANYBODY)).toString(), 0);
+
+        await stableToken.mintFromUrise(ANYBODY, 100, {from: SOMEBODY});
+
+        assert.equal((await stableToken.balanceOf(ANYBODY)).toString(), 100);
+      });
+
+      it('should not be possible to mintFromUrise by not urise contract address', async () => {
+        assert.equal((await stableToken.balanceOf(ANYBODY)).toString(), 0);
+
+        await assertReverts(stableToken.mintFromUrise(ANYBODY, 100, {from: ANYBODY}));
+
+        assert.equal((await stableToken.balanceOf(ANYBODY)).toString(), 0);
+      });
     });
 
-    it('should not be possible to update quarantine wallet address to a previous address by not owner', async () => {
-      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
-      await assertReverts(stableToken.updateRiseContract(OWNER, {from: ANYBODY}));
-      assert.equal(await stableToken.uriseContract(), ADDRESS_NULL);
-    });
-  });
+    describe('burnFromUrise()', async () => {
+      beforeEach('setUriseContract', async () => {
+        await stableToken.setUriseContract(SOMEBODY);
+        await stableToken.mintFromUrise(ANYBODY, 100, {from: SOMEBODY});
+      });
 
-  describe('transferForOwner()', async () => {
-    it('should be possible to transfer from one addresss to the other by owner', async () => {
-      await stableToken.mint(SOMEBODY, 100);
-      await stableToken.mint(ANYBODY, 100);
+      it('should be possible to burnFromUrise by urise contract address', async () => {
+        assert.equal((await stableToken.balanceOf(ANYBODY)).toString(), 100);
 
-      assert.isTrue(await stableToken.transferForOwner.call(ANYBODY, SOMEBODY, 50));
-      const result = await stableToken.transferForOwner(ANYBODY, SOMEBODY, 50);
+        await stableToken.burnFromUrise(ANYBODY, 100, {from: SOMEBODY});
 
-      assert.equal((await stableToken.balanceOf(ANYBODY)).toNumber(), 50);
-      assert.equal((await stableToken.balanceOf(SOMEBODY)).toNumber(), 150);
+        assert.equal((await stableToken.balanceOf(ANYBODY)).toString(), 0);
+      });
 
-      assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'Transfer');
-      assert.equal(result.logs[0].args.from, ANYBODY);
-      assert.equal(result.logs[0].args.to, SOMEBODY);
-      assert.equal(result.logs[0].args.value, 50);
-    });
+      it('should not be possible to burnFromUrise by not urise contract address', async () => {
+        assert.equal((await stableToken.balanceOf(ANYBODY)).toString(), 100);
 
-    it('should be possible to transfer from owner addresss to the other by owner', async () => {
-      await stableToken.mint(SOMEBODY, 100);
-      await stableToken.mint(OWNER, 100);
+        await assertReverts(stableToken.burnFromUrise(ANYBODY, 100, {from: ANYBODY}));
 
-      assert.isTrue(await stableToken.transferForOwner.call(OWNER, SOMEBODY, 50));
-      const result = await stableToken.transferForOwner(OWNER, SOMEBODY, 50);
-
-      assert.equal((await stableToken.balanceOf(OWNER)).toString(), '50');
-      assert.equal((await stableToken.balanceOf(SOMEBODY)).toNumber(), 150);
-
-      assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'Transfer');
-      assert.equal(result.logs[0].args.from, OWNER);
-      assert.equal(result.logs[0].args.to, SOMEBODY);
-      assert.equal(result.logs[0].args.value, 50);
-    });
-
-    it('should be possible to transfer from some addresss to the owner by owner', async () => {
-      await stableToken.mint(SOMEBODY, 100);
-      await stableToken.mint(OWNER, 100);
-
-      assert.isTrue(await stableToken.transferForOwner.call(SOMEBODY, OWNER, 50));
-      const result = await stableToken.transferForOwner(SOMEBODY, OWNER, 50);
-
-      assert.equal((await stableToken.balanceOf(OWNER)).toString(), '150');
-      assert.equal((await stableToken.balanceOf(SOMEBODY)).toNumber(), 50);
-
-      assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'Transfer');
-      assert.equal(result.logs[0].args.from, SOMEBODY);
-      assert.equal(result.logs[0].args.to, OWNER);
-      assert.equal(result.logs[0].args.value, 50);
-    });
-
-    it('should not be possible to transfer from null addresss to the other by owner', async () => {
-      await stableToken.mint(SOMEBODY, 100);
-
-      await assertReverts(stableToken.transferForOwner(ADDRESS_NULL, SOMEBODY, 50));
-
-      assert.equal((await stableToken.balanceOf(SOMEBODY)).toNumber(), 100);
-    });
-
-    it('should not be possible to transfer from some addresss to the null address by owner', async () => {
-      await stableToken.mint(SOMEBODY, 100);
-
-      await assertReverts(stableToken.transferForOwner(SOMEBODY, ADDRESS_NULL, 50));
-
-      assert.equal((await stableToken.balanceOf(SOMEBODY)).toNumber(), 100);
+        assert.equal((await stableToken.balanceOf(ANYBODY)).toString(), 100);
+      });
     });
   });
 

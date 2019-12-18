@@ -3,7 +3,7 @@ const Reverter = require('./helpers/reverter');
 const {assertReverts} = require('./helpers/assertThrows');
 const truffleAssert = require('truffle-assertions');
 
-contract('Claimable', async (accounts) => {
+contract('Administrable', async (accounts) => {
   const reverter = new Reverter(web3);
 
   let administrable;
@@ -22,8 +22,6 @@ contract('Claimable', async (accounts) => {
 
   describe('creating', async () => {
     it('should initialize and set an owner as admin', async () => {
-      administrable = await Administrable.new();
-
       const txHash = administrable.transactionHash;
       const result = await truffleAssert.createTransactionResult(administrable, txHash);
 
@@ -37,7 +35,7 @@ contract('Claimable', async (accounts) => {
 
   describe('appointAdmin()', async () => {
     it('should be possible to appoint admin by owner', async () => {
-      assert.isFlase(await administrable.isAdmin(SOMEBODY));
+      assert.isFalse(await administrable.isAdmin(SOMEBODY));
 
       const result = await administrable.appointAdmin(SOMEBODY);
 
@@ -49,7 +47,7 @@ contract('Claimable', async (accounts) => {
     });
 
     it('should be possible to set admin to address whitch is already admin by owner', async () => {
-      assert.isFlase(await administrable.isAdmin(SOMEBODY));
+      assert.isFalse(await administrable.isAdmin(SOMEBODY));
 
       await administrable.appointAdmin(SOMEBODY);
       const result = await administrable.appointAdmin(SOMEBODY);
@@ -62,7 +60,7 @@ contract('Claimable', async (accounts) => {
     });
 
     it('should not be possible to set admin by not owner', async () => {
-      assert.isFlase(await administrable.isAdmin(SOMEBODY));
+      assert.isFalse(await administrable.isAdmin(SOMEBODY));
 
       await assertReverts(administrable.appointAdmin(SOMEBODY, {from: ANYBODY}));
 
@@ -70,7 +68,7 @@ contract('Claimable', async (accounts) => {
     });
 
     it('should not be possible to set admin by admin but not owner', async () => {
-      assert.isFlase(await administrable.isAdmin(SOMEBODY));
+      assert.isFalse(await administrable.isAdmin(SOMEBODY));
 
       await administrable.appointAdmin(ANYBODY);
 

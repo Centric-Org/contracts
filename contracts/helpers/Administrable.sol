@@ -15,8 +15,8 @@ contract Administrable is Claimable {
     }
     
     modifier onlyAdmin () {
-       require(isAdmin[msg.sender]);
-       _;
+        require(isAdmin[msg.sender], 'NOT_AN_ADMIN');
+        _;
     }
     
     function appointAdmin (address _newAdmin) 
@@ -25,8 +25,8 @@ contract Administrable is Claimable {
             isAdmin[_newAdmin] = true;
         }
         
-    emit AdminAppointed(_newAdmin);
-    return true;
+        emit AdminAppointed(_newAdmin);
+        return true;
     }
     
     function dismissAdmin (address _admin)

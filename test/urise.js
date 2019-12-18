@@ -2,6 +2,7 @@ const Urise = artifacts.require('UriseMock');
 const StableToken = artifacts.require('StableToken');
 const Reverter = require('./helpers/reverter');
 const {assertReverts} = require('./helpers/assertThrows');
+
 contract('Urise', async (accounts) => {
   const reverter = new Reverter(web3);
 
@@ -11,7 +12,6 @@ contract('Urise', async (accounts) => {
   const OWNER = accounts[0];
   const SOMEBODY = accounts[1];
   const ANYBODY = accounts[2];
-  const ADDRESS_NULL = '0x0000000000000000000000000000000000000000';
 
   before('setup', async () => {
     uriseToken = await Urise.new(OWNER, OWNER, OWNER);
@@ -284,10 +284,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(1)).change.toString(), '30000');
       assert.equal((await uriseToken.hoursToBlock(1)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args._risePrice.toString(), '10003');
-      assert.equal(result.logs[0].args._futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args._change.toString(), '30000');
-      assert.equal(result.logs[0].args._created.toString(), '1');
+      assert.equal(result.logs[0].args.risePrice.toString(), '10003');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '30000');
+      assert.equal(result.logs[0].args.created.toString(), '1');
     });
 
     it('should be possible to create first block with valid future growth rate values and price factors case 2', async () => {
@@ -300,10 +300,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(1)).change.toString(), '30000');
       assert.equal((await uriseToken.hoursToBlock(1)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args._risePrice.toString(), '10003');
-      assert.equal(result.logs[0].args._futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args._change.toString(), '30000');
-      assert.equal(result.logs[0].args._created.toString(), '1');
+      assert.equal(result.logs[0].args.risePrice.toString(), '10003');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '30000');
+      assert.equal(result.logs[0].args.created.toString(), '1');
     });
 
     it('should be possible to create first block with valid future growth rate values and price factors case 3', async () => {
@@ -316,10 +316,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(1)).change.toString(), '30000');
       assert.equal((await uriseToken.hoursToBlock(1)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args._risePrice.toString(), '10003');
-      assert.equal(result.logs[0].args._futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args._change.toString(), '30000');
-      assert.equal(result.logs[0].args._created.toString(), '1');
+      assert.equal(result.logs[0].args.risePrice.toString(), '10003');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '30000');
+      assert.equal(result.logs[0].args.created.toString(), '1');
     });
 
     it('should be possible to create first block with valid future growth rate values and price factors case 4', async () => {
@@ -332,10 +332,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(1)).change.toString(), '30000');
       assert.equal((await uriseToken.hoursToBlock(1)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args._risePrice.toString(), '10003');
-      assert.equal(result.logs[0].args._futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args._change.toString(), '30000');
-      assert.equal(result.logs[0].args._created.toString(), '1');
+      assert.equal(result.logs[0].args.risePrice.toString(), '10003');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '30000');
+      assert.equal(result.logs[0].args.created.toString(), '1');
     });
 
     it('should be possible to create second block with valid future growth rate values and price factors case 1', async () => {
@@ -348,10 +348,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(1)).change.toString(), '30000');
       assert.equal((await uriseToken.hoursToBlock(1)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args._risePrice.toString(), '10003');
-      assert.equal(result.logs[0].args._futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args._change.toString(), '30000');
-      assert.equal(result.logs[0].args._created.toString(), '1');
+      assert.equal(result.logs[0].args.risePrice.toString(), '10003');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '30000');
+      assert.equal(result.logs[0].args.created.toString(), '1');
 
       await uriseToken.setCurrentTime(7201);
 
@@ -364,10 +364,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(2)).change.toString(), '29991');
       assert.equal((await uriseToken.hoursToBlock(2)).created.toString(), '2');
 
-      assert.equal(result1.logs[0].args._risePrice.toString(), '10006');
-      assert.equal(result1.logs[0].args._futureGrowthRate.toString(), '1001');
-      assert.equal(result1.logs[0].args._change.toString(), '29991');
-      assert.equal(result1.logs[0].args._created.toString(), '2');
+      assert.equal(result1.logs[0].args.risePrice.toString(), '10006');
+      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.change.toString(), '29991');
+      assert.equal(result1.logs[0].args.created.toString(), '2');
     });
 
     it('should be possible to create second block with valid future growth rate values and price factors case 2', async () => {
@@ -380,10 +380,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(1)).change.toString(), '30000');
       assert.equal((await uriseToken.hoursToBlock(1)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args._risePrice.toString(), '10003');
-      assert.equal(result.logs[0].args._futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args._change.toString(), '30000');
-      assert.equal(result.logs[0].args._created.toString(), '1');
+      assert.equal(result.logs[0].args.risePrice.toString(), '10003');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '30000');
+      assert.equal(result.logs[0].args.created.toString(), '1');
 
       await uriseToken.setCurrentTime(7201);
 
@@ -396,10 +396,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(2)).change.toString(), '29991');
       assert.equal((await uriseToken.hoursToBlock(2)).created.toString(), '2');
 
-      assert.equal(result1.logs[0].args._risePrice.toString(), '10006');
-      assert.equal(result1.logs[0].args._futureGrowthRate.toString(), '1001');
-      assert.equal(result1.logs[0].args._change.toString(), '29991');
-      assert.equal(result1.logs[0].args._created.toString(), '2');
+      assert.equal(result1.logs[0].args.risePrice.toString(), '10006');
+      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.change.toString(), '29991');
+      assert.equal(result1.logs[0].args.created.toString(), '2');
     });
 
     it('should be possible to create second block with valid future growth rate values and price factors case 3', async () => {
@@ -412,10 +412,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(1)).change.toString(), '30000');
       assert.equal((await uriseToken.hoursToBlock(1)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args._risePrice.toString(), '10003');
-      assert.equal(result.logs[0].args._futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args._change.toString(), '30000');
-      assert.equal(result.logs[0].args._created.toString(), '1');
+      assert.equal(result.logs[0].args.risePrice.toString(), '10003');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '30000');
+      assert.equal(result.logs[0].args.created.toString(), '1');
 
       await uriseToken.setCurrentTime(7201);
 
@@ -428,10 +428,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(2)).change.toString(), '29991');
       assert.equal((await uriseToken.hoursToBlock(2)).created.toString(), '2');
 
-      assert.equal(result1.logs[0].args._risePrice.toString(), '10006');
-      assert.equal(result1.logs[0].args._futureGrowthRate.toString(), '1001');
-      assert.equal(result1.logs[0].args._change.toString(), '29991');
-      assert.equal(result1.logs[0].args._created.toString(), '2');
+      assert.equal(result1.logs[0].args.risePrice.toString(), '10006');
+      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.change.toString(), '29991');
+      assert.equal(result1.logs[0].args.created.toString(), '2');
     });
 
     it('should be possible to create second block with valid future growth rate values and price factors case 4', async () => {
@@ -444,10 +444,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(1)).change.toString(), '30000');
       assert.equal((await uriseToken.hoursToBlock(1)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args._risePrice.toString(), '10003');
-      assert.equal(result.logs[0].args._futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args._change.toString(), '30000');
-      assert.equal(result.logs[0].args._created.toString(), '1');
+      assert.equal(result.logs[0].args.risePrice.toString(), '10003');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '30000');
+      assert.equal(result.logs[0].args.created.toString(), '1');
 
       await uriseToken.setCurrentTime(7201);
 
@@ -460,10 +460,10 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.hoursToBlock(2)).change.toString(), '29991');
       assert.equal((await uriseToken.hoursToBlock(2)).created.toString(), '2');
 
-      assert.equal(result1.logs[0].args._risePrice.toString(), '10006');
-      assert.equal(result1.logs[0].args._futureGrowthRate.toString(), '1001');
-      assert.equal(result1.logs[0].args._change.toString(), '29991');
-      assert.equal(result1.logs[0].args._created.toString(), '2');
+      assert.equal(result1.logs[0].args.risePrice.toString(), '10006');
+      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.change.toString(), '29991');
+      assert.equal(result1.logs[0].args.created.toString(), '2');
     });
 
     it('should not be possible to create block with wrong monthBlock', async () => {
@@ -484,13 +484,14 @@ contract('Urise', async (accounts) => {
       uriseToken = await Urise.new(OWNER, OWNER, stableToken.address);
       await stableToken.setUriseContract(uriseToken.address);
     });
-    
+
     it('should be possible to switchToStable with suficient balance case 1', async () => {
       await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
 
       await uriseToken.mint(SOMEBODY, 1000);
 
-      await uriseToken.doRise(672);
+      await uriseToken.doCreateBlock(672);
+      await uriseToken.doRise();
 
       const result = await uriseToken.switchToStable(900, SOMEBODY, {from: SOMEBODY});
 
@@ -506,16 +507,18 @@ contract('Urise', async (accounts) => {
       assert.equal(result.logs[2].event, 'MintStable');
       assert.equal(result.logs[2].args.receiver, SOMEBODY);
       assert.equal(result.logs[2].args.amount, 900);
-    })
+    });
 
     it('should be possible to switchToStable with suficient balance case 2', async () => {
       await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
 
       await uriseToken.mint(SOMEBODY, 1000);
 
-      await uriseToken.doCreateBlocks(672);
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
       await uriseToken.setCurrentTime(72001);
-      await uriseToken.doRise(672);
+      await uriseToken.doRise();
 
       const result = await uriseToken.switchToStable(900, SOMEBODY, {from: SOMEBODY});
 
@@ -531,16 +534,18 @@ contract('Urise', async (accounts) => {
       assert.equal(result.logs[2].event, 'MintStable');
       assert.equal(result.logs[2].args.receiver, SOMEBODY);
       assert.equal(result.logs[2].args.amount, 905);
-    })
+    });
 
     it('should be possible to switchToStable with suficient balance case 3', async () => {
       await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
 
       await uriseToken.mint(SOMEBODY, 1000);
 
-      await uriseToken.doCreateBlocks(672);
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
       await uriseToken.setCurrentTime(72001);
-      await uriseToken.doRise(672);
+      await uriseToken.doRise();
 
       const result = await uriseToken.switchToStable(0, SOMEBODY, {from: SOMEBODY});
 
@@ -556,16 +561,18 @@ contract('Urise', async (accounts) => {
       assert.equal(result.logs[2].event, 'MintStable');
       assert.equal(result.logs[2].args.receiver, SOMEBODY);
       assert.equal(result.logs[2].args.amount, 0);
-    })
+    });
 
     it('should not be possible to switchToStable with insufficient balance', async () => {
       await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
 
       await uriseToken.mint(SOMEBODY, 800);
 
-      await uriseToken.doCreateBlocks(672);
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
       await uriseToken.setCurrentTime(72001);
-      await uriseToken.doRise(672);
+      await uriseToken.doRise();
 
       await assertReverts(uriseToken.switchToStable(900, SOMEBODY, {from: SOMEBODY}));
 
@@ -573,16 +580,17 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
       assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), 0);
       assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), 800);
-    })
+    });
 
     it('should not be possible to switchToStable with 0 risePrice', async () => {
       await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
 
       await uriseToken.mint(SOMEBODY, 1000);
 
-      await uriseToken.doCreateBlocks(672);
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
       await uriseToken.setCurrentTime(144001);
-      await uriseToken.doRise(672);
 
       await assertReverts(uriseToken.switchToStable(900, SOMEBODY, {from: SOMEBODY}));
 
@@ -590,18 +598,17 @@ contract('Urise', async (accounts) => {
       assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
       assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), 0);
       assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), 1000);
-    })
+    });
   });
 
   describe('burnQuarantined()', async () => {
-    const quarantineAddress = ANYBODY;
-
     beforeEach('set up stable contract', async () => {
       stableToken = await StableToken.new(OWNER, OWNER);
       uriseToken = await Urise.new(OWNER, OWNER, stableToken.address);
       await stableToken.setUriseContract(uriseToken.address);
       await uriseToken.updateFutureGrowthRate(101, [39050, 37703, 36446, 35270]);
-      await uriseToken.doRise(672);
+      await uriseToken.doCreateBlock(672);
+      await uriseToken.doRise();
       await uriseToken.mint(SOMEBODY, 100000);
     });
 
@@ -829,6 +836,7 @@ contract('Urise', async (accounts) => {
   describe('switchToRise()', async () => {
     beforeEach('set up stable contract', async () => {
       stableToken = await StableToken.new(OWNER, OWNER);
+      await uriseToken.setCurrentTime(72001);
       uriseToken = await Urise.new(OWNER, OWNER, stableToken.address);
       await stableToken.setUriseContract(uriseToken.address);
       await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
@@ -836,9 +844,12 @@ contract('Urise', async (accounts) => {
 
     it('should be possible to switchToRise with sufficient funds', async () => {
       await uriseToken.mint(SOMEBODY, 2000);
-      await uriseToken.doCreateBlocks(672);
+
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
       await uriseToken.setCurrentTime(72001);
-      await uriseToken.doRise(672);
+
       await uriseToken.switchToStable(1000, SOMEBODY, {from: SOMEBODY});
 
       assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), 1000);
@@ -856,124 +867,378 @@ contract('Urise', async (accounts) => {
       assert.equal(result.logs.length, 4);
       assert.equal(result.logs[1].event, 'BurnStable');
       assert.equal(result.logs[3].event, 'ConvertToRise');
-    })
+      assert.equal(result.logs[1].args.amountBurnt, 1006);
+      assert.equal(result.logs[3].args.converter, SOMEBODY);
+      assert.equal(result.logs[3].args.amountConverted, 1006);
+    });
+
+    it('should not be possible to switchToRise with insufficient funds', async () => {
+      await uriseToken.mint(SOMEBODY, 900);
+
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
+      await uriseToken.setCurrentTime(72001);
+
+      await uriseToken.switchToStable(900, SOMEBODY, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), 0);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 900);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 900);
+      assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), 905);
+
+      await assertReverts(uriseToken.switchToRise(1006, SOMEBODY, {from: SOMEBODY}));
+
+      assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), 0);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 900);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 900);
+      assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), 905);
+    });
+
+    it('should not be possible to switchToRise with no block for current hour', async () => {
+      await uriseToken.mint(SOMEBODY, 2000);
+
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
+      await uriseToken.setCurrentTime(72001);
+
+      await uriseToken.switchToStable(1000, SOMEBODY, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), 1000);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 1000);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 1000);
+      assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), 1006);
+
+      await uriseToken.setCurrentTime(172001);
+
+      await assertReverts(uriseToken.switchToRise(1006, SOMEBODY, {from: SOMEBODY}));
+
+      assert.equal((await uriseToken.balanceOf(SOMEBODY)).toString(), 1000);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 1000);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 1000);
+      assert.equal((await stableToken.balanceOf(SOMEBODY)).toString(), 1006);
+    });
   });
 
   describe('doRise()', async () => {
     beforeEach('set up stable contract', async () => {
       stableToken = await StableToken.new(OWNER, OWNER);
-      await uriseToken.updateStableTokenAddress(stableToken.address);
-      await stableToken.updateRiseContract(uriseToken.address);
-      await uriseToken.updateQuarantineWalletAddress(quarantineAddress);
+      await uriseToken.setCurrentTime(72001);
+      uriseToken = await Urise.new(OWNER, OWNER, stableToken.address);
+      await uriseToken.setCurrentTime(72001);
+      await stableToken.setUriseContract(uriseToken.address);
+      await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
     });
 
-    it('should be possible to doRise with valid futureGrowthRate and monthBlocks from owner', async () => {
-      await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
-      await uriseToken.createBlockMock(672);
-      await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
-      await uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY});
-      await uriseToken.setCurrentTime(7201);
+    it('should be possible to doRise from somebody', async () => {
+      await uriseToken.mint(ANYBODY, 10000);
 
-      const result = await uriseToken.doRise(720);
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
+      await uriseToken.switchToStable(9000, ANYBODY, {from: ANYBODY});
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      assert.equal((await uriseToken.doRise.call()), true);
+      const result = await uriseToken.doRise({from: SOMEBODY});
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 8997);
+      assert.equal((await uriseToken.lastCalledHour()).toString(), 20);
 
       assert.equal(result.logs.length, 3);
       assert.equal(result.logs[2].event, 'DoRise');
-      assert.equal(result.logs[2].args.time, 7201);
-      assert.equal(result.logs[2].args.blockNumber, 2);
-      assert.equal(result.logs[2].args.riseAmountBurnt, 15);
-      assert.equal(result.logs[2].args.change, 29991);
+      assert.equal(result.logs[2].args.currentHour, 20);
+      assert.equal(result.logs[2].args.riseAmountBurnt, 3);
+      assert.equal(result.logs[2].args.change, 29829);
     });
 
-    it('should not be possible to doRise with invalid futureGrowthRate but valid monthBlocks from owner', async () => {
-      await uriseToken.createBlockMock(672);
-      await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
-      await uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY});
+    it('should be possible to doRise from owner', async () => {
+      await uriseToken.mint(ANYBODY, 10000);
 
-      await assertReverts(uriseToken.doRise(720));
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
+      await uriseToken.switchToStable(9000, ANYBODY, {from: ANYBODY});
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      assert.equal((await uriseToken.doRise.call()), true);
+      const result = await uriseToken.doRise();
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 8997);
+      assert.equal((await uriseToken.lastCalledHour()).toString(), 20);
+
+      assert.equal(result.logs.length, 3);
+      assert.equal(result.logs[2].event, 'DoRise');
+      assert.equal(result.logs[2].args.currentHour, 20);
+      assert.equal(result.logs[2].args.riseAmountBurnt, 3);
+      assert.equal(result.logs[2].args.change, 29829);
     });
 
-    it('should not be possible to doRise with valid futureGrowthRate but invalid monthBlocks from owner', async () => {
-      await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
-      await uriseToken.createBlockMock(672);
-      await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
-      await uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY});
+    it('should be possible to doRise if quarantine balance is 0', async () => {
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
 
-      await assertReverts(uriseToken.doRise(721));
+      assert.equal((await uriseToken.doRise.call()), true);
+      const result = await uriseToken.doRise();
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
+      assert.equal((await uriseToken.lastCalledHour()).toString(), 20);
+
+      assert.equal(result.logs.length, 3);
+      assert.equal(result.logs[2].event, 'DoRise');
+      assert.equal(result.logs[2].args.currentHour, 20);
+      assert.equal(result.logs[2].args.riseAmountBurnt, 0);
+      assert.equal(result.logs[2].args.change, 29829);
     });
 
-    it('should not be possible to doRise with valid futureGrowthRate but invalid monthBlocks from owner case 2', async () => {
-      await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
-      await uriseToken.createBlockMock(672);
-      await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
-      await uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY});
+    it('should be possible to doRise second time in the next hour', async () => {
+      await uriseToken.mint(ANYBODY, 10000);
 
-      await assertReverts(uriseToken.doRise(10000));
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
+      await uriseToken.switchToStable(9000, ANYBODY, {from: ANYBODY});
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      assert.equal((await uriseToken.doRise.call()), true);
+      const result = await uriseToken.doRise();
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 8997);
+      assert.equal((await uriseToken.lastCalledHour()).toString(), 20);
+
+      assert.equal(result.logs.length, 3);
+      assert.equal(result.logs[2].event, 'DoRise');
+      assert.equal(result.logs[2].args.currentHour, 20);
+      assert.equal(result.logs[2].args.riseAmountBurnt, 3);
+      assert.equal(result.logs[2].args.change, 29829);
+
+      await uriseToken.setCurrentTime(75601);
+      assert.equal((await uriseToken.doRise.call()), true);
+      const result1 = await uriseToken.doRise();
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 8994);
+      assert.equal((await uriseToken.lastCalledHour()).toString(), 21);
+
+      assert.equal(result1.logs.length, 3);
+      assert.equal(result1.logs[2].event, 'DoRise');
+      assert.equal(result1.logs[2].args.currentHour, 21);
+      assert.equal(result1.logs[2].args.riseAmountBurnt, 3);
+      assert.equal(result1.logs[2].args.change, 29821);
     });
 
-    it('should not be possible to doRise with valid futureGrowthRate and monthBlocks not from owner', async () => {
-      await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
-      await uriseToken.createBlockMock(672);
-      await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
-      await uriseToken.switchToStable(50000, SOMEBODY, {from: SOMEBODY});
+    it('should not be possible to doRise if current block is empty', async () => {
+      await uriseToken.mint(ANYBODY, 10000);
 
-      await assertReverts(uriseToken.doRise(720, {from: ANYBODY}));
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
+      await uriseToken.switchToStable(9000, ANYBODY, {from: ANYBODY});
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      await uriseToken.setCurrentTime(1000000000);
+      await assertReverts(uriseToken.doRise());
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+      assert.equal((await uriseToken.lastCalledHour()).toString(), 0);
     });
 
-    it('should not be possible to doRise with valid futureGrowthRate and monthBlocks from owner when burQuarantine returns 0', async () => {
-      await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
-      await uriseToken.createBlockMock(672);
-      await uriseToken.mint(SOMEBODY, 100000);
-      await uriseToken.approve(SOMEBODY, 50000, {from: SOMEBODY});
-      await uriseToken.switchToStable(0, SOMEBODY);
+    it('should not be possible to doRise second time in the same hour', async () => {
+      await uriseToken.mint(ANYBODY, 10000);
 
-      await assertReverts(uriseToken.doRise(720, {from: ANYBODY}));
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
+      await uriseToken.switchToStable(9000, ANYBODY, {from: ANYBODY});
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      assert.equal((await uriseToken.doRise.call()), true);
+      const result = await uriseToken.doRise();
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 8997);
+      assert.equal((await uriseToken.lastCalledHour()).toString(), 20);
+
+      assert.equal(result.logs.length, 3);
+      assert.equal(result.logs[2].event, 'DoRise');
+      assert.equal(result.logs[2].args.currentHour, 20);
+      assert.equal(result.logs[2].args.riseAmountBurnt, 3);
+      assert.equal(result.logs[2].args.change, 29829);
+
+      await assertReverts(uriseToken.doRise());
+
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 8997);
+      assert.equal((await uriseToken.lastCalledHour()).toString(), 20);
     });
   });
 
-  describe('doCreateBlocks', async () => {
+  describe('doCreateBlock()', async () => {
     beforeEach('set up stable contract', async () => {
+      stableToken = await StableToken.new(OWNER, OWNER);
+      uriseToken = await Urise.new(OWNER, OWNER, stableToken.address);
+      await stableToken.setUriseContract(uriseToken.address);
       await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
     });
 
-    it('should be possible to doCreateBlocks with valid values from owner case 1', async () => {
-      const result = await uriseToken.doCreateBlocks(672);
+    it('should be possible to doCreateBlock first block from owner', async () => {
+      assert.equal((await uriseToken.getBlockData(1))._risePrice, 0);
 
-      assert.equal(result.logs.length, 24);
-      assert.equal(result.logs[0].event, 'BlockCreated');
+      await uriseToken.doCreateBlock(672);
+
+      assert.equal((await uriseToken.getBlockData(1))._risePrice, 10003);
     });
 
-    it('should be possible to doCreateBlocks with valid values from owner case 2', async () => {
-      const result = await uriseToken.doCreateBlocks(696);
+    it('should be possible to doCreateBlock first block from admin', async () => {
+      assert.equal((await uriseToken.getBlockData(1))._risePrice, 0);
 
-      assert.equal(result.logs.length, 24);
-      assert.equal(result.logs[0].event, 'BlockCreated');
+      await uriseToken.appointAdmin(SOMEBODY);
+      await uriseToken.doCreateBlock(672, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.getBlockData(1))._risePrice, 10003);
     });
 
-    it('should be possible to doCreateBlocks with valid values from owner case 3', async () => {
-      const result = await uriseToken.doCreateBlocks(720);
+    it('should be possible to doCreateBlock not a first block from admin', async () => {
+      for (let i = 0; i < 28; i++) {
+        await uriseToken.doCreateBlock(672);
+      }
 
-      assert.equal(result.logs.length, 24);
-      assert.equal(result.logs[0].event, 'BlockCreated');
+      assert.equal((await uriseToken.getBlockData(29))._risePrice, 0);
+
+      await uriseToken.appointAdmin(SOMEBODY);
+      await uriseToken.doCreateBlock(672, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.getBlockData(29))._risePrice, 10087);
     });
 
-    it('should be possible to doCreateBlocks with valid values from owner case 4', async () => {
-      const result = await uriseToken.doCreateBlocks(744);
+    it('should not be possible to doCreateBlock from not owner or admin', async () => {
+      assert.equal((await uriseToken.getBlockData(1))._risePrice, 0);
 
-      assert.equal(result.logs.length, 24);
-      assert.equal(result.logs[0].event, 'BlockCreated');
+      await assertReverts(uriseToken.doCreateBlock(672, {from: ANYBODY}));
+
+      assert.equal((await uriseToken.getBlockData(1))._risePrice, 0);
+    });
+  });
+
+  describe('withdrawLostTokens()', async () => {
+    beforeEach('set up stable contract', async () => {
+      stableToken = await StableToken.new(OWNER, OWNER);
+      uriseToken = await Urise.new(OWNER, OWNER, stableToken.address);
+      await stableToken.setUriseContract(uriseToken.address);
+      await uriseToken.updateFutureGrowthRate(1001, [39050, 37703, 36446, 35270]);
     });
 
-    it('should not be possible to doCreateBlocks with invalid montjBlock values from owner case 1', async () => {
-      await assertReverts(uriseToken.doCreateBlocks(691));
+    it('should be possible to withdraw lost tokens by owner', async () => {
+      await uriseToken.mint(SOMEBODY, 10000);
+      await uriseToken.doCreateBlock(672);
+      await uriseToken.switchToStable(9000, SOMEBODY, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 9000);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      await uriseToken.transfer(uriseToken.address, 100, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 9100);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000000);
+
+      await uriseToken.withdrawLostTokens(100);
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000100);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 9000);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
     });
 
-    it('should not be possible to doCreateBlocks with invalid montjBlock values from owner case 2', async () => {
-      await assertReverts(uriseToken.doCreateBlocks(10000));
+    it('should be possible to withdraw lost tokens by owner if quarantine balance is 0', async () => {
+      await uriseToken.mint(SOMEBODY, 100);
+      await uriseToken.doCreateBlock(672);
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 0);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
+
+      await uriseToken.transfer(uriseToken.address, 100, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 100);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000000);
+
+      await uriseToken.withdrawLostTokens(100);
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000100);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 0);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
+    });
+
+    it('should not be possible to withdraw more lost tokens than possible by owner', async () => {
+      await uriseToken.mint(SOMEBODY, 10000);
+      await uriseToken.doCreateBlock(672);
+      await uriseToken.switchToStable(9000, SOMEBODY, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 9000);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      await uriseToken.transfer(uriseToken.address, 100, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 9100);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000000);
+
+      await assertReverts(uriseToken.withdrawLostTokens(101));
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000000);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 9100);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+    });
+
+    it('should not be possible to withdraw more lost tokens than possible by owner if quarantine balance is 0', async () => {
+      await uriseToken.mint(SOMEBODY, 100);
+      await uriseToken.doCreateBlock(672);
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 0);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
+
+      await uriseToken.transfer(uriseToken.address, 100, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 100);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000000);
+
+      await assertReverts(uriseToken.withdrawLostTokens(101));
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000000);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 100);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 0);
+    });
+
+    it('should not be possible to withdraw lost tokens by not owner', async () => {
+      await uriseToken.mint(SOMEBODY, 10000);
+      await uriseToken.doCreateBlock(672);
+      await uriseToken.switchToStable(9000, SOMEBODY, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 9000);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      await uriseToken.transfer(uriseToken.address, 100, {from: SOMEBODY});
+
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 9100);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000000);
+
+      await assertReverts(uriseToken.withdrawLostTokens(100, {from: ANYBODY}));
+
+      assert.equal((await uriseToken.balanceOf(OWNER)).toString(), 100000000000000000);
+      assert.equal((await uriseToken.balanceOf(uriseToken.address)).toString(), 9100);
+      assert.equal((await uriseToken.quarantineBalance()).toString(), 9000);
     });
   });
 });

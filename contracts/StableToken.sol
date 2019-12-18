@@ -21,6 +21,7 @@ contract StableToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     }
 
     function setUriseContract(address _uriseContractAddress) external onlyContractOwner() {
+        require(_uriseContractAddress != address(0), 'URISE_CONTRACT_CANNOTBE_NULL_ADDRESS');
         require(uriseContract == address(0), 'URISE_CONTRACT_ADDRESS_IS_ALREADY_SET');
         uriseContract = _uriseContractAddress;
     }
@@ -29,12 +30,13 @@ contract StableToken is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         return owner;
     }
 
-    function mintFromUrise(address to, uint256 value) external onlyUrise returns (bool) {
+    function mintFromUrise(address to, uint256 value) external onlyUrise returns (bool _success) {
         _mint(to, value);
         return true;
     }
 
-    function burnFromUrise(address tokensOwner, uint256 value) external onlyUrise returns (bool) {
+    function burnFromUrise(address tokensOwner, uint256 value)
+    external onlyUrise returns (bool _success) {
         _burn(tokensOwner, value);
         return true;
     }

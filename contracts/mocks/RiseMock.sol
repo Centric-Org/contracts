@@ -1,13 +1,13 @@
 pragma solidity 0.4.24;
 
-import '../Urise.sol';
+import '../Rise.sol';
 
-contract UriseMock is Urise {
+contract RiseMock is Rise {
     uint256 currentTime;
 
-    constructor (address _mintSaver, address _burnableStorage, address _stableContract)
+    constructor (address _mintSaver, address _burnableStorage, address _cashContract)
     public
-    Urise(_mintSaver, _burnableStorage, _stableContract) {}
+    Rise(_mintSaver, _burnableStorage, _cashContract) {}
 
     function getCurrentTime () public view returns(uint256) {
         if(currentTime == 0) {

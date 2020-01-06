@@ -1,4 +1,4 @@
-1. Deploy StableToken.sol
-2. Deploy Urise.sol
-3. Call Urise.updateFutureGrowthRate
-4. Call Urise.doCreateBlocks
+1. Deploy Cash.sol
+2. Deploy Rise.sol
+3. Call Rise.updateFutureGrowthRate
+4. Call Rise.doCreateBlock

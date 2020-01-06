@@ -2,18 +2,18 @@ pragma solidity 0.4.24;
 
 import './TRC20.sol';
 
-contract StableTokenInterface {
+contract CashInterface {
     function balanceOf(address who) external view returns (uint256);
     function getOwner() external returns(address _owner);
-    function mintFromUrise(address to, uint256 value) public returns (bool);
-    function burnFromUrise(address tokensOwner, uint256 value) external returns (bool);
+    function mintFromRise(address to, uint256 value) public returns (bool);
+    function burnFromRise(address tokensOwner, uint256 value) external returns (bool);
 }
 
-contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
+contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     /**
      * STATE VARIABLES
      */
-    address public stableContract;
+    address public cashContract;
     uint256 public quarantineBalance;
     uint256 public lastBlockNumber;
     uint256 public lastCalledHour;
@@ -23,17 +23,17 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     uint256 public futureGrowthRate;
     uint256 public GROWTH_RATE_BASE = 10000;
 
-    // price of URISE in USD
+    // price of Rise in USD
     // base of PRICE_BASE
     uint256 public PRICE_BASE = 10000;
 
     uint256 public CHANGE_BASE = 10**8;
 
     struct Block {
-        uint256 risePrice;     // USD price of URISE for the block
+        uint256 risePrice;     // USD price of Rise for the block
         uint256 growthRate;    // FutureGrowthRate value at the time of block creation
         //solium-disable-next-line max-len
-        uint256 change;        // percentage (base of PRICE_BASE), UrisePrice change relative to prev. block
+        uint256 change;        // percentage (base of PRICE_BASE), RisePrice change relative to prev. block
         uint256 created;       // hours, unix epoch time
     }
 
@@ -57,7 +57,7 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         uint256 change
     );
 
-    event ConvertToStable(
+    event ConvertToCash(
         address converter,
         uint256 amountConverted
     );
@@ -67,9 +67,9 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         uint256 amountConverted
     );
 
-    event MintStable(address receiver, uint256 amount);
+    event MintCash(address receiver, uint256 amount);
 
-    event BurnStable(uint256 amountBurnt);
+    event BurnCash(uint256 amountBurnt);
 
     event FutureGrowthRateUpdated(uint256 _oldValue, uint256 _newValue,
     uint256[4] _newPriceFactors);
@@ -80,17 +80,17 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     event QuarantinBalanceBurnt(uint256 amount);
 
     /** 
-    * Creates Urise contract. Also sets the stable address 
+    * Creates Rise contract. Also sets the Cash address 
     * to the contract storage to be able to interact with it.
     * Mints 1 billion tokens to _mintSaver address.
     */
-    constructor(address _mintSaver, address _burnableStorage, address _stableContract)
+    constructor(address _mintSaver, address _burnableStorage, address _cashContract)
         public
-        TRC20Detailed('TEST URISE Token', 'TRS', 8)
+        TRC20Detailed('Centric RISE', 'CNXR', 8)
         TRC20Burnable(_burnableStorage)
     {
         mint(_mintSaver, 100000000000000000);   // 1 Billion
-        stableContract = _stableContract;
+        cashContract = _cashContract;
 
         // set so to have the first created block as active
         lastBlockNumber = getCurrentTime() / 1 hours - 1;    
@@ -106,9 +106,9 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
 /** 
  *  uint256 blockNumber;   // hours, unix epoch time
- *  uint256 risePrice;     // USD price of URISE for the block
+ *  uint256 risePrice;     // USD price of Rise for the block
  *  uint256 growthRate;    // FutureGrowthRate value at the time of block creation
- *  uint256 change;        // percentage (base of PRICE_BASE), UrisePrice change relative to prev. block
+ *  uint256 change;        // percentage (base of PRICE_BASE), RisePrice change relative to prev. block
  *  uint256 created;       // hours, unix epoch time
  */
 
@@ -168,9 +168,9 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     }
 
     /**
-    * Public function that burns amount of tokens of a new block based on change parameter
+    * Public function that burns Rise from quarantine based on change parameter of new block
     * according to the burnQuarantine() formula.
-    * Needed for economic logic of stable token.
+    * Needed for economic logic of Rise token.
     */
     function doRise() external returns(bool _success) {
         require(hoursToBlock[getCurrentHour()].risePrice != 0,
@@ -188,56 +188,56 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     }
 
     /**
-    * Public function that allows users to switch urise tokens to stable ones.
-    * Amount of received stable tokens depends on the risePrice of a current block.
+    * Public function that allows users to switch Cash tokens to Rise ones.
+    * Amount of received Rise tokens depends on the risePrice of a current block.
     */
-    function switchToRise(uint256 _stableAmount, address _riseRecipient) 
+    function switchToRise(uint256 _cashAmount, address _riseRecipient) 
     external returns(bool _success) {
         require(hoursToBlock[getCurrentHour()].risePrice != 0,
             'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
 
-        require(StableTokenInterface(stableContract).balanceOf(msg.sender) >= _stableAmount,
-            'INSUFFICIENT_STABLE_BALANCE');
+        require(CashTokenInterface(cashContract).balanceOf(msg.sender) >= _cashAmount,
+            'INSUFFICIENT_CASH_BALANCE');
 
-        require(StableTokenInterface(stableContract).burnFromUrise(msg.sender, _stableAmount),
-            'BURNING_STABLE_FAILED');
+        require(CashTokenInterface(cashContract).burnFromRise(msg.sender, _cashAmount),
+            'BURNING_CASH_FAILED');
 
-        emit BurnStable(_stableAmount);
+        emit BurnCash(_cashAmount);
 
         uint256 _riseToDequarantine =
-            (_stableAmount.mul(PRICE_BASE)).div(hoursToBlock[getCurrentHour()].risePrice);
+            (_cashAmount.mul(PRICE_BASE)).div(hoursToBlock[getCurrentHour()].risePrice);
 
         quarantineBalance = quarantineBalance.sub(_riseToDequarantine);
         require(this.transfer(_riseRecipient, _riseToDequarantine),
-            'SWITCH_TO_URISE_FAILED');
+            'SWITCH_TO_Rise_FAILED');
 
-        emit ConvertToRise(msg.sender, _stableAmount);
+        emit ConvertToRise(msg.sender, _cashAmount);
         return true;
     }
 
     /**
-    * Public function that allows users to switch stable tokens to urise ones.
-    * Amount of received urise tokens depends on the risePrice of a current block. 
+    * Public function that allows users to switch Rise tokens to Cash ones.
+    * Amount of received Cash tokens depends on the risePrice of a current block. 
     */
-    function switchToStable(uint256 _riseAmount, address _stableRecipient) 
+    function switchToCash(uint256 _riseAmount, address _cashRecipient) 
     external returns(uint256) {
         require(balanceOf(msg.sender) >= _riseAmount, 'INSUFFICIENT_BALANCE');
         require(hoursToBlock[getCurrentHour()].risePrice != 0,
             'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
 
         quarantineBalance = quarantineBalance.add(_riseAmount);
-        require(transfer(address(this), _riseAmount), 'URISE_TRANSFER_FAILED');
+        require(transfer(address(this), _riseAmount), 'Rise_TRANSFER_FAILED');
 
-        uint256 _stableToIssue =
+        uint256 _cashToIssue =
             (_riseAmount.mul(hoursToBlock[getCurrentHour()].risePrice)).div(PRICE_BASE);
 
-        require(StableTokenInterface(stableContract)
-            .mintFromUrise(_stableRecipient, _stableToIssue), 'STABLE_MINT_FAILED');
+        require(CashTokenInterface(cashContract)
+            .mintFromRise(_cashRecipient, _cashToIssue), 'CASH_MINT_FAILED');
 
-        emit MintStable(_stableRecipient, _stableToIssue);
+        emit MintCash(_cashRecipient, _cashToIssue);
         
-        emit ConvertToStable(msg.sender, _riseAmount);
-        return _stableToIssue;
+        emit ConvertToCash(msg.sender, _riseAmount);
+        return _cashToIssue;
     }
     
     /**
@@ -261,7 +261,7 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
     /**
     * Internal function that implements logic to burn a part of tokens on quarantine.
-    * Formula is based on chage parameter of each new block.
+    * Formula is based on change parameter of each new block.
     */
     function burnQuarantined(uint256 _change) internal returns(uint256) {
         uint256 _quarantined = quarantineBalance;
@@ -313,7 +313,7 @@ contract Urise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         return true;
     }
 
-    // for testing purposes
+    // Helper function only
     function getCurrentTime() public view returns(uint256) {
         return now;
     }

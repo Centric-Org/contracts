@@ -9,7 +9,7 @@ contract Cash is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
     constructor(address _mintSaver, address _burnableStorage)
         public
-        TRC20Detailed('Centric CASH', 'CNXC', 8)
+        TRC20Detailed('Centric CASH', 'CNS', 8)
         TRC20Burnable(_burnableStorage)
     {
         mint(_mintSaver, 0);

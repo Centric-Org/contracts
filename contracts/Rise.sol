@@ -3,6 +3,7 @@ pragma solidity 0.4.24;
 import './TRC20.sol';
 
 contract CashInterface {
+    function totalSupply() public view returns (uint256);
     function balanceOf(address who) external view returns (uint256);
     function getOwner() external returns(address _owner);
     function mintFromRise(address to, uint256 value) public returns (bool);
@@ -14,7 +15,6 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
      * STATE VARIABLES
      */
     address public cashContract;
-    uint256 public quarantineBalance;
     uint256 public lastBlockNumber;
     uint256 public lastCalledHour;
 
@@ -25,7 +25,8 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
     // price of Rise in USD
     // base of PRICE_BASE
-    uint256 public PRICE_BASE = 10000;
+    uint256 public PRICE_BASE = 10**8;
+    uint256 public initialPrice = (PRICE_BASE * 70638) / 10000;
 
     uint256 public CHANGE_BASE = 10**8;
 
@@ -51,20 +52,21 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     mapping (uint256 => uint256[4]) public futureGrowthRateToPriceFactors;
     uint256 public PRICE_FACTOR_BASE = 10**8;
 
-    event DoRise(
+    event DoBalance(
         uint256 currentHour,
-        uint256 riseAmountBurnt,
-        uint256 change
+        uint256 riseAmountBurnt
     );
 
     event ConvertToCash(
         address converter,
-        uint256 amountConverted
+        uint256 riseAmountSent,
+        uint256 cashAmountReceived
     );
 
     event ConvertToRise(
         address converter,
-        uint256 amountConverted
+        uint256 cashAmountSent,
+        uint256 riseAmountReceived
     );
 
     event MintCash(address receiver, uint256 amount);
@@ -86,14 +88,14 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     */
     constructor(address _mintSaver, address _burnableStorage, address _cashContract)
         public
-        TRC20Detailed('Centric RISE', 'CNXR', 8)
+        TRC20Detailed('Centric RISE', 'CNR', 8)
         TRC20Burnable(_burnableStorage)
     {
         mint(_mintSaver, 100000000000000000);   // 1 Billion
         cashContract = _cashContract;
 
-        // set so to have the first created block as active
-        lastBlockNumber = getCurrentTime() / 1 hours - 1;    
+        // signal that no block was created
+        lastBlockNumber = 0;    
     }
 
     function getCurrentPrice() external view returns(uint256) {
@@ -133,13 +135,14 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
      * and if not - create it. Otherwise users will not be able to switch tokens
      * before new block is not created.
      * _monthBlocks - hours in month, should be between 28*24 and 31*24
+     * _blockNumber - always has to be lastBlockNumber + 1 (works only as a security check) 
      */
-    function doCreateBlock(uint256 _monthBlocks) 
+    function doCreateBlock(uint256 _monthBlocks, uint256 _blockNumber) 
     external onlyAdmin() returns(bool _success) {
         require(futureGrowthRate != 0, 'WRONG_FUTURE_GROWTH_RATE');
         require(_monthBlocks >= 28*24 && _monthBlocks <= 31*24, 'WRONG_MONTH_BLOCKS');
 
-        require (createBlock(_monthBlocks), 'FAILED_TO_CREATE_BLOCK');
+        require (createBlock(_monthBlocks, _blockNumber), 'FAILED_TO_CREATE_BLOCK');
 
         return true;
     }
@@ -168,11 +171,11 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     }
 
     /**
-    * Public function that burns Rise from quarantine based on change parameter of new block
+    * Public function that burns Rise from quarantine
     * according to the burnQuarantine() formula.
     * Needed for economic logic of Rise token.
     */
-    function doRise() external returns(bool _success) {
+    function doBalance() external returns(bool _success) {
         require(hoursToBlock[getCurrentHour()].risePrice != 0,
             'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
         require(lastCalledHour < getCurrentHour(),
@@ -180,10 +183,9 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
         lastCalledHour = getCurrentHour();
 
-        uint256 _change = hoursToBlock[getCurrentHour()].change;
-        uint256 _riseBurnt = burnQuarantined(_change);
+        uint256 _riseBurnt = burnQuarantined();
 
-        emit DoRise(getCurrentHour(), _riseBurnt, _change);
+        emit DoBalance(getCurrentHour(), _riseBurnt);
         return true;
     }
 
@@ -191,15 +193,15 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     * Public function that allows users to switch Cash tokens to Rise ones.
     * Amount of received Rise tokens depends on the risePrice of a current block.
     */
-    function switchToRise(uint256 _cashAmount, address _riseRecipient) 
+    function convertToRise(uint256 _cashAmount) 
     external returns(bool _success) {
         require(hoursToBlock[getCurrentHour()].risePrice != 0,
             'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
 
-        require(CashTokenInterface(cashContract).balanceOf(msg.sender) >= _cashAmount,
+        require(CashInterface(cashContract).balanceOf(msg.sender) >= _cashAmount,
             'INSUFFICIENT_CASH_BALANCE');
 
-        require(CashTokenInterface(cashContract).burnFromRise(msg.sender, _cashAmount),
+        require(CashInterface(cashContract).burnFromRise(msg.sender, _cashAmount),
             'BURNING_CASH_FAILED');
 
         emit BurnCash(_cashAmount);
@@ -207,11 +209,10 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         uint256 _riseToDequarantine =
             (_cashAmount.mul(PRICE_BASE)).div(hoursToBlock[getCurrentHour()].risePrice);
 
-        quarantineBalance = quarantineBalance.sub(_riseToDequarantine);
-        require(this.transfer(_riseRecipient, _riseToDequarantine),
-            'SWITCH_TO_Rise_FAILED');
+        require(this.transfer(msg.sender, _riseToDequarantine),
+            'CONVERT_TO_RISE_FAILED');
 
-        emit ConvertToRise(msg.sender, _cashAmount);
+        emit ConvertToRise(msg.sender, _cashAmount, _riseToDequarantine);
         return true;
     }
 
@@ -219,56 +220,37 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     * Public function that allows users to switch Rise tokens to Cash ones.
     * Amount of received Cash tokens depends on the risePrice of a current block. 
     */
-    function switchToCash(uint256 _riseAmount, address _cashRecipient) 
+    function convertToCash(uint256 _riseAmount) 
     external returns(uint256) {
         require(balanceOf(msg.sender) >= _riseAmount, 'INSUFFICIENT_BALANCE');
         require(hoursToBlock[getCurrentHour()].risePrice != 0,
             'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
 
-        quarantineBalance = quarantineBalance.add(_riseAmount);
-        require(transfer(address(this), _riseAmount), 'Rise_TRANSFER_FAILED');
+        require(transfer(address(this), _riseAmount), 'RISE_TRANSFER_FAILED');
 
         uint256 _cashToIssue =
             (_riseAmount.mul(hoursToBlock[getCurrentHour()].risePrice)).div(PRICE_BASE);
 
-        require(CashTokenInterface(cashContract)
-            .mintFromRise(_cashRecipient, _cashToIssue), 'CASH_MINT_FAILED');
+        require(CashInterface(cashContract)
+            .mintFromRise(msg.sender, _cashToIssue), 'CASH_MINT_FAILED');
 
-        emit MintCash(_cashRecipient, _cashToIssue);
+        emit MintCash(msg.sender, _cashToIssue);
         
-        emit ConvertToCash(msg.sender, _riseAmount);
+        emit ConvertToCash(msg.sender, _riseAmount, _cashToIssue);
         return _cashToIssue;
     }
-    
-    /**
-    * Function is needed to withdraw lost tokens that probably were sent 
-    * to the contract address by mistake.
-    * Of there are no such tokens than it will be not possible to withdraw any.
-    */
-    function withdrawLostTokens(uint256 _amount) 
-    external onlyContractOwner() returns(bool _success) {
-        require(_amount <= balanceOf(address(this)).sub(quarantineBalance),
-            'NOT_ALLOWED_TO_WITHDRAW_QUARANTINE_TOKENS');
-        
-        this.transfer(msg.sender, _amount);
-        
-        return true;
-    }
-    
-    function getCurrentHour() public view returns (uint256) {
-        return getCurrentTime().div(1 hours);
-    }
-
     /**
     * Internal function that implements logic to burn a part of tokens on quarantine.
     * Formula is based on change parameter of each new block.
     */
-    function burnQuarantined(uint256 _change) internal returns(uint256) {
-        uint256 _quarantined = quarantineBalance;
-        uint256 _riseToBurn = _quarantined.sub(_quarantined.mul(CHANGE_BASE).div(
-            uint256(1).mul(CHANGE_BASE).add(_change)));
-            
-        quarantineBalance = quarantineBalance.sub(_riseToBurn);
+    function burnQuarantined() internal returns(uint256) {
+        uint256 _quarantined = balanceOf(this);
+        uint256 _currentPrice = hoursToBlock[getCurrentHour()].risePrice;
+        uint256 _cashSupply = CashInterface(cashContract).totalSupply();
+
+        uint256 _riseToBurn = _quarantined.mul(_currentPrice).div(PRICE_BASE).sub(_cashSupply)
+            .mul(PRICE_BASE).div(_currentPrice);
+
         this.burn(_riseToBurn);
         
         emit QuarantinBalanceBurnt(_riseToBurn);
@@ -278,10 +260,19 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     /**
     * Internal function for creating a new block.
     */
-    function createBlock(uint256 _monthBlocks) internal returns(bool _success) {
-        uint256 _lastPrice = hoursToBlock[lastBlockNumber].risePrice;
-        if (_lastPrice == 0) _lastPrice = PRICE_BASE;
-        uint256 _nextBlockNumber = lastBlockNumber.add(1);
+    function createBlock(uint256 _monthBlocks, uint256 _expectedBlockNumber) internal returns(bool _success) {
+        uint256 _lastPrice;
+        uint256 _nextBlockNumber;
+
+        if (lastBlockNumber == 0) {
+            _lastPrice = initialPrice;
+            _nextBlockNumber = getCurrentHour().add(1);
+        } else {
+            _lastPrice = hoursToBlock[lastBlockNumber].risePrice;
+            _nextBlockNumber = lastBlockNumber.add(1);
+        }
+
+        require(_nextBlockNumber == _expectedBlockNumber, 'WRONG_BLOCK_NUMBER');
         
         uint256 _risePriceFactor;
         if (_monthBlocks == 28*24) _risePriceFactor =
@@ -298,7 +289,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
             .mul(PRICE_FACTOR_BASE))).div(PRICE_FACTOR_BASE);
 
         uint256 _change = (_risePrice.sub(_lastPrice)).mul(CHANGE_BASE).div(_lastPrice);
-        uint256 _created = getCurrentTime() / 1 hours;
+        uint256 _created = getCurrentHour();
 
         hoursToBlock[_nextBlockNumber] = Block({
             risePrice: _risePrice,
@@ -312,9 +303,9 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         emit BlockCreated(_nextBlockNumber, _risePrice, futureGrowthRate, _change, _created);
         return true;
     }
-
+    
     // Helper function only
-    function getCurrentTime() public view returns(uint256) {
-        return now;
+    function getCurrentHour() public view returns (uint256) {
+        return now.div(1 hours);
     }
 }

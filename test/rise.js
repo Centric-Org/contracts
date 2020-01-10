@@ -642,7 +642,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '982');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 18);
     });
 
@@ -664,7 +664,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '49650');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 350);
     });
 
@@ -686,7 +686,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '49457');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 543);
     });
 
@@ -709,7 +709,7 @@ contract('Rise', async (accounts) => {
 
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 156);
     });
 
@@ -731,7 +731,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '99');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 1);
     });
 
@@ -754,7 +754,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '4964985106');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 35014894);
     });
 
@@ -777,7 +777,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '4905255501');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 94744499);
     });
 
@@ -800,7 +800,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '8989464749882');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 10535250118);
     });
 
@@ -822,7 +822,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '4082');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 4);
     });
 
@@ -844,7 +844,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '3933');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 153);
     });
 
@@ -866,7 +866,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '1');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 0);
     });
 
@@ -881,7 +881,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.quarantineBalance()).toString(), '0');
 
       assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 0);
     });
 
@@ -903,7 +903,7 @@ contract('Rise', async (accounts) => {
     //   assert.equal((await riseToken.quarantineBalance()).toString(), '9');
 
     //   assert.equal(result.logs.length, 2);
-    //   assert.equal(result.logs[1].event, 'QuarantinBalanceBurnt');
+    //   assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
     //   assert.equal(result.logs[1].args.amount, 1);
     // });
   });

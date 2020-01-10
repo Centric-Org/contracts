@@ -2,10 +2,10 @@ pragma solidity 0.4.24;
 
 import './TRC20.sol';
 
+
 contract CashInterface {
     function totalSupply() public view returns (uint256);
     function balanceOf(address who) external view returns (uint256);
-    function getOwner() external returns(address _owner);
     function mintFromRise(address to, uint256 value) public returns (bool);
     function burnFromRise(address tokensOwner, uint256 value) external returns (bool);
 }
@@ -15,39 +15,43 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
      * STATE VARIABLES
      */
     address public cashContract;
+    uint256 public quarantineBalance;
     uint256 public lastBlockNumber;
     uint256 public lastCalledHour;
 
+    // FutureGrowthRate applied to Price Block creation
     // percentage (fraction of 1, e.g.: 0.3)
     // presented as integer with base of GROWTH_RATE_BASE (to be divided by GROWTH_RATE_BASE to get a fraction of 1)
     uint256 public futureGrowthRate;
     uint256 public GROWTH_RATE_BASE = 10000;
 
-    // price of Rise in USD
-    // base of PRICE_BASE
+    // Price of Rise in USD has base of PRICE_BASE
     uint256 public PRICE_BASE = 10**8;
+
+    // Inital price of Rise in USD has base of PRICE_BASE
     uint256 public initialPrice = (PRICE_BASE * 70638) / 10000;
 
-    uint256 public CHANGE_BASE = 10**8;
-
+    // Structure of a Price Block
     struct Block {
         uint256 risePrice;     // USD price of Rise for the block
         uint256 growthRate;    // FutureGrowthRate value at the time of block creation
         //solium-disable-next-line max-len
         uint256 change;        // percentage (base of PRICE_BASE), RisePrice change relative to prev. block
-        uint256 created;       // hours, unix epoch time
+        uint256 created;       // hours, Unix epoch time
     }
 
     mapping (uint256 => Block) public hoursToBlock;
     
     /**
-     * price factors for months with [28, 29, 30, 31] days,
+     * Price factors for months with [28, 29, 30, 31] days,
+     * price factors determine compounding hourly growth
+     * from the headling monthly futureGrowthRate,   
      * calculated as (1+r)^(1/t)-1
      * where:
      * r - futureGrowthRate,
      * t - number of hours in a given month
      * PRICE_FACTOR_BASE = 10**8
-     * e.g.: for futureGrowthRate=0.3 price factors are (considering PRICE_FACTOR_BASE): [39050, 37703, 36446, 35270]
+     * e.g.: for futureGrowthRate=0.3 price factors are (considering PRICE_FACTOR_BASE): [39050, 37703, 36446, 35270] 
      */
     mapping (uint256 => uint256[4]) public futureGrowthRateToPriceFactors;
     uint256 public PRICE_FACTOR_BASE = 10**8;
@@ -79,7 +83,9 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     event BlockCreated(uint256 blockNumber, uint256 risePrice, uint256 futureGrowthRate,
     uint256 change, uint256 created);
 
-    event QuarantinBalanceBurnt(uint256 amount);
+    event QuarantineBalanceBurnt(uint256 amount);
+
+    event LostTokensBurnt(uint256 amount);
 
     /** 
     * Creates Rise contract. Also sets the Cash address 
@@ -93,27 +99,26 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     {
         mint(_mintSaver, 100000000000000000);   // 1 Billion
         cashContract = _cashContract;
-
-        // signal that no block was created
-        lastBlockNumber = 0;    
     }
 
+    // Returns price of Rise for the current hour
     function getCurrentPrice() external view returns(uint256) {
         return hoursToBlock[getCurrentHour()].risePrice;
     }
     
+    // Returns price of Rise at a specified hour
     function getPrice(uint256 _hour) external view returns(uint256) {
         return hoursToBlock[_hour].risePrice;
     }
 
-/** 
- *  uint256 blockNumber;   // hours, unix epoch time
- *  uint256 risePrice;     // USD price of Rise for the block
- *  uint256 growthRate;    // FutureGrowthRate value at the time of block creation
- *  uint256 change;        // percentage (base of PRICE_BASE), RisePrice change relative to prev. block
- *  uint256 created;       // hours, unix epoch time
- */
-
+    /** 
+     *  Returns Price Block data
+     *  uint256 blockNumber;   // hours, unix epoch time
+     *  uint256 risePrice;     // USD price of Rise for the block
+     *  uint256 growthRate;    // FutureGrowthRate value at the time of block creation
+     *  uint256 change;        // percentage (base of PRICE_BASE), RisePrice change relative to prev. block
+     *  uint256 created;       // hours, unix epoch time
+     */
     function getBlockData(uint256 _hoursEpoch) 
     external view 
     returns(uint256 _risePrice, uint256 _growthRate, uint256 _change, uint256 _created) 
@@ -129,7 +134,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     }
 
     /** 
-     * Inititally need to create block for the 1st year: single call creates ONE block.
+     * Single call creates ONE Price Block.
      * For creating a batch of blocks function needs to be run according amount of times.
      * Admin should always make sure that there is a block for the currentHour 
      * and if not - create it. Otherwise users will not be able to switch tokens
@@ -147,7 +152,10 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         return true;
     }
 
-    // _priceFactors - see comments for mapping futureGrowthRateToPriceFactors
+    /**
+     * Updates the value of futureGrowthRate
+     * _priceFactors - see comments for mapping futureGrowthRateToPriceFactors
+     */ 
     function updateFutureGrowthRate(uint256 _newGrowthRate, uint256[4] _priceFactors) 
     external onlyAdmin() returns(bool _success) {
         require (_newGrowthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
@@ -190,9 +198,9 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     }
 
     /**
-    * Public function that allows users to switch Cash tokens to Rise ones.
-    * Amount of received Rise tokens depends on the risePrice of a current block.
-    */
+     * Public function that allows users to convert Cash tokens to Rise ones.
+     * Amount of received Rise tokens depends on the risePrice of a current block.
+     */
     function convertToRise(uint256 _cashAmount) 
     external returns(bool _success) {
         require(hoursToBlock[getCurrentHour()].risePrice != 0,
@@ -209,6 +217,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         uint256 _riseToDequarantine =
             (_cashAmount.mul(PRICE_BASE)).div(hoursToBlock[getCurrentHour()].risePrice);
 
+        quarantineBalance = quarantineBalance.sub(_riseToDequarantine);
         require(this.transfer(msg.sender, _riseToDequarantine),
             'CONVERT_TO_RISE_FAILED');
 
@@ -217,15 +226,16 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     }
 
     /**
-    * Public function that allows users to switch Rise tokens to Cash ones.
-    * Amount of received Cash tokens depends on the risePrice of a current block. 
-    */
+     * Public function that allows users to convert Rise tokens to Cash ones.
+     * Amount of received Cash tokens depends on the risePrice of a current block. 
+     */
     function convertToCash(uint256 _riseAmount) 
     external returns(uint256) {
         require(balanceOf(msg.sender) >= _riseAmount, 'INSUFFICIENT_BALANCE');
         require(hoursToBlock[getCurrentHour()].risePrice != 0,
             'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
 
+        quarantineBalance = quarantineBalance.add(_riseAmount);
         require(transfer(address(this), _riseAmount), 'RISE_TRANSFER_FAILED');
 
         uint256 _cashToIssue =
@@ -239,28 +249,55 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         emit ConvertToCash(msg.sender, _riseAmount, _cashToIssue);
         return _cashToIssue;
     }
+
     /**
-    * Internal function that implements logic to burn a part of tokens on quarantine.
-    * Formula is based on change parameter of each new block.
-    */
+     * Function is needed to burn lost tokens that probably were sent 
+     * to the contract address by mistake.
+     */
+    function burnLostTokens(uint256 _amount) 
+    external onlyContractOwner() returns(bool _success) {
+        require(_amount <= balanceOf(address(this)).sub(quarantineBalance),
+            'NOT_ALLOWED_TO_BURN_QUARANTINE_TOKENS');
+        
+        this.burn(_amount);
+        
+        emit LostTokensBurnt(_amount);
+        return true;
+    }
+    
+    /**
+     * Internal function that implements logic to burn a part of Rise tokens on quarantine.
+     * Formula is based on network capitalization rules -
+     * Network capitalization of quarantined Rise must equal
+     * network capitalization of Cash
+     * calculated as (q * pRISE - c * pCASH) / pRISE
+     * where:
+     * q - quarantined Rise,
+     * pRISE - current risePrice
+     * c - current cash supply
+     * pCash - Cash pegged price ($1 USD)
+     * PRICE_FACTOR_BASE = 10**8 
+     */
     function burnQuarantined() internal returns(uint256) {
-        uint256 _quarantined = balanceOf(this);
+        uint256 _quarantined = quarantineBalance;
         uint256 _currentPrice = hoursToBlock[getCurrentHour()].risePrice;
         uint256 _cashSupply = CashInterface(cashContract).totalSupply();
 
-        uint256 _riseToBurn = _quarantined.mul(_currentPrice).div(PRICE_BASE).sub(_cashSupply)
-            .mul(PRICE_BASE).div(_currentPrice);
+        uint256 _riseToBurn = ((((_quarantined.mul(_currentPrice)).div(PRICE_BASE))
+            .sub(_cashSupply)).mul(PRICE_BASE)).div(_currentPrice);
 
+        quarantineBalance = quarantineBalance.sub(_riseToBurn);
         this.burn(_riseToBurn);
         
-        emit QuarantinBalanceBurnt(_riseToBurn);
+        emit QuarantineBalanceBurnt(_riseToBurn);
         return _riseToBurn;
     }
     
     /**
-    * Internal function for creating a new block.
-    */
-    function createBlock(uint256 _monthBlocks, uint256 _expectedBlockNumber) internal returns(bool _success) {
+     * Internal function for creating a new Price Block.
+     */
+    function createBlock(uint256 _monthBlocks, uint256 _expectedBlockNumber)
+    internal returns(bool _success) {
         uint256 _lastPrice;
         uint256 _nextBlockNumber;
 
@@ -288,7 +325,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         uint256 _risePrice = ((_risePriceFactor.mul(_lastPrice)).add(_lastPrice
             .mul(PRICE_FACTOR_BASE))).div(PRICE_FACTOR_BASE);
 
-        uint256 _change = (_risePrice.sub(_lastPrice)).mul(CHANGE_BASE).div(_lastPrice);
+        uint256 _change = (_risePrice.sub(_lastPrice)).mul(PRICE_BASE).div(_lastPrice);
         uint256 _created = getCurrentHour();
 
         hoursToBlock[_nextBlockNumber] = Block({
@@ -304,8 +341,13 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         return true;
     }
     
+    // For testing purposes
+    function getCurrentTime() public view returns(uint256) {
+        return now;
+    }
+
     // Helper function only
     function getCurrentHour() public view returns (uint256) {
-        return now.div(1 hours);
+        return getCurrentTime().div(1 hours);
     }
 }

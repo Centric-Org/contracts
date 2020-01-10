@@ -26,10 +26,6 @@ contract Cash is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         riseContract = _riseContractAddress;
     }
 
-    function getOwner() external onlyRise() view returns(address _owner) {
-        return owner;
-    }
-
     function mintFromRise(address to, uint256 value) external onlyRise returns (bool _success) {
         _mint(to, value);
         return true;

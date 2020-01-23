@@ -159,7 +159,6 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     function updateFutureGrowthRate(uint256 _newGrowthRate, uint256[4] _priceFactors) 
     external onlyAdmin() returns(bool _success) {
         require (_newGrowthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
-        require (_newGrowthRate != futureGrowthRate, 'CANNOT_APPROVE_CURRENT_RATE');
         require (_newGrowthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
 
         uint256 _oldRate = futureGrowthRate;

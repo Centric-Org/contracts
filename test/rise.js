@@ -13,25 +13,22 @@ contract('Rise', async (accounts) => {
   const SOMEBODY = accounts[1];
   const ANYBODY = accounts[2];
 
-  beforeEach('setup', async () => {
+  before('setup rise contract', async () => {
     riseToken = await Rise.new(OWNER, OWNER, OWNER);
-
     await riseToken.setCurrentTime(3600);
-
-    await reverter.snapshot();
   });
+
+  beforeEach('setup', reverter.snapshot);
 
   afterEach('revert', reverter.revert);
 
   describe('creation', async () => {
-    beforeEach('setup', async () => {
-      riseToken = await Rise.new(OWNER, SOMEBODY, ANYBODY);
-    });
-
     it('should set up all correctly while creation', async () => {
-      assert.equal((await riseToken.balanceOf(OWNER)).toString(), '100000000000000000');
-      assert.equal(await riseToken.cashContract(), ANYBODY);
-      assert.equal((await riseToken.lastBlockNumber()).toString(), '0');
+      const riseTokenLocal = await Rise.new(OWNER, SOMEBODY, ANYBODY);
+
+      assert.equal((await riseTokenLocal.balanceOf(OWNER)).toString(), '100000000000000000');
+      assert.equal(await riseTokenLocal.cashContract(), ANYBODY);
+      assert.equal((await riseTokenLocal.lastBlockNumber()).toString(), '0');
     });
   });
 
@@ -58,6 +55,36 @@ contract('Rise', async (accounts) => {
       assert.equal(result.logs[0].args._newPriceFactors[3].toNumber(), 35270);
     });
 
+    it('should be possible to update with current rate from owner', async () => {
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
+        [39050, 37703, 36446, 35270]));
+
+      await riseToken.updateFutureGrowthRate(101, [39050, 37703, 36446, 35270]);
+
+      assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
+      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 0)).toNumber(), 39050);
+      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 1)).toNumber(), 37703);
+      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 2)).toNumber(), 36446);
+      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 3)).toNumber(), 35270);
+
+      const result = await riseToken.updateFutureGrowthRate(101, [39050, 37703, 36446, 35270]);
+
+      assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
+      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 0)).toNumber(), 39050);
+      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 1)).toNumber(), 37703);
+      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 2)).toNumber(), 36446);
+      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 3)).toNumber(), 35270);
+
+      assert.equal(result.logs.length, 1);
+      assert.equal(result.logs[0].event, 'FutureGrowthRateUpdated');
+      assert.equal(result.logs[0].args._oldValue, 101);
+      assert.equal(result.logs[0].args._newValue, 101);
+      assert.equal(result.logs[0].args._newPriceFactors[0].toNumber(), 39050);
+      assert.equal(result.logs[0].args._newPriceFactors[1].toNumber(), 37703);
+      assert.equal(result.logs[0].args._newPriceFactors[2].toNumber(), 36446);
+      assert.equal(result.logs[0].args._newPriceFactors[3].toNumber(), 35270);
+    });
+
     it('should not be possible to update with zero rate from owner', async () => {
       assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
         [39050, 37703, 36446, 35270]));
@@ -71,27 +98,6 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 3)).toNumber(), 35270);
 
       await assertReverts(riseToken.updateFutureGrowthRate(0, [39050, 37703, 36446, 35270]));
-
-      assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
-      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 0)).toNumber(), 39050);
-      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 1)).toNumber(), 37703);
-      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 2)).toNumber(), 36446);
-      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 3)).toNumber(), 35270);
-    });
-
-    it('should not be possible to update with current rate from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [39050, 37703, 36446, 35270]));
-
-      await riseToken.updateFutureGrowthRate(101, [39050, 37703, 36446, 35270]);
-
-      assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
-      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 0)).toNumber(), 39050);
-      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 1)).toNumber(), 37703);
-      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 2)).toNumber(), 36446);
-      assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 3)).toNumber(), 35270);
-
-      await assertReverts(riseToken.updateFutureGrowthRate(101, [39050, 37703, 36446, 35270]));
 
       assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
       assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 0)).toNumber(), 39050);

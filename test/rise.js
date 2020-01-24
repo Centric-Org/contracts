@@ -32,6 +32,29 @@ contract('Rise', async (accounts) => {
     });
   });
 
+  describe('getter functions', async () => {
+    it('getCurrentPrice() should return a valid value', async () => {
+      await riseToken.updateFutureGrowthRate(101, [39050, 37703, 36446, 35270]);
+
+      await riseToken.createBlockMock(672, 2);
+      await riseToken.setCurrentTime(7201);
+
+      assert.equal((await riseToken.getCurrentPrice()).toString(), 706655841);
+    });
+
+    it('getPrice() should return a valid value', async () => {
+      await riseToken.updateFutureGrowthRate(101, [39050, 37703, 36446, 35270]);
+
+      await riseToken.createBlockMock(672, 2);
+
+      assert.equal((await riseToken.getPrice(2)).toString(), 706655841);
+    });
+
+    it('getCurrentTime() should return a valid value', async () => {
+      assert.equal((await riseToken.getCurrentTime.call()).toString(), 3600);
+    });
+  });
+
   describe('updateFutureGrowthRate()', async () => {
     it('should be possible to update with valid arguments from owner', async () => {
       assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,

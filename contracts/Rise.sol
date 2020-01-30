@@ -57,18 +57,18 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     uint256 public PRICE_FACTOR_BASE = 10**11;
 
     event DoBalance(
-        uint256 currentHour,
+        uint256 indexed currentHour,
         uint256 riseAmountBurnt
     );
 
     event ConvertToCash(
-        address converter,
+        address indexed converter,
         uint256 riseAmountSent,
         uint256 cashAmountReceived
     );
 
     event ConvertToRise(
-        address converter,
+        address indexed converter,
         uint256 cashAmountSent,
         uint256 riseAmountReceived
     );

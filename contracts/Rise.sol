@@ -113,7 +113,6 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
     /** 
      *  Returns Price Block data
-     *  uint256 blockNumber;   // hours, unix epoch time
      *  uint256 risePrice;     // USD price of Rise for the block
      *  uint256 growthRate;    // FutureGrowthRate value at the time of block creation
      *  uint256 change;        // percentage (base of PRICE_BASE), RisePrice change relative to prev. block
@@ -138,7 +137,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
      * For creating a batch of blocks function needs to be run according amount of times.
      * Admin should always make sure that there is a block for the currentHour 
      * and if not - create it. Otherwise users will not be able to switch tokens
-     * before new block is not created.
+     * until a new block is created.
      * _monthBlocks - hours in month, should be between 28*24 and 31*24
      * _blockNumber - always has to be lastBlockNumber + 1 (works only as a security check) 
      */
@@ -198,7 +197,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
     /**
      * Public function that allows users to convert Cash tokens to Rise ones.
-     * Amount of received Rise tokens depends on the risePrice of a current block.
+     * Amount of received Rise tokens depends on the risePrice of the current block.
      */
     function convertToRise(uint256 _cashAmount) 
     external returns(bool _success) {
@@ -274,7 +273,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
      * q - quarantined Rise,
      * pRISE - current risePrice
      * c - current cash supply
-     * pCash - Cash pegged price ($1 USD)
+     * pCash - Cash pegged price ($1 USD fixed conversion price)
      * PRICE_FACTOR_BASE = 10**8 
      */
     function burnQuarantined() internal returns(uint256) {

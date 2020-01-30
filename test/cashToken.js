@@ -15,8 +15,8 @@ contract('Cash', async (accounts) => {
   const ADDRESS_NULL = '0x0000000000000000000000000000000000000000';
 
   before('setup', async () => {
-    riseToken = await Rise.new(OWNER, OWNER, OWNER);
-    cashToken = await Cash.new(OWNER, OWNER);
+    riseToken = await Rise.new(OWNER, OWNER);
+    cashToken = await Cash.new(OWNER);
 
     await reverter.snapshot();
   });

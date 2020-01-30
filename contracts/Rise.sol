@@ -50,11 +50,11 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
      * where:
      * r - futureGrowthRate,
      * t - number of hours in a given month
-     * PRICE_FACTOR_BASE = 10**8
-     * e.g.: for futureGrowthRate=0.3 price factors are (considering PRICE_FACTOR_BASE): [39050, 37703, 36446, 35270] 
+     * PRICE_FACTOR_BASE = 10**11
+     * e.g.: for futureGrowthRate=0.285 price factors are (considering PRICE_FACTOR_BASE): [37322249, 36035043, 34833666, 33709810] 
      */
     mapping (uint256 => uint256[4]) public futureGrowthRateToPriceFactors;
-    uint256 public PRICE_FACTOR_BASE = 10**8;
+    uint256 public PRICE_FACTOR_BASE = 10**11;
 
     event DoBalance(
         uint256 currentHour,
@@ -322,9 +322,9 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         else require(false, 'WRONG_MONTH_BLOCKS');
         
         uint256 _risePrice = ((_risePriceFactor.mul(_lastPrice)).add(_lastPrice
-            .mul(PRICE_FACTOR_BASE))).div(PRICE_FACTOR_BASE);
+            .mul(PRICE_FACTOR_BASE))).ceilDiv(PRICE_FACTOR_BASE);
 
-        uint256 _change = (_risePrice.sub(_lastPrice)).mul(PRICE_BASE).div(_lastPrice);
+        uint256 _change = (_risePrice.sub(_lastPrice)).mul(PRICE_BASE).roundDiv(_lastPrice);
         uint256 _created = getCurrentHour();
 
         hoursToBlock[_nextBlockNumber] = Block({

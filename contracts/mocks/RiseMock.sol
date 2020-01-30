@@ -5,9 +5,9 @@ import '../Rise.sol';
 contract RiseMock is Rise {
     uint256 currentTime;
 
-    constructor (address _mintSaver, address _burnableStorage, address _cashContract)
+    constructor (address _mintSaver, address _cashContract)
     public
-    Rise(_mintSaver, _burnableStorage, _cashContract) {}
+    Rise(_mintSaver, _cashContract) {}
 
     function getCurrentTime () public view returns(uint256) {
         if(currentTime == 0) {

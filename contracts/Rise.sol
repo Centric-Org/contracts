@@ -92,10 +92,10 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     * to the contract storage to be able to interact with it.
     * Mints 1 billion tokens to _mintSaver address.
     */
-    constructor(address _mintSaver, address _burnableStorage, address _cashContract)
+    constructor(address _mintSaver, address _cashContract)
         public
         TRC20Detailed('Centric RISE', 'CNR', 8)
-        TRC20Burnable(_burnableStorage)
+        TRC20Burnable()
     {
         mint(_mintSaver, 100000000000000000);   // 1 Billion
         cashContract = _cashContract;

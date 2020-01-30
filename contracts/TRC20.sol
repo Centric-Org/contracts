@@ -158,26 +158,11 @@ contract TRC20 is ITRC20, Administrable {
 
 
 contract TRC20Burnable is TRC20 {
-
-    address private _burnableStorage;
-
-    constructor(address burnableStorage) public {
-        _burnableStorage = burnableStorage;
-    }
-
-    function burnableStorage() public view returns (address) {
-        return _burnableStorage;
-    }
-
-    function burnStorage(uint256 value) public onlyContractOwner {
-        _burn(_burnableStorage, value);
-    }
-
     function burn(uint256 value) public {
         _burn(msg.sender, value);
     }
 
-    function burnFrom(address from, uint256 value) public onlyContractOwner {
+    function burnFrom(address from, uint256 value) public {
         _burnFrom(from, value);
     }
 }

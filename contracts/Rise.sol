@@ -300,8 +300,9 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         uint256 _nextBlockNumber;
 
         if (lastBlockNumber == 0) {
+            require(_expectedBlockNumber > getCurrentHour(), 'FIRST_BLOCK_MUST_BE_IN_THE_FUTURE');
             _lastPrice = initialPrice;
-            _nextBlockNumber = getCurrentHour().add(1);
+            _nextBlockNumber = _expectedBlockNumber;
         } else {
             _lastPrice = hoursToBlock[lastBlockNumber].risePrice;
             _nextBlockNumber = lastBlockNumber.add(1);

@@ -29,7 +29,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     uint256 public PRICE_BASE = 10**8;
 
     // Inital price of Rise in USD has base of PRICE_BASE
-    uint256 public initialPrice = (PRICE_BASE * 70638) / 10000;
+    uint256 public initialPrice = 888901550;
 
     // Structure of a Price Block
     struct Block {

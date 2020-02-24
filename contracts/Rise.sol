@@ -252,10 +252,9 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
      * Function is needed to burn lost tokens that probably were sent 
      * to the contract address by mistake.
      */
-    function burnLostTokens(uint256 _amount) 
+    function burnLostTokens() 
     external onlyContractOwner() returns(bool _success) {
-        require(_amount <= balanceOf(address(this)).sub(quarantineBalance),
-            'NOT_ALLOWED_TO_BURN_QUARANTINE_TOKENS');
+        uint256 _amount = balanceOf(address(this)).sub(quarantineBalance);
         
         this.burn(_amount);
         

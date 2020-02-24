@@ -1245,7 +1245,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 9100);
       assert.equal((await riseToken.quarantineBalance()).toString(), 9000);
 
-      await riseToken.burnLostTokens(100);
+      await riseToken.burnLostTokens();
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 9000);
       assert.equal((await riseToken.quarantineBalance()).toString(), 9000);
@@ -1264,48 +1264,9 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 100);
       assert.equal((await riseToken.quarantineBalance()).toString(), 0);
 
-      await riseToken.burnLostTokens(100);
+      await riseToken.burnLostTokens();
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 0);
-      assert.equal((await riseToken.quarantineBalance()).toString(), 0);
-    });
-
-    it('should not be possible to burn more lost tokens than possible by owner', async () => {
-      await riseToken.mint(SOMEBODY, 10000);
-      await riseToken.doCreateBlock(672, 2);
-      await riseToken.setCurrentTime(7201);
-      await riseToken.convertToCash(9000, { from: SOMEBODY });
-
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 9000);
-      assert.equal((await riseToken.quarantineBalance()).toString(), 9000);
-
-      await riseToken.transfer(riseToken.address, 100, { from: SOMEBODY });
-
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 9100);
-      assert.equal((await riseToken.quarantineBalance()).toString(), 9000);
-
-      await assertReverts(riseToken.burnLostTokens(101));
-
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 9100);
-      assert.equal((await riseToken.quarantineBalance()).toString(), 9000);
-    });
-
-    it('should not be possible to burn more lost tokens than possible by owner if quarantine balance is 0', async () => {
-      await riseToken.mint(SOMEBODY, 100);
-      await riseToken.doCreateBlock(672, 2);
-      await riseToken.setCurrentTime(7201);
-
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 0);
-      assert.equal((await riseToken.quarantineBalance()).toString(), 0);
-
-      await riseToken.transfer(riseToken.address, 100, { from: SOMEBODY });
-
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 100);
-      assert.equal((await riseToken.quarantineBalance()).toString(), 0);
-
-      await assertReverts(riseToken.burnLostTokens(101));
-
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 100);
       assert.equal((await riseToken.quarantineBalance()).toString(), 0);
     });
 
@@ -1323,7 +1284,7 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 9100);
       assert.equal((await riseToken.quarantineBalance()).toString(), 9000);
 
-      await assertReverts(riseToken.burnLostTokens(100, { from: ANYBODY }));
+      await assertReverts(riseToken.burnLostTokens({ from: ANYBODY }));
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 9100);
       assert.equal((await riseToken.quarantineBalance()).toString(), 9000);

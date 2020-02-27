@@ -1,9 +1,9 @@
 const Claimable = artifacts.require('Claimable');
 const Reverter = require('./helpers/reverter');
-const {assertReverts} = require('./helpers/assertThrows');
+const { assertReverts } = require('./helpers/assertThrows');
 const truffleAssert = require('truffle-assertions');
 
-contract('Claimable', async (accounts) => {
+contract('Claimable', async accounts => {
   const reverter = new Reverter(web3);
 
   let claimable;
@@ -53,7 +53,7 @@ contract('Claimable', async (accounts) => {
     });
 
     it('should not be possible to transfer ownership by not owner', async () => {
-      await assertReverts(claimable.transferOwnership(SOMEBODY, {from: SOMEBODY}));
+      await assertReverts(claimable.transferOwnership(SOMEBODY, { from: SOMEBODY }));
 
       assert.equal(await claimable.owner.call(), OWNER);
       assert.equal(await claimable.pendingOwner.call(), ADDRESS_NULL);
@@ -68,7 +68,7 @@ contract('Claimable', async (accounts) => {
     it('should be possible to claim ownership by pending owner', async () => {
       await claimable.transferOwnership(SOMEBODY);
 
-      const result = await claimable.claimOwnership({from: SOMEBODY});
+      const result = await claimable.claimOwnership({ from: SOMEBODY });
 
       assert.equal(await claimable.pendingOwner.call(), ADDRESS_NULL);
       assert.equal(await claimable.owner.call(), SOMEBODY);
@@ -82,7 +82,7 @@ contract('Claimable', async (accounts) => {
     it('should not be possible to claim ownership not by pending owner', async () => {
       await claimable.transferOwnership(SOMEBODY);
 
-      await assertReverts(claimable.claimOwnership({from: NOBODY}));
+      await assertReverts(claimable.claimOwnership({ from: NOBODY }));
 
       assert.equal(await claimable.owner.call(), OWNER);
       assert.equal(await claimable.pendingOwner.call(), SOMEBODY);
@@ -106,24 +106,24 @@ contract('Claimable', async (accounts) => {
 
     it('should pass by valid owner after ownership claimed', async () => {
       await claimable.transferOwnership(SOMEBODY);
-      await claimable.claimOwnership({from: SOMEBODY});
+      await claimable.claimOwnership({ from: SOMEBODY });
 
-      assert.isTrue(await claimable.isOwner.call({from: SOMEBODY}));
+      assert.isTrue(await claimable.isOwner.call({ from: SOMEBODY }));
     });
 
     it('should not pass by not a valid owner', async () => {
-      assert.isFalse(await claimable.isOwner.call({from: SOMEBODY}));
+      assert.isFalse(await claimable.isOwner.call({ from: SOMEBODY }));
     });
 
     it('should not pass by not a valid owner after ownership transfered', async () => {
       await claimable.transferOwnership(SOMEBODY);
 
-      assert.isFalse(await claimable.isOwner.call({from: SOMEBODY}));
+      assert.isFalse(await claimable.isOwner.call({ from: SOMEBODY }));
     });
 
     it('should not pass by old valid owner after ownership claimed', async () => {
       await claimable.transferOwnership(SOMEBODY);
-      await claimable.claimOwnership({from: SOMEBODY});
+      await claimable.claimOwnership({ from: SOMEBODY });
 
       assert.isFalse(await claimable.isOwner.call());
     });

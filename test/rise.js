@@ -3,7 +3,7 @@ const Cash = artifacts.require('Cash');
 const Reverter = require('./helpers/reverter');
 const { assertReverts } = require('./helpers/assertThrows');
 
-contract('Rise', async (accounts) => {
+contract('Rise', async accounts => {
   const reverter = new Reverter(web3);
 
   let riseToken;
@@ -57,8 +57,7 @@ contract('Rise', async (accounts) => {
 
   describe('updateFutureGrowthRate()', async () => {
     it('should be possible to update with valid arguments from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       const result = await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -79,8 +78,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should be possible to update with current rate from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -109,8 +107,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should not be possible to update with zero rate from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -130,8 +127,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should not be possible to update with rate greater than base from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -151,8 +147,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should not be possible to update with at least one 0 value in priceFactors from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -172,8 +167,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should not be possible to update with at least one 0 value in priceFactors from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -193,8 +187,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should not be possible to update with all 0 values in priceFactors from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -214,8 +207,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should not be possible to update with value less than next one in priceFactors case 1 from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -235,8 +227,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should not be possible to update with value less than next one in priceFactors case 2 from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -256,8 +247,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should not be possible to update with value less than next one in priceFactors case 3 from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -277,8 +267,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should not be possible to update with valid values not from owner', async () => {
-      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101,
-        [1495449, 1443881, 1395751, 1350727]));
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, [1495449, 1443881, 1395751, 1350727]));
 
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
@@ -288,8 +277,9 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 2)).toNumber(), 1395751);
       assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 3)).toNumber(), 1350727);
 
-      await assertReverts(riseToken.updateFutureGrowthRate(201,
-        [1495449, 1443881, 1395751, 1350727], { from: ANYBODY }));
+      await assertReverts(
+        riseToken.updateFutureGrowthRate(201, [1495449, 1443881, 1395751, 1350727], { from: ANYBODY })
+      );
 
       assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
       assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 0)).toNumber(), 1495449);
@@ -737,7 +727,6 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '49995');
       assert.equal((await riseToken.quarantineBalance()).toString(), '49995');
 
-
       assert.equal(result.logs.length, 2);
       assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
       assert.equal(result.logs[1].args.amount, 5);
@@ -1030,7 +1019,7 @@ contract('Rise', async (accounts) => {
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
 
-      assert.equal((await riseToken.doBalance.call()), true);
+      assert.equal(await riseToken.doBalance.call(), true);
       const result = await riseToken.doBalance({ from: SOMEBODY });
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899758);
@@ -1055,7 +1044,7 @@ contract('Rise', async (accounts) => {
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
 
-      assert.equal((await riseToken.doBalance.call()), true);
+      assert.equal(await riseToken.doBalance.call(), true);
       const result = await riseToken.doBalance();
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899758);
@@ -1076,7 +1065,7 @@ contract('Rise', async (accounts) => {
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 0);
 
-      assert.equal((await riseToken.doBalance.call()), true);
+      assert.equal(await riseToken.doBalance.call(), true);
       const result = await riseToken.doBalance();
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 0);
@@ -1101,7 +1090,7 @@ contract('Rise', async (accounts) => {
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
 
-      assert.equal((await riseToken.doBalance.call()), true);
+      assert.equal(await riseToken.doBalance.call(), true);
       const result = await riseToken.doBalance();
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899758);
@@ -1113,7 +1102,7 @@ contract('Rise', async (accounts) => {
       assert.equal(result.logs[2].args.riseAmountBurnt, 242);
 
       await riseToken.setCurrentTime(75601);
-      assert.equal((await riseToken.doBalance.call()), true);
+      assert.equal(await riseToken.doBalance.call(), true);
       const result1 = await riseToken.doBalance();
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899745);
@@ -1158,7 +1147,7 @@ contract('Rise', async (accounts) => {
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
 
-      assert.equal((await riseToken.doBalance.call()), true);
+      assert.equal(await riseToken.doBalance.call(), true);
       const result = await riseToken.doBalance({ from: SOMEBODY });
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899758);

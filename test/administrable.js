@@ -1,9 +1,9 @@
 const Administrable = artifacts.require('Administrable');
 const Reverter = require('./helpers/reverter');
-const {assertReverts} = require('./helpers/assertThrows');
+const { assertReverts } = require('./helpers/assertThrows');
 const truffleAssert = require('truffle-assertions');
 
-contract('Administrable', async (accounts) => {
+contract('Administrable', async accounts => {
   const reverter = new Reverter(web3);
 
   let administrable;
@@ -62,7 +62,7 @@ contract('Administrable', async (accounts) => {
     it('should not be possible to set admin by not owner', async () => {
       assert.isFalse(await administrable.isAdmin(SOMEBODY));
 
-      await assertReverts(administrable.appointAdmin(SOMEBODY, {from: ANYBODY}));
+      await assertReverts(administrable.appointAdmin(SOMEBODY, { from: ANYBODY }));
 
       assert.isFalse(await administrable.isAdmin(SOMEBODY));
     });
@@ -72,7 +72,7 @@ contract('Administrable', async (accounts) => {
 
       await administrable.appointAdmin(ANYBODY);
 
-      await assertReverts(administrable.appointAdmin(SOMEBODY, {from: ANYBODY}));
+      await assertReverts(administrable.appointAdmin(SOMEBODY, { from: ANYBODY }));
 
       assert.isFalse(await administrable.isAdmin(SOMEBODY));
     });
@@ -110,7 +110,7 @@ contract('Administrable', async (accounts) => {
     it('should not be possible to dismiss admin by not owner', async () => {
       await administrable.appointAdmin(SOMEBODY);
 
-      await assertReverts(administrable.dismissAdmin(SOMEBODY, {from: ANYBODY}));
+      await assertReverts(administrable.dismissAdmin(SOMEBODY, { from: ANYBODY }));
 
       assert.isTrue(await administrable.isAdmin(SOMEBODY));
     });
@@ -120,7 +120,7 @@ contract('Administrable', async (accounts) => {
 
       await administrable.appointAdmin(ANYBODY);
 
-      await assertReverts(administrable.dismissAdmin(SOMEBODY, {from: ANYBODY}));
+      await assertReverts(administrable.dismissAdmin(SOMEBODY, { from: ANYBODY }));
 
       assert.isTrue(await administrable.isAdmin(SOMEBODY));
     });

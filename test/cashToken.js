@@ -1,9 +1,9 @@
 const Cash = artifacts.require('Cash');
 const Rise = artifacts.require('RiseMock');
 const Reverter = require('./helpers/reverter');
-const {assertReverts} = require('./helpers/assertThrows');
+const { assertReverts } = require('./helpers/assertThrows');
 
-contract('Cash', async (accounts) => {
+contract('Cash', async accounts => {
   const reverter = new Reverter(web3);
 
   let riseToken;
@@ -30,7 +30,7 @@ contract('Cash', async (accounts) => {
 
     it('should not be possible to set Rise contract address to a new one not by owner', async () => {
       assert.equal(await cashToken.riseContract(), ADDRESS_NULL);
-      await assertReverts(cashToken.setRiseContract(riseToken.address, {from: ANYBODY}));
+      await assertReverts(cashToken.setRiseContract(riseToken.address, { from: ANYBODY }));
       assert.equal(await cashToken.riseContract(), ADDRESS_NULL);
     });
 
@@ -42,7 +42,7 @@ contract('Cash', async (accounts) => {
 
     it('should not be possible to set Rise contract address to a ADDRESS_NULL by not owner', async () => {
       assert.equal(await cashToken.riseContract(), ADDRESS_NULL);
-      await assertReverts(cashToken.setRiseContract(ADDRESS_NULL, {from: ANYBODY}));
+      await assertReverts(cashToken.setRiseContract(ADDRESS_NULL, { from: ANYBODY }));
       assert.equal(await cashToken.riseContract(), ADDRESS_NULL);
     });
 
@@ -64,7 +64,7 @@ contract('Cash', async (accounts) => {
       it('should be possible to mintFromRise by Rise contract address', async () => {
         assert.equal((await cashToken.balanceOf(ANYBODY)).toString(), 0);
 
-        await cashToken.mintFromRise(ANYBODY, 100, {from: SOMEBODY});
+        await cashToken.mintFromRise(ANYBODY, 100, { from: SOMEBODY });
 
         assert.equal((await cashToken.balanceOf(ANYBODY)).toString(), 100);
       });
@@ -72,7 +72,7 @@ contract('Cash', async (accounts) => {
       it('should not be possible to mintFromRise by not Rise contract address', async () => {
         assert.equal((await cashToken.balanceOf(ANYBODY)).toString(), 0);
 
-        await assertReverts(cashToken.mintFromRise(ANYBODY, 100, {from: ANYBODY}));
+        await assertReverts(cashToken.mintFromRise(ANYBODY, 100, { from: ANYBODY }));
 
         assert.equal((await cashToken.balanceOf(ANYBODY)).toString(), 0);
       });
@@ -81,13 +81,13 @@ contract('Cash', async (accounts) => {
     describe('burnFromRise()', async () => {
       beforeEach('setRiseContract', async () => {
         await cashToken.setRiseContract(SOMEBODY);
-        await cashToken.mintFromRise(ANYBODY, 100, {from: SOMEBODY});
+        await cashToken.mintFromRise(ANYBODY, 100, { from: SOMEBODY });
       });
 
       it('should be possible to burnFromRise by Rise contract address', async () => {
         assert.equal((await cashToken.balanceOf(ANYBODY)).toString(), 100);
 
-        await cashToken.burnFromRise(ANYBODY, 100, {from: SOMEBODY});
+        await cashToken.burnFromRise(ANYBODY, 100, { from: SOMEBODY });
 
         assert.equal((await cashToken.balanceOf(ANYBODY)).toString(), 0);
       });
@@ -95,7 +95,7 @@ contract('Cash', async (accounts) => {
       it('should not be possible to burnFromRise by not Rise contract address', async () => {
         assert.equal((await cashToken.balanceOf(ANYBODY)).toString(), 100);
 
-        await assertReverts(cashToken.burnFromRise(ANYBODY, 100, {from: ANYBODY}));
+        await assertReverts(cashToken.burnFromRise(ANYBODY, 100, { from: ANYBODY }));
 
         assert.equal((await cashToken.balanceOf(ANYBODY)).toString(), 100);
       });

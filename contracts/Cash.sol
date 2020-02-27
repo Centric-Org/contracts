@@ -12,7 +12,7 @@ contract Cash is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         TRC20Detailed('Centric CASH', 'CNS', 8)
         TRC20Burnable()
     {
-        mint(_mintSaver, 100000000);
+        mint(_mintSaver, 0);
     }
 
     modifier onlyRise() {

@@ -544,10 +544,10 @@ contract('Rise', async accounts => {
 
       await riseToken.mint(SOMEBODY, 1000);
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 2);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
 
       const result = await riseToken.convertToCash(900, { from: SOMEBODY });
@@ -572,10 +572,10 @@ contract('Rise', async accounts => {
 
       await riseToken.mint(SOMEBODY, 1000);
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 2);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
 
       const result = await riseToken.convertToCash(0, { from: SOMEBODY });
@@ -600,10 +600,10 @@ contract('Rise', async accounts => {
 
       await riseToken.mint(SOMEBODY, 800);
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 2);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
 
       await assertReverts(riseToken.convertToCash(900, { from: SOMEBODY }));
@@ -619,8 +619,8 @@ contract('Rise', async accounts => {
 
       await riseToken.mint(SOMEBODY, 1000);
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 2);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
       await riseToken.setCurrentTime(144001);
 
@@ -647,10 +647,10 @@ contract('Rise', async accounts => {
     it('should be possible to burnQuarantined with sufficient wallet balance case 1', async () => {
       await riseToken.convertToCash(26000, { from: SOMEBODY });
 
-      for (let i = 0; i < 60; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 63; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(180001);
+      await riseToken.setCurrentTime(50 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '26000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '26000');
@@ -669,10 +669,10 @@ contract('Rise', async accounts => {
     it('should be possible to burnQuarantined with sufficient wallet balance case 2', async () => {
       await riseToken.convertToCash(50000, { from: SOMEBODY });
 
-      for (let i = 0; i < 21; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 24; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '50000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '50000');
@@ -691,10 +691,10 @@ contract('Rise', async accounts => {
     it('should be possible to burnQuarantined with sufficient wallet balance case 3', async () => {
       await riseToken.convertToCash(50000, { from: SOMEBODY });
 
-      for (let i = 0; i < 30; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i <= 30; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(108001);
+      await riseToken.setCurrentTime(30 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '50000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '50000');
@@ -713,10 +713,10 @@ contract('Rise', async accounts => {
     it('should be possible to burnQuarantined with sufficient wallet balance case 4', async () => {
       await riseToken.convertToCash(50000, { from: SOMEBODY });
 
-      for (let i = 0; i < 10; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 13; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(36001);
+      await riseToken.setCurrentTime(10 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '50000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '50000');
@@ -735,10 +735,10 @@ contract('Rise', async accounts => {
     it('should be possible to burnQuarantined with sufficient wallet balance case 5', async () => {
       await riseToken.convertToCash(1800, { from: SOMEBODY });
 
-      for (let i = 0; i < 60; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 63; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(180001);
+      await riseToken.setCurrentTime(50 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '1800');
       assert.equal((await riseToken.quarantineBalance()).toString(), '1800');
@@ -758,10 +758,10 @@ contract('Rise', async accounts => {
       await riseToken.mint(SOMEBODY, 5000000000);
       await riseToken.convertToCash(5000000000, { from: SOMEBODY });
 
-      for (let i = 0; i < 20; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 23; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '5000000000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '5000000000');
@@ -781,10 +781,10 @@ contract('Rise', async accounts => {
       await riseToken.mint(SOMEBODY, 5000000000);
       await riseToken.convertToCash(5000000000, { from: SOMEBODY });
 
-      for (let i = 0; i < 50; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 53; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(184001);
+      await riseToken.setCurrentTime(51 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '5000000000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '5000000000');
@@ -804,10 +804,10 @@ contract('Rise', async accounts => {
       await riseToken.mint(SOMEBODY, 9000000000000);
       await riseToken.convertToCash(9000000000000, { from: SOMEBODY });
 
-      for (let i = 0; i < 10; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 13; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(18000);
+      await riseToken.setCurrentTime(5 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '9000000000000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '9000000000000');
@@ -827,10 +827,10 @@ contract('Rise', async accounts => {
       await riseToken.mint(SOMEBODY, 140086);
       await riseToken.convertToCash(140086, { from: SOMEBODY });
 
-      for (let i = 0; i < 10; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 13; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(18000);
+      await riseToken.setCurrentTime(5 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '140086');
       assert.equal((await riseToken.quarantineBalance()).toString(), '140086');
@@ -850,10 +850,10 @@ contract('Rise', async accounts => {
       await riseToken.mint(SOMEBODY, 140086);
       await riseToken.convertToCash(140086, { from: SOMEBODY });
 
-      for (let i = 0; i < 100; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 103; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(360000);
+      await riseToken.setCurrentTime(10 * 36000);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '140086');
       assert.equal((await riseToken.quarantineBalance()).toString(), '140086');
@@ -872,10 +872,10 @@ contract('Rise', async accounts => {
     it('should be possible to burnQuarantined with sufficient wallet balance case 11', async () => {
       await riseToken.convertToCash(1, { from: SOMEBODY });
 
-      for (let i = 0; i < 100; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 103; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(360000);
+      await riseToken.setCurrentTime(10 * 36000);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '1');
       assert.equal((await riseToken.quarantineBalance()).toString(), '1');
@@ -910,7 +910,7 @@ contract('Rise', async accounts => {
   describe('convertToRise()', async () => {
     beforeEach('set up stable contract', async () => {
       cashToken = await Cash.new(OWNER);
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
       riseToken = await Rise.new(OWNER, cashToken.address);
       await cashToken.setRiseContract(riseToken.address);
       await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
@@ -919,10 +919,10 @@ contract('Rise', async accounts => {
     it('should be possible to convertToRise with sufficient funds', async () => {
       await riseToken.mint(SOMEBODY, 2000);
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 2);
+      for (let i = 2; i < 30; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       await riseToken.convertToCash(1000, { from: SOMEBODY });
 
@@ -950,10 +950,10 @@ contract('Rise', async accounts => {
     it('should not be possible to convertToRise with insufficient funds', async () => {
       await riseToken.mint(SOMEBODY, 900);
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 2);
+      for (let i = 2; i < 30; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       await riseToken.convertToCash(900, { from: SOMEBODY });
 
@@ -973,10 +973,10 @@ contract('Rise', async accounts => {
     it('should not be possible to convertToRise with no block for current hour', async () => {
       await riseToken.mint(SOMEBODY, 2000);
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 2);
+      for (let i = 2; i < 30; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       await riseToken.convertToCash(1000, { from: SOMEBODY });
 
@@ -985,7 +985,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.quarantineBalance()).toString(), 1000);
       assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8891);
 
-      await riseToken.setCurrentTime(172001);
+      await riseToken.setCurrentTime(120 * 3600);
 
       await assertReverts(riseToken.convertToRise(1007, { from: SOMEBODY }));
 
@@ -1011,11 +1011,11 @@ contract('Rise', async accounts => {
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
 
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
 
@@ -1036,11 +1036,11 @@ contract('Rise', async accounts => {
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
 
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
 
@@ -1057,11 +1057,11 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to doBalance if quarantine balance is 0', async () => {
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
 
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 0);
 
@@ -1082,11 +1082,11 @@ contract('Rise', async accounts => {
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
 
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
 
@@ -1119,11 +1119,11 @@ contract('Rise', async accounts => {
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
 
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
 
@@ -1139,11 +1139,11 @@ contract('Rise', async accounts => {
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 3);
+      for (let i = 3; i < 31; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
 
-      await riseToken.setCurrentTime(72001);
+      await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
 
@@ -1191,8 +1191,8 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to doCreateBlock not a first block from admin', async () => {
-      for (let i = 0; i < 28; i++) {
-        await riseToken.doCreateBlock(672, i + 2);
+      for (let i = 2; i < 30; i++) {
+        await riseToken.doCreateBlock(672, i);
       }
 
       assert.equal((await riseToken.getBlockData(30))._risePrice, 0);

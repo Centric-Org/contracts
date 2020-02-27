@@ -42,12 +42,34 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.getCurrentPrice()).toString(), 888914843);
     });
 
+    it('getCurrentPrice() should throw on non existent price', async () => {
+      await riseToken.setCurrentTime(7201);
+
+      await assertReverts(riseToken.getCurrentPrice());
+    });
+
     it('getPrice() should return a valid value', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
       await riseToken.createBlockMock(672, 2);
 
       assert.equal((await riseToken.getPrice(2)).toString(), 888914843);
+    });
+
+    it('getPrice() should throw on non existent price', async () => {
+      await assertReverts(riseToken.getPrice(2));
+    });
+
+    it('getBlockData() should return a valid value', async () => {
+      await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
+
+      await riseToken.createBlockMock(672, 2);
+
+      assert.equal((await riseToken.getBlockData(2))._risePrice, 888914843);
+    });
+
+    it('getBlockData() should throw on non existent price', async () => {
+      await assertReverts(riseToken.getBlockData(2));
     });
 
     it('getCurrentTime() should return a valid value', async () => {
@@ -1174,7 +1196,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to doCreateBlock first block from owner', async () => {
-      assert.equal((await riseToken.getBlockData(2))._risePrice, 0);
+      await assertReverts(riseToken.getBlockData(2));
 
       await riseToken.doCreateBlock(672, 2);
 
@@ -1182,7 +1204,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to doCreateBlock first block from admin', async () => {
-      assert.equal((await riseToken.getBlockData(2))._risePrice, 0);
+      await assertReverts(riseToken.getBlockData(2));
 
       await riseToken.appointAdmin(SOMEBODY);
       await riseToken.doCreateBlock(672, 2, { from: SOMEBODY });
@@ -1195,7 +1217,7 @@ contract('Rise', async accounts => {
         await riseToken.doCreateBlock(672, i);
       }
 
-      assert.equal((await riseToken.getBlockData(30))._risePrice, 0);
+      await assertReverts(riseToken.getBlockData(30));
 
       await riseToken.appointAdmin(SOMEBODY);
       await riseToken.doCreateBlock(672, 30, { from: SOMEBODY });
@@ -1204,11 +1226,11 @@ contract('Rise', async accounts => {
     });
 
     it('should not be possible to doCreateBlock from not owner or admin', async () => {
-      assert.equal((await riseToken.getBlockData(2))._risePrice, 0);
+      await assertReverts(riseToken.getBlockData(2));
 
       await assertReverts(riseToken.doCreateBlock(672, 2, { from: ANYBODY }));
 
-      assert.equal((await riseToken.getBlockData(2))._risePrice, 0);
+      await assertReverts(riseToken.getBlockData(2));
     });
   });
 

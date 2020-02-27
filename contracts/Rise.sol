@@ -105,11 +105,13 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
     // Returns price of Rise for the current hour
     function getCurrentPrice() external view returns(uint256) {
+        require (hoursToBlock[getCurrentHour()].risePrice > 0, 'BLOCK_NOT_DEFINED');
         return hoursToBlock[getCurrentHour()].risePrice;
     }
     
     // Returns price of Rise at a specified hour
     function getPrice(uint256 _hour) external view returns(uint256) {
+        require (hoursToBlock[_hour].risePrice > 0, 'BLOCK_NOT_DEFINED');
         return hoursToBlock[_hour].risePrice;
     }
 
@@ -125,6 +127,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     returns(uint256 _risePrice, uint256 _growthRate, uint256 _change, uint256 _created) 
     {
         require (_hoursEpoch > 0, 'EMPTY_HOURS_VALUE');
+        require (hoursToBlock[_hoursEpoch].risePrice > 0, 'BLOCK_NOT_DEFINED');
 
         _risePrice = hoursToBlock[_hoursEpoch].risePrice;
         _growthRate = hoursToBlock[_hoursEpoch].growthRate;

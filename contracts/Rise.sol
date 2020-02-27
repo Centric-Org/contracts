@@ -1,6 +1,7 @@
 pragma solidity 0.4.25;
 
 import './TRC20.sol';
+import './RoundMath.sol';
 
 
 contract CashInterface {
@@ -11,6 +12,7 @@ contract CashInterface {
 }
 
 contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
+    using RoundMath for uint256;
     /**
      * STATE VARIABLES
      */

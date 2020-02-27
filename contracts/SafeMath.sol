@@ -22,20 +22,6 @@ library SafeMath {
         return c;
     }
 
-    /// @dev Integer division of two numbers rounding the quotient, reverts on division by zero.
-    function roundDiv(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, 'DIVIDING_ERROR');
-        uint256 c = ((a * 10 / b) + 5) / 10;
-        return c;
-    }
-
-    /// @dev Integer division of two numbers ceiling the quotient, reverts on division by zero.
-    function ceilDiv(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, 'DIVIDING_ERROR');
-        uint256 c = ((a * 10 / b) + 9) / 10;
-        return c;
-    }
-
     /// @dev Subtracts two numbers, reverts on overflow (i.e. if subtrahend is greater than minuend).
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b <= a, 'SUB_ERROR');

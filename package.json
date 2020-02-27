@@ -1,5 +1,5 @@
 {
-  "name": "URise",
+  "name": "centric",
   "version": "1.0.0",
   "main": "truffle-config.js",
   "directories": {
@@ -10,7 +10,8 @@
     "test": "truffle test",
     "compile": "truffle compile",
     "validate-tests": "eslint test/*.js test/helpers/*.js --fix",
-    "validate-sol": "solium --dir contracts --fix"
+    "validate-sol": "solium --dir contracts --fix",
+    "format": "prettier --write \"**/*.js\""
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +21,7 @@
     "dotenv": "^8.1.0",
     "eslint-config-google": "^0.14.0",
     "ganache-cli": "^6.7.0",
+    "prettier": "^1.19.1",
     "truffle": "^5.1.14",
     "truffle-assertions": "^0.9.2",
     "truffle-flattener": "^1.4.2",

@@ -164,6 +164,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     external onlyAdmin() returns(bool _success) {
         require (_newGrowthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
         require (_newGrowthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
+        require (_priceFactors.length == 4, 'WRONG_NUMBER_OF_PRICE_FACTORS');
 
         uint256 _oldRate = futureGrowthRate;
         futureGrowthRate = _newGrowthRate;

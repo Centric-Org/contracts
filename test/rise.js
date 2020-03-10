@@ -300,7 +300,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 3)).toNumber(), 1350727);
 
       await assertReverts(
-        riseToken.updateFutureGrowthRate(201, [1495449, 1443881, 1395751, 1350727], { from: ANYBODY })
+        riseToken.updateFutureGrowthRate(201, [1495449, 1443881, 1395751, 1350727], { from: ANYBODY }),
       );
 
       assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
@@ -308,6 +308,30 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 1)).toNumber(), 1443881);
       assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 2)).toNumber(), 1395751);
       assert.equal((await riseToken.futureGrowthRateToPriceFactors(101, 3)).toNumber(), 1350727);
+    });
+
+    it('should not be possible to update with only 3 price factors', async () => {
+      var error = false;
+      await riseToken.updateFutureGrowthRate
+        .call(101, [1495449, 1443881, 1395751])
+        .catch(e => {
+          error = true;
+        })
+        .finally(() => {
+          assert.equal(error, true);
+        });
+    });
+
+    it('should be possible to update with max price factors', async () => {
+      const maxValues = [103200116, 99639719, 96316796, 93208355];
+      assert.isTrue(await riseToken.updateFutureGrowthRate.call(101, maxValues));
+    });
+
+    it('should be possible to update with too big price factors', async () => {
+      const maxValues = [103200116, 99639719, 96316796, 93208355];
+      await assertReverts(
+        riseToken.updateFutureGrowthRate.call(101, [maxValues[0] + 1, maxValues[1], maxValues[2], maxValues[3]]),
+      );
     });
   });
 

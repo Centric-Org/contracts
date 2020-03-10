@@ -53,7 +53,8 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
      * r - futureGrowthRate,
      * t - number of hours in a given month
      * PRICE_FACTOR_BASE = 10**11
-     * e.g.: for futureGrowthRate=0.285 price factors are (considering PRICE_FACTOR_BASE): [37322249, 36035043, 34833666, 33709810] 
+     * e.g.: for futureGrowthRate=2850=(2850/GROWTH_RATE_BASE)=0.285=28.5% 
+     * price factors are (considering PRICE_FACTOR_BASE): [37322249, 36035043, 34833666, 33709810]
      */
     mapping (uint256 => uint256[4]) public futureGrowthRateToPriceFactors;
     uint256 public PRICE_FACTOR_BASE = 10**11;
@@ -166,15 +167,20 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
         require (_newGrowthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
         require (_priceFactors.length == 4, 'WRONG_NUMBER_OF_PRICE_FACTORS');
 
-        uint256 _oldRate = futureGrowthRate;
-        futureGrowthRate = _newGrowthRate;
-
         for (uint8 i = 0; i < _priceFactors.length; i++) {
             require(_priceFactors[i] != 0, 'ZERO_PRICE_FACTOR');
         }
 
+        require(_priceFactors[0] < 103200117, 'PRICE_FACTORS_ARE_NOT_VALID');
+        require(_priceFactors[1] < 99639720, 'PRICE_FACTORS_ARE_NOT_VALID');
+        require(_priceFactors[2] < 96316797, 'PRICE_FACTORS_ARE_NOT_VALID');
+        require(_priceFactors[3] < 93208356, 'PRICE_FACTORS_ARE_NOT_VALID');
+
         require(_priceFactors[0] > _priceFactors[1] && _priceFactors[1] > _priceFactors[2] &&
             _priceFactors[2] > _priceFactors[3], 'PRICE_FACTORS_ARE_NOT_VALID');
+
+        uint256 _oldRate = futureGrowthRate;
+        futureGrowthRate = _newGrowthRate;
 
         futureGrowthRateToPriceFactors[_newGrowthRate] = _priceFactors;
 

@@ -3,15 +3,11 @@ pragma solidity 0.4.25;
 import './SafeMath.sol';
 import './TRC20.sol';
 
-contract Cash is TRC20Burnable, TRC20Detailed, TRC20Mintable {
 
+contract Cash is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     address public riseContract;
 
-    constructor(address _mintSaver)
-        public
-        TRC20Detailed('Centric CASH', 'CNS', 8)
-        TRC20Burnable()
-    {
+    constructor(address _mintSaver) public TRC20Detailed('Centric CASH', 'CNS', 8) TRC20Burnable() {
         mint(_mintSaver, 0);
     }
 
@@ -32,7 +28,10 @@ contract Cash is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     }
 
     function burnFromRise(address tokensOwner, uint256 value)
-    external onlyRise returns (bool _success) {
+        external
+        onlyRise
+        returns (bool _success)
+    {
         _burn(tokensOwner, value);
         return true;
     }

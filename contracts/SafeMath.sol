@@ -1,8 +1,8 @@
 pragma solidity 0.4.25;
 
+
 /// @dev Math operations with safety checks that revert on error
 library SafeMath {
-
     /// @dev Multiplies two numbers, reverts on overflow.
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {

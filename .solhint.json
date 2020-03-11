@@ -1,0 +1,4 @@
+{
+  "solidity.linter": "solium",
+  "solidity.soliumRules": {}
+}

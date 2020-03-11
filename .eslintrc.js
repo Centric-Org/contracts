@@ -2,10 +2,10 @@ module.exports = {
   extends: 'google',
   env: {
     node: true,
-    es6: true
+    es6: true,
   },
   parserOptions: {
-    ecmaVersion: 2017
+    ecmaVersion: 2017,
   },
   rules: {
     indent: [
@@ -13,21 +13,21 @@ module.exports = {
       2,
       {
         CallExpression: {
-          arguments: 1
+          arguments: 1,
         },
         FunctionDeclaration: {
           body: 1,
-          parameters: 1
+          parameters: 1,
         },
         FunctionExpression: {
           body: 1,
-          parameters: 1
+          parameters: 1,
         },
-        MemberExpression: 0,
+        // MemberExpression: 0,
         ObjectExpression: 1,
         SwitchCase: 1,
-        ignoredNodes: ['ConditionalExpression']
-      }
+        ignoredNodes: ['ConditionalExpression'],
+      },
     ],
     'require-jsdoc': 0,
     'max-len': [
@@ -37,8 +37,10 @@ module.exports = {
         tabWidth: 4,
         ignoreUrls: true,
         // Mocha tests are calls to function it() with usually long test name.
-        ignorePattern: ' it\\('
-      }
-    ]
-  }
+        ignorePattern: ' it\\(',
+      },
+    ],
+    'object-curly-spacing': ['error', 'always'],
+    'arrow-parens': ['error', 'as-needed'],
+  },
 };

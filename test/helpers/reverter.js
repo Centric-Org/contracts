@@ -8,14 +8,14 @@ function Reverter(web3) {
           jsonrpc: '2.0',
           method: 'evm_revert',
           id: new Date().getTime(),
-          params: [snapshotId]
+          params: [snapshotId],
         },
         (err, result) => {
           if (err) {
             return reject(err);
           }
           return resolve(this.snapshot());
-        }
+        },
       );
     });
   };
@@ -26,7 +26,7 @@ function Reverter(web3) {
         {
           jsonrpc: '2.0',
           method: 'evm_snapshot',
-          id: new Date().getTime()
+          id: new Date().getTime(),
         },
         (err, result) => {
           if (err) {
@@ -34,7 +34,7 @@ function Reverter(web3) {
           }
           snapshotId = web3.utils.toDecimal(result.result);
           return resolve();
-        }
+        },
       );
     });
   };

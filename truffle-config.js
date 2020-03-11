@@ -49,7 +49,7 @@ module.exports = {
       network_id: '*', // Any network (default: none)
       gas: 6000000,
       gasLimit: 6000000, // <-- Use this high gas value
-      gasPrice: 1
+      gasPrice: 1,
     },
     coverage: {
       host: 'localhost',
@@ -57,7 +57,7 @@ module.exports = {
       port: 8555, // <-- If you change this, also set the port option in .solcover.js.
       gas: 0xfffffffffff, // <-- Use this high gas value
       gasLimit: 0xfffffffffff, // <-- Use this high gas value
-      gasPrice: 0x01 // <-- Use this low gas price
+      gasPrice: 0x01, // <-- Use this low gas price
     },
 
     // Another network with more advanced options...
@@ -74,30 +74,39 @@ module.exports = {
     // NB: It's important to wrap the provider as a function.
     ropsten: {
       provider: () =>
-        new HDWalletProvider(process.env.MNENOMIC, 'https://ropsten.infura.io/v3/' + process.env.INFURA_API_KEY),
+        new HDWalletProvider(
+          process.env.MNENOMIC,
+          'https://ropsten.infura.io/v3/' + process.env.INFURA_API_KEY,
+        ),
       network_id: 3,
       // gas: 8000000,
       // gasLimit: 8000000, // <-- Use this high gas value
 
-      gasPrice: 10000000000
+      gasPrice: 10000000000,
     },
 
     kovan: {
       provider: () =>
-        new HDWalletProvider(process.env.MNENOMIC, 'https://kovan.infura.io/v3/' + process.env.INFURA_API_KEY),
+        new HDWalletProvider(
+          process.env.MNENOMIC,
+          'https://kovan.infura.io/v3/' + process.env.INFURA_API_KEY,
+        ),
       network_id: 42,
       // gas: 8000000,
       // gasLimit: 8000000, // <-- Use this high gas value
 
-      gasPrice: 1000000000
+      gasPrice: 1000000000,
     },
 
     main: {
       provider: () =>
-        new HDWalletProvider(process.env.MNENOMIC, 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY),
+        new HDWalletProvider(
+          process.env.MNENOMIC,
+          'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
+        ),
       gasPrice: 10000000000,
-      network_id: 1
-    }
+      network_id: 1,
+    },
 
     // Useful for private networks
     // private: {
@@ -120,9 +129,9 @@ module.exports = {
       settings: {
         optimizer: {
           enabled: true,
-          runs: 1000
-        }
-      }
-    }
-  }
+          runs: 1000,
+        },
+      },
+    },
+  },
 };

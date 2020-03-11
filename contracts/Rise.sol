@@ -15,7 +15,7 @@ contract CashInterface {
 }
 
 
-contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
+contract Rise is TRC20Detailed {
     using RoundMath for uint256;
     /**
      * STATE VARIABLES
@@ -107,9 +107,8 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     constructor(address _mintSaver, address _cashContract)
         public
         TRC20Detailed('Centric RISE', 'CNR', 8)
-        TRC20Burnable()
     {
-        mint(_mintSaver, 100000000000000000); // 1 Billion
+        _mint(_mintSaver, 100000000000000000); // 1 Billion
         cashContract = _cashContract;
     }
 
@@ -289,7 +288,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
     function burnLostTokens() external onlyContractOwner() returns (bool _success) {
         uint256 _amount = balanceOf(address(this)).sub(quarantineBalance);
 
-        this.burn(_amount);
+        _burn(this, _amount);
 
         emit LostTokensBurnt(_amount);
         return true;
@@ -319,7 +318,7 @@ contract Rise is TRC20Burnable, TRC20Detailed, TRC20Mintable {
             .div(_currentPrice);
 
         quarantineBalance = quarantineBalance.sub(_riseToBurn);
-        this.burn(_riseToBurn);
+        _burn(this, _riseToBurn);
 
         emit QuarantineBalanceBurnt(_riseToBurn);
         return _riseToBurn;

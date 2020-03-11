@@ -4,11 +4,11 @@ import './SafeMath.sol';
 import './TRC20.sol';
 
 
-contract Cash is TRC20Burnable, TRC20Detailed, TRC20Mintable {
+contract Cash is TRC20Detailed {
     address public riseContract;
 
-    constructor(address _mintSaver) public TRC20Detailed('Centric CASH', 'CNS', 8) TRC20Burnable() {
-        mint(_mintSaver, 0);
+    constructor(address _mintSaver) public TRC20Detailed('Centric CASH', 'CNS', 8) {
+        _mint(_mintSaver, 0);
     }
 
     modifier onlyRise() {

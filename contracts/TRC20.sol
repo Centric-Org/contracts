@@ -157,17 +157,6 @@ contract TRC20 is ITRC20, Administrable {
 }
 
 
-contract TRC20Burnable is TRC20 {
-    function burn(uint256 value) public {
-        _burn(msg.sender, value);
-    }
-
-    function burnFrom(address from, uint256 value) public {
-        _burnFrom(from, value);
-    }
-}
-
-
 contract TRC20Detailed is TRC20 {
     string private _name;
     string private _symbol;
@@ -189,14 +178,5 @@ contract TRC20Detailed is TRC20 {
 
     function decimals() public view returns (uint8) {
         return _decimals;
-    }
-}
-
-
-contract TRC20Mintable is TRC20 {
-
-    function mint(address to, uint256 value) public onlyContractOwner returns (bool) {
-        _mint(to, value);
-        return true;
     }
 }

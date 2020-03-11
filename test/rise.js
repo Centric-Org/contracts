@@ -605,7 +605,7 @@ contract('Rise', async accounts => {
     it('should be possible to convertToCash with suficient balance case 1', async () => {
       await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
 
-      await riseToken.mint(SOMEBODY, 1000);
+      await riseToken.transfer(SOMEBODY, 1000);
 
       await riseToken.doCreateBlock(672, 2);
       await riseToken.setCurrentTime(7200);
@@ -631,7 +631,7 @@ contract('Rise', async accounts => {
     it('should be possible to convertToCash with suficient balance case 2', async () => {
       await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
 
-      await riseToken.mint(SOMEBODY, 1000);
+      await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
         await riseToken.doCreateBlock(672, i);
@@ -659,7 +659,7 @@ contract('Rise', async accounts => {
     it('should be possible to convertToCash with suficient balance case 3', async () => {
       await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
 
-      await riseToken.mint(SOMEBODY, 1000);
+      await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
         await riseToken.doCreateBlock(672, i);
@@ -687,7 +687,7 @@ contract('Rise', async accounts => {
     it('should not be possible to convertToCash with insufficient balance', async () => {
       await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
 
-      await riseToken.mint(SOMEBODY, 800);
+      await riseToken.transfer(SOMEBODY, 800);
 
       for (let i = 3; i < 31; i++) {
         await riseToken.doCreateBlock(672, i);
@@ -706,7 +706,7 @@ contract('Rise', async accounts => {
     it('should not be possible to convertToCash with 0 risePrice', async () => {
       await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
 
-      await riseToken.mint(SOMEBODY, 1000);
+      await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
         await riseToken.doCreateBlock(672, i);
@@ -730,7 +730,7 @@ contract('Rise', async accounts => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
       await riseToken.doCreateBlock(672, 2);
       await riseToken.setCurrentTime(7200);
-      await riseToken.mint(SOMEBODY, 100000);
+      await riseToken.transfer(SOMEBODY, 100000);
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 1', async () => {
@@ -844,7 +844,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 6', async () => {
-      await riseToken.mint(SOMEBODY, 5000000000);
+      await riseToken.transfer(SOMEBODY, 5000000000);
       await riseToken.convertToCash(5000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 23; i++) {
@@ -867,7 +867,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 7', async () => {
-      await riseToken.mint(SOMEBODY, 5000000000);
+      await riseToken.transfer(SOMEBODY, 5000000000);
       await riseToken.convertToCash(5000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 53; i++) {
@@ -890,7 +890,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 8', async () => {
-      await riseToken.mint(SOMEBODY, 9000000000000);
+      await riseToken.transfer(SOMEBODY, 9000000000000);
       await riseToken.convertToCash(9000000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
@@ -913,7 +913,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 9', async () => {
-      await riseToken.mint(SOMEBODY, 140086);
+      await riseToken.transfer(SOMEBODY, 140086);
       await riseToken.convertToCash(140086, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
@@ -936,7 +936,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 10', async () => {
-      await riseToken.mint(SOMEBODY, 140086);
+      await riseToken.transfer(SOMEBODY, 140086);
       await riseToken.convertToCash(140086, { from: SOMEBODY });
 
       for (let i = 3; i < 103; i++) {
@@ -1006,7 +1006,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to convertToRise with sufficient funds', async () => {
-      await riseToken.mint(SOMEBODY, 2000);
+      await riseToken.transfer(SOMEBODY, 2000);
 
       for (let i = 2; i < 30; i++) {
         await riseToken.doCreateBlock(672, i);
@@ -1037,7 +1037,7 @@ contract('Rise', async accounts => {
     });
 
     it('should not be possible to convertToRise with insufficient funds', async () => {
-      await riseToken.mint(SOMEBODY, 900);
+      await riseToken.transfer(SOMEBODY, 900);
 
       for (let i = 2; i < 30; i++) {
         await riseToken.doCreateBlock(672, i);
@@ -1060,7 +1060,7 @@ contract('Rise', async accounts => {
     });
 
     it('should not be possible to convertToRise with no block for current hour', async () => {
-      await riseToken.mint(SOMEBODY, 2000);
+      await riseToken.transfer(SOMEBODY, 2000);
 
       for (let i = 2; i < 30; i++) {
         await riseToken.doCreateBlock(672, i);
@@ -1096,7 +1096,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to doBalance from somebody', async () => {
-      await riseToken.mint(ANYBODY, 1000000);
+      await riseToken.transfer(ANYBODY, 1000000);
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
@@ -1121,7 +1121,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to doBalance from owner', async () => {
-      await riseToken.mint(ANYBODY, 1000000);
+      await riseToken.transfer(ANYBODY, 1000000);
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
@@ -1167,7 +1167,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to doBalance second time in the next hour', async () => {
-      await riseToken.mint(ANYBODY, 1000000);
+      await riseToken.transfer(ANYBODY, 1000000);
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
@@ -1204,7 +1204,7 @@ contract('Rise', async accounts => {
     });
 
     it('should not be possible to doBalance if current block is empty', async () => {
-      await riseToken.mint(ANYBODY, 1000000);
+      await riseToken.transfer(ANYBODY, 1000000);
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
@@ -1224,7 +1224,7 @@ contract('Rise', async accounts => {
     });
 
     it('should not be possible to doBalance second time in the same hour', async () => {
-      await riseToken.mint(ANYBODY, 1000000);
+      await riseToken.transfer(ANYBODY, 1000000);
 
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
@@ -1310,7 +1310,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to burn lost tokens by owner', async () => {
-      await riseToken.mint(SOMEBODY, 10000);
+      await riseToken.transfer(SOMEBODY, 10000);
       await riseToken.doCreateBlock(672, 2);
       await riseToken.setCurrentTime(7201);
       await riseToken.convertToCash(9000, { from: SOMEBODY });
@@ -1330,7 +1330,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to burn lost tokens by owner if quarantine balance is 0', async () => {
-      await riseToken.mint(SOMEBODY, 100);
+      await riseToken.transfer(SOMEBODY, 100);
       await riseToken.doCreateBlock(672, 2);
       await riseToken.setCurrentTime(7201);
 
@@ -1349,7 +1349,7 @@ contract('Rise', async accounts => {
     });
 
     it('should not be possible to burn lost tokens by not owner', async () => {
-      await riseToken.mint(SOMEBODY, 10000);
+      await riseToken.transfer(SOMEBODY, 10000);
       await riseToken.doCreateBlock(672, 2);
       await riseToken.setCurrentTime(7201);
       await riseToken.convertToCash(9000, { from: SOMEBODY });

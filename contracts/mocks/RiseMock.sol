@@ -21,9 +21,9 @@ contract RiseMock is Rise {
         currentTime = _currentTime;
     }
 
-    function createBlockMock(uint256 _monthBlocks, uint256 _expectedBlockNumber)
+    function createBlockMock(uint256 _expectedBlockNumber)
     public returns(bool _isSuccess) {
-        return createBlock(_monthBlocks, _expectedBlockNumber);
+        return createBlock(_expectedBlockNumber);
     }
 
     function burnQuarantinedMock() public returns(uint256) {

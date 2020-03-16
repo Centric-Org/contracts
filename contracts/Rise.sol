@@ -2,6 +2,7 @@ pragma solidity 0.4.25;
 
 import './TRC20.sol';
 import './RoundMath.sol';
+import './MonthLib.sol';
 
 
 contract CashInterface {
@@ -17,6 +18,8 @@ contract CashInterface {
 
 contract Rise is TRC20Detailed {
     using RoundMath for uint256;
+    using MonthLib for uint256;
+
     /**
      * STATE VARIABLES
      */
@@ -153,18 +156,12 @@ contract Rise is TRC20Detailed {
      * Admin should always make sure that there is a block for the currentHour
      * and if not - create it. Otherwise users will not be able to switch tokens
      * until a new block is created.
-     * _monthBlocks - hours in month, should be between 28*24 and 31*24
      * _blockNumber - always has to be lastBlockNumber + 1 (works only as a security check)
      */
-    function doCreateBlock(uint256 _monthBlocks, uint256 _blockNumber)
-        external
-        onlyAdmin()
-        returns (bool _success)
-    {
+    function doCreateBlock(uint256 _blockNumber) external onlyAdmin() returns (bool _success) {
         require(futureGrowthRate != 0, 'WRONG_FUTURE_GROWTH_RATE');
-        require(_monthBlocks >= 28 * 24 && _monthBlocks <= 31 * 24, 'WRONG_MONTH_BLOCKS');
 
-        require(createBlock(_monthBlocks, _blockNumber), 'FAILED_TO_CREATE_BLOCK');
+        require(createBlock(_blockNumber), 'FAILED_TO_CREATE_BLOCK');
 
         return true;
     }
@@ -173,7 +170,6 @@ contract Rise is TRC20Detailed {
      * Updates the value of futureGrowthRate
      * _priceFactors - see comments for mapping futureGrowthRateToPriceFactors
      */
-
     function updateFutureGrowthRate(uint256 _newGrowthRate, uint256[4] _priceFactors)
         external
         onlyAdmin()
@@ -327,10 +323,7 @@ contract Rise is TRC20Detailed {
     /**
      * Internal function for creating a new Price Block.
      */
-    function createBlock(uint256 _monthBlocks, uint256 _expectedBlockNumber)
-        internal
-        returns (bool _success)
-    {
+    function createBlock(uint256 _expectedBlockNumber) internal returns (bool _success) {
         uint256 _lastPrice;
         uint256 _nextBlockNumber;
 
@@ -344,6 +337,8 @@ contract Rise is TRC20Detailed {
         }
 
         require(_nextBlockNumber == _expectedBlockNumber, 'WRONG_BLOCK_NUMBER');
+
+        uint256 _monthBlocks = (_nextBlockNumber * 60 * 60 * 1000).getHoursInMonth();
 
         uint256 _risePriceFactor;
         if (_monthBlocks == 28 * 24)

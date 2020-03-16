@@ -36,10 +36,10 @@ contract('Rise', async accounts => {
     it('getCurrentPrice() should return a valid value', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      await riseToken.createBlockMock(672, 2);
+      await riseToken.createBlockMock(2);
       await riseToken.setCurrentTime(7201);
 
-      assert.equal((await riseToken.getCurrentPrice()).toString(), 888914843);
+      assert.equal((await riseToken.getCurrentPrice()).toString(), 888913557);
     });
 
     it('getCurrentPrice() should throw on non existent price', async () => {
@@ -51,9 +51,9 @@ contract('Rise', async accounts => {
     it('getPrice() should return a valid value', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      await riseToken.createBlockMock(672, 2);
+      await riseToken.createBlockMock(2);
 
-      assert.equal((await riseToken.getPrice(2)).toString(), 888914843);
+      assert.equal((await riseToken.getPrice(2)).toString(), 888913557);
     });
 
     it('getPrice() should throw on non existent price', async () => {
@@ -63,9 +63,9 @@ contract('Rise', async accounts => {
     it('getBlockData() should return a valid value', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      await riseToken.createBlockMock(672, 2);
+      await riseToken.createBlockMock(2);
 
-      assert.equal((await riseToken.getBlockData(2))._risePrice, 888914843);
+      assert.equal((await riseToken.getBlockData(2))._risePrice, 888913557);
     });
 
     it('getBlockData() should throw on non existent price', async () => {
@@ -382,55 +382,55 @@ contract('Rise', async accounts => {
     it('should be possible to create first block with valid future growth rate values and price factors case 1', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      const result = await riseToken.createBlockMock(672, 2);
+      const result = await riseToken.createBlockMock(2);
 
-      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888914843');
+      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
-      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1495');
+      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1351');
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args.risePrice.toString(), '888914843');
+      assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
       assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args.change.toString(), '1495');
+      assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
     });
 
     it('should be possible to create first block with valid future growth rate values and price factors case 2', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      const result = await riseToken.createBlockMock(696, 2);
+      const result = await riseToken.createBlockMock(2);
 
-      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888914385');
+      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
-      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1444');
+      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1351');
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args.risePrice.toString(), '888914385');
+      assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
       assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args.change.toString(), '1444');
+      assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
     });
 
     it('should be possible to create first block with valid future growth rate values and price factors case 3', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      const result = await riseToken.createBlockMock(720, 2);
+      const result = await riseToken.createBlockMock(2);
 
-      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913957');
+      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
-      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1396');
+      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1351');
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
-      assert.equal(result.logs[0].args.risePrice.toString(), '888913957');
+      assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
       assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args.change.toString(), '1396');
+      assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
     });
 
     it('should be possible to create first block with valid future growth rate values and price factors case 4', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      const result = await riseToken.createBlockMock(744, 2);
+      const result = await riseToken.createBlockMock(2);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -446,103 +446,7 @@ contract('Rise', async accounts => {
     it('should be possible to create second block with valid future growth rate values and price factors case 1', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      const result = await riseToken.createBlockMock(672, 2);
-
-      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888914843');
-      assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
-      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1495');
-      assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
-
-      assert.equal(result.logs[0].args.risePrice.toString(), '888914843');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args.change.toString(), '1495');
-      assert.equal(result.logs[0].args.created.toString(), '1');
-
-      await riseToken.setCurrentTime(7201);
-
-      await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
-
-      const result1 = await riseToken.createBlockMock(672, 3);
-
-      assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '888928137');
-      assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
-      assert.equal((await riseToken.hoursToBlock(3)).change.toString(), '1496');
-      assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
-
-      assert.equal(result1.logs[0].args.risePrice.toString(), '888928137');
-      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
-      assert.equal(result1.logs[0].args.change.toString(), '1496');
-      assert.equal(result1.logs[0].args.created.toString(), '2');
-    });
-
-    it('should be possible to create second block with valid future growth rate values and price factors case 2', async () => {
-      await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
-
-      const result = await riseToken.createBlockMock(672, 2);
-
-      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888914843');
-      assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
-      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1495');
-      assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
-
-      assert.equal(result.logs[0].args.risePrice.toString(), '888914843');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args.change.toString(), '1495');
-      assert.equal(result.logs[0].args.created.toString(), '1');
-
-      await riseToken.setCurrentTime(7201);
-
-      await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
-
-      const result1 = await riseToken.createBlockMock(696, 3);
-
-      assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '888927678');
-      assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
-      assert.equal((await riseToken.hoursToBlock(3)).change.toString(), '1444');
-      assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
-
-      assert.equal(result1.logs[0].args.risePrice.toString(), '888927678');
-      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
-      assert.equal(result1.logs[0].args.change.toString(), '1444');
-      assert.equal(result1.logs[0].args.created.toString(), '2');
-    });
-
-    it('should be possible to create second block with valid future growth rate values and price factors case 3', async () => {
-      await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
-
-      const result = await riseToken.createBlockMock(672, 2);
-
-      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888914843');
-      assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
-      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1495');
-      assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
-
-      assert.equal(result.logs[0].args.risePrice.toString(), '888914843');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
-      assert.equal(result.logs[0].args.change.toString(), '1495');
-      assert.equal(result.logs[0].args.created.toString(), '1');
-
-      await riseToken.setCurrentTime(7201);
-
-      await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
-
-      const result1 = await riseToken.createBlockMock(720, 3);
-
-      assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '888927250');
-      assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
-      assert.equal((await riseToken.hoursToBlock(3)).change.toString(), '1396');
-      assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
-
-      assert.equal(result1.logs[0].args.risePrice.toString(), '888927250');
-      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
-      assert.equal(result1.logs[0].args.change.toString(), '1396');
-      assert.equal(result1.logs[0].args.created.toString(), '2');
-    });
-
-    it('should be possible to create second block with valid future growth rate values and price factors case 4', async () => {
-      await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
-
-      const result = await riseToken.createBlockMock(744, 2);
+      const result = await riseToken.createBlockMock(2);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -558,7 +462,7 @@ contract('Rise', async accounts => {
 
       await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
 
-      const result1 = await riseToken.createBlockMock(744, 3);
+      const result1 = await riseToken.createBlockMock(3);
 
       assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '888925564');
       assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
@@ -571,22 +475,107 @@ contract('Rise', async accounts => {
       assert.equal(result1.logs[0].args.created.toString(), '2');
     });
 
-    it('should not be possible to create block with wrong monthBlock', async () => {
+    it('should be possible to create second block with valid future growth rate values and price factors case 2', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      await assertReverts(riseToken.createBlockMock(673, 2));
+      const result = await riseToken.createBlockMock(2);
 
-      assert.equal((await riseToken.hoursToBlock(1)).risePrice.toString(), '0');
-      assert.equal((await riseToken.hoursToBlock(1)).growthRate.toString(), '0');
-      assert.equal((await riseToken.hoursToBlock(1)).change.toString(), '0');
-      assert.equal((await riseToken.hoursToBlock(1)).created.toString(), '0');
+      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
+      assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
+      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1351');
+      assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
+
+      assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '1351');
+      assert.equal(result.logs[0].args.created.toString(), '1');
+
+      await riseToken.setCurrentTime(7201);
+
+      await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
+
+      const result1 = await riseToken.createBlockMock(3);
+
+      assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '888925564');
+      assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
+      assert.equal((await riseToken.hoursToBlock(3)).change.toString(), '1351');
+      assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
+
+      assert.equal(result1.logs[0].args.risePrice.toString(), '888925564');
+      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.change.toString(), '1351');
+      assert.equal(result1.logs[0].args.created.toString(), '2');
+    });
+
+    it('should be possible to create second block with valid future growth rate values and price factors case 3', async () => {
+      await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
+
+      const result = await riseToken.createBlockMock(2);
+
+      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
+      assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
+      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1351');
+      assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
+
+      assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '1351');
+      assert.equal(result.logs[0].args.created.toString(), '1');
+
+      await riseToken.setCurrentTime(7201);
+
+      await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
+
+      const result1 = await riseToken.createBlockMock(3);
+
+      assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '888925564');
+      assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
+      assert.equal((await riseToken.hoursToBlock(3)).change.toString(), '1351');
+      assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
+
+      assert.equal(result1.logs[0].args.risePrice.toString(), '888925564');
+      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.change.toString(), '1351');
+      assert.equal(result1.logs[0].args.created.toString(), '2');
+    });
+
+    it('should be possible to create second block with valid future growth rate values and price factors case 4', async () => {
+      await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
+
+      const result = await riseToken.createBlockMock(2);
+
+      assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
+      assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
+      assert.equal((await riseToken.hoursToBlock(2)).change.toString(), '1351');
+      assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
+
+      assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
+      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.change.toString(), '1351');
+      assert.equal(result.logs[0].args.created.toString(), '1');
+
+      await riseToken.setCurrentTime(7201);
+
+      await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
+
+      const result1 = await riseToken.createBlockMock(3);
+
+      assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '888925564');
+      assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
+      assert.equal((await riseToken.hoursToBlock(3)).change.toString(), '1351');
+      assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
+
+      assert.equal(result1.logs[0].args.risePrice.toString(), '888925564');
+      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.change.toString(), '1351');
+      assert.equal(result1.logs[0].args.created.toString(), '2');
     });
 
     it('should not be possible to create block with wrong expectedBlockNumber', async () => {
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
 
-      await riseToken.createBlockMock(744, 2);
-      await assertReverts(riseToken.createBlockMock(744, 4));
+      await riseToken.createBlockMock(2);
+      await assertReverts(riseToken.createBlockMock(4));
 
       assert.equal((await riseToken.hoursToBlock(1)).risePrice.toString(), '0');
       assert.equal((await riseToken.hoursToBlock(1)).growthRate.toString(), '0');
@@ -607,7 +596,7 @@ contract('Rise', async accounts => {
 
       await riseToken.transfer(SOMEBODY, 1000);
 
-      await riseToken.doCreateBlock(672, 2);
+      await riseToken.doCreateBlock(2);
       await riseToken.setCurrentTime(7200);
       await riseToken.doBalance();
 
@@ -634,7 +623,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
@@ -662,7 +651,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
@@ -690,7 +679,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 800);
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
@@ -709,7 +698,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(144001);
 
@@ -728,7 +717,7 @@ contract('Rise', async accounts => {
       riseToken = await Rise.new(OWNER, cashToken.address);
       await cashToken.setRiseContract(riseToken.address);
       await riseToken.updateFutureGrowthRate(101, [1495449, 1443881, 1395751, 1350727]);
-      await riseToken.doCreateBlock(672, 2);
+      await riseToken.doCreateBlock(2);
       await riseToken.setCurrentTime(7200);
       await riseToken.transfer(SOMEBODY, 100000);
     });
@@ -737,73 +726,73 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(26000, { from: SOMEBODY });
 
       for (let i = 3; i < 63; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(50 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '26000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '26000');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 18);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 16);
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '25982');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '25982');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '25984');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '25984');
 
       assert.equal(result.logs.length, 2);
       assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 18);
+      assert.equal(result.logs[1].args.amount, 16);
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 2', async () => {
       await riseToken.convertToCash(50000, { from: SOMEBODY });
 
       for (let i = 3; i < 24; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '50000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '50000');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 13);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 12);
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '49987');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '49987');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '49988');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '49988');
 
       assert.equal(result.logs.length, 2);
       assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 13);
+      assert.equal(result.logs[1].args.amount, 12);
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 3', async () => {
       await riseToken.convertToCash(50000, { from: SOMEBODY });
 
       for (let i = 3; i <= 30; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(30 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '50000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '50000');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 20);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 18);
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '49980');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '49980');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '49982');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '49982');
 
       assert.equal(result.logs.length, 2);
       assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 20);
+      assert.equal(result.logs[1].args.amount, 18);
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 4', async () => {
       await riseToken.convertToCash(50000, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(10 * 3600);
 
@@ -825,7 +814,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(1800, { from: SOMEBODY });
 
       for (let i = 3; i < 63; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(50 * 3600);
 
@@ -848,22 +837,22 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(5000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 23; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '5000000000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '5000000000');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 1345750);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 1215536);
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4998654250');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '4998654250');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4998784464');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '4998784464');
 
       assert.equal(result.logs.length, 2);
       assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 1345750);
+      assert.equal(result.logs[1].args.amount, 1215536);
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 7', async () => {
@@ -871,22 +860,22 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(5000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 53; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(51 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '5000000000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '5000000000');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 3662581);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 3308272);
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4996337419');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '4996337419');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4996691728');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '4996691728');
 
       assert.equal(result.logs.length, 2);
       assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 3662581);
+      assert.equal(result.logs[1].args.amount, 3308272);
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 8', async () => {
@@ -894,22 +883,22 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(9000000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(5 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '9000000000000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '9000000000000');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 403775344);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 364697849);
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '8999596224656');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '8999596224656');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '8999635302151');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '8999635302151');
 
       assert.equal(result.logs.length, 2);
       assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 403775344);
+      assert.equal(result.logs[1].args.amount, 364697849);
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 9', async () => {
@@ -917,22 +906,22 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(140086, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(5 * 3600);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '140086');
       assert.equal((await riseToken.quarantineBalance()).toString(), '140086');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 6);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 5);
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '140080');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '140080');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '140081');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '140081');
 
       assert.equal(result.logs.length, 2);
       assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 6);
+      assert.equal(result.logs[1].args.amount, 5);
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 10', async () => {
@@ -940,29 +929,29 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(140086, { from: SOMEBODY });
 
       for (let i = 3; i < 103; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(10 * 36000);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '140086');
       assert.equal((await riseToken.quarantineBalance()).toString(), '140086');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 205);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 185);
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '139881');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '139881');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '139901');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '139901');
 
       assert.equal(result.logs.length, 2);
       assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 205);
+      assert.equal(result.logs[1].args.amount, 185);
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 11', async () => {
       await riseToken.convertToCash(1, { from: SOMEBODY });
 
       for (let i = 3; i < 103; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(10 * 36000);
 
@@ -1009,7 +998,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 2000);
 
       for (let i = 2; i < 30; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
@@ -1040,7 +1029,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 900);
 
       for (let i = 2; i < 30; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
@@ -1063,7 +1052,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 2000);
 
       for (let i = 2; i < 30; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
@@ -1091,7 +1080,7 @@ contract('Rise', async accounts => {
       riseToken = await Rise.new(OWNER, cashToken.address);
       await cashToken.setRiseContract(riseToken.address);
       await riseToken.updateFutureGrowthRate(1001, [1495449, 1443881, 1395751, 1350727]);
-      await riseToken.doCreateBlock(672, 2);
+      await riseToken.doCreateBlock(2);
       await riseToken.setCurrentTime(7200);
     });
 
@@ -1101,7 +1090,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1111,13 +1100,13 @@ contract('Rise', async accounts => {
       assert.equal(await riseToken.doBalance.call(), true);
       const result = await riseToken.doBalance({ from: SOMEBODY });
 
-      assert.equal((await riseToken.quarantineBalance()).toString(), 899758);
+      assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
       assert.equal((await riseToken.lastCalledHour()).toString(), 20);
 
       assert.equal(result.logs.length, 3);
       assert.equal(result.logs[2].event, 'DoBalance');
       assert.equal(result.logs[2].args.currentHour, 20);
-      assert.equal(result.logs[2].args.riseAmountBurnt, 242);
+      assert.equal(result.logs[2].args.riseAmountBurnt, 218);
     });
 
     it('should be possible to doBalance from owner', async () => {
@@ -1126,7 +1115,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1136,18 +1125,18 @@ contract('Rise', async accounts => {
       assert.equal(await riseToken.doBalance.call(), true);
       const result = await riseToken.doBalance();
 
-      assert.equal((await riseToken.quarantineBalance()).toString(), 899758);
+      assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
       assert.equal((await riseToken.lastCalledHour()).toString(), 20);
 
       assert.equal(result.logs.length, 3);
       assert.equal(result.logs[2].event, 'DoBalance');
       assert.equal(result.logs[2].args.currentHour, 20);
-      assert.equal(result.logs[2].args.riseAmountBurnt, 242);
+      assert.equal(result.logs[2].args.riseAmountBurnt, 218);
     });
 
     it('should be possible to doBalance if quarantine balance is 0', async () => {
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1172,7 +1161,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1182,25 +1171,25 @@ contract('Rise', async accounts => {
       assert.equal(await riseToken.doBalance.call(), true);
       const result = await riseToken.doBalance();
 
-      assert.equal((await riseToken.quarantineBalance()).toString(), 899758);
+      assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
       assert.equal((await riseToken.lastCalledHour()).toString(), 20);
 
       assert.equal(result.logs.length, 3);
       assert.equal(result.logs[2].event, 'DoBalance');
       assert.equal(result.logs[2].args.currentHour, 20);
-      assert.equal(result.logs[2].args.riseAmountBurnt, 242);
+      assert.equal(Number(result.logs[2].args.riseAmountBurnt), 218);
 
       await riseToken.setCurrentTime(75601);
       assert.equal(await riseToken.doBalance.call(), true);
       const result1 = await riseToken.doBalance();
 
-      assert.equal((await riseToken.quarantineBalance()).toString(), 899745);
+      assert.equal((await riseToken.quarantineBalance()).toString(), 899770);
       assert.equal((await riseToken.lastCalledHour()).toString(), 21);
 
       assert.equal(result1.logs.length, 3);
       assert.equal(result1.logs[2].event, 'DoBalance');
       assert.equal(result1.logs[2].args.currentHour, 21);
-      assert.equal(result1.logs[2].args.riseAmountBurnt, 13);
+      assert.equal(Number(result1.logs[2].args.riseAmountBurnt), 12);
     });
 
     it('should not be possible to doBalance if current block is empty', async () => {
@@ -1209,7 +1198,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1229,7 +1218,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1239,17 +1228,17 @@ contract('Rise', async accounts => {
       assert.equal(await riseToken.doBalance.call(), true);
       const result = await riseToken.doBalance({ from: SOMEBODY });
 
-      assert.equal((await riseToken.quarantineBalance()).toString(), 899758);
+      assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
       assert.equal((await riseToken.lastCalledHour()).toString(), 20);
 
       assert.equal(result.logs.length, 3);
       assert.equal(result.logs[2].event, 'DoBalance');
       assert.equal(result.logs[2].args.currentHour, 20);
-      assert.equal(result.logs[2].args.riseAmountBurnt, 242);
+      assert.equal(Number(result.logs[2].args.riseAmountBurnt), 218);
 
       await assertReverts(riseToken.doBalance());
 
-      assert.equal((await riseToken.quarantineBalance()).toString(), 899758);
+      assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
       assert.equal((await riseToken.lastCalledHour()).toString(), 20);
     });
   });
@@ -1265,37 +1254,37 @@ contract('Rise', async accounts => {
     it('should be possible to doCreateBlock first block from owner', async () => {
       await assertReverts(riseToken.getBlockData(2));
 
-      await riseToken.doCreateBlock(672, 2);
+      await riseToken.doCreateBlock(2);
 
-      assert.equal((await riseToken.getBlockData(2))._risePrice, 888914843);
+      assert.equal((await riseToken.getBlockData(2))._risePrice, 888913557);
     });
 
     it('should be possible to doCreateBlock first block from admin', async () => {
       await assertReverts(riseToken.getBlockData(2));
 
       await riseToken.appointAdmin(SOMEBODY);
-      await riseToken.doCreateBlock(672, 2, { from: SOMEBODY });
+      await riseToken.doCreateBlock(2, { from: SOMEBODY });
 
-      assert.equal((await riseToken.getBlockData(2))._risePrice, 888914843);
+      assert.equal((await riseToken.getBlockData(2))._risePrice, 888913557);
     });
 
     it('should be possible to doCreateBlock not a first block from admin', async () => {
       for (let i = 2; i < 30; i++) {
-        await riseToken.doCreateBlock(672, i);
+        await riseToken.doCreateBlock(i);
       }
 
       await assertReverts(riseToken.getBlockData(30));
 
       await riseToken.appointAdmin(SOMEBODY);
-      await riseToken.doCreateBlock(672, 30, { from: SOMEBODY });
+      await riseToken.doCreateBlock(30, { from: SOMEBODY });
 
-      assert.equal((await riseToken.getBlockData(30))._risePrice, 889287140);
+      assert.equal(Number((await riseToken.getBlockData(30))._risePrice), 889249819);
     });
 
     it('should not be possible to doCreateBlock from not owner or admin', async () => {
       await assertReverts(riseToken.getBlockData(2));
 
-      await assertReverts(riseToken.doCreateBlock(672, 2, { from: ANYBODY }));
+      await assertReverts(riseToken.doCreateBlock(2, { from: ANYBODY }));
 
       await assertReverts(riseToken.getBlockData(2));
     });
@@ -1311,7 +1300,7 @@ contract('Rise', async accounts => {
 
     it('should be possible to burn lost tokens by owner', async () => {
       await riseToken.transfer(SOMEBODY, 10000);
-      await riseToken.doCreateBlock(672, 2);
+      await riseToken.doCreateBlock(2);
       await riseToken.setCurrentTime(7201);
       await riseToken.convertToCash(9000, { from: SOMEBODY });
 
@@ -1331,7 +1320,7 @@ contract('Rise', async accounts => {
 
     it('should be possible to burn lost tokens by owner if quarantine balance is 0', async () => {
       await riseToken.transfer(SOMEBODY, 100);
-      await riseToken.doCreateBlock(672, 2);
+      await riseToken.doCreateBlock(2);
       await riseToken.setCurrentTime(7201);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 0);
@@ -1350,7 +1339,7 @@ contract('Rise', async accounts => {
 
     it('should not be possible to burn lost tokens by not owner', async () => {
       await riseToken.transfer(SOMEBODY, 10000);
-      await riseToken.doCreateBlock(672, 2);
+      await riseToken.doCreateBlock(2);
       await riseToken.setCurrentTime(7201);
       await riseToken.convertToCash(9000, { from: SOMEBODY });
 

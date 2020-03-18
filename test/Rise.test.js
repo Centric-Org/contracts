@@ -5,10 +5,10 @@ const { assertReverts } = require('./helpers/assertThrows');
 
 getFGRPriceFactors = async (token, rate) => {
   const pf = [];
-  pf[0] = (await token.futureGrowthRateToPriceFactors(rate, 0)).toNumber();
-  pf[1] = (await token.futureGrowthRateToPriceFactors(rate, 1)).toNumber();
-  pf[2] = (await token.futureGrowthRateToPriceFactors(rate, 2)).toNumber();
-  pf[3] = (await token.futureGrowthRateToPriceFactors(rate, 3)).toNumber();
+  pf[0] = (await token.growthRateToPriceFactors(rate, 0)).toNumber();
+  pf[1] = (await token.growthRateToPriceFactors(rate, 1)).toNumber();
+  pf[2] = (await token.growthRateToPriceFactors(rate, 2)).toNumber();
+  pf[3] = (await token.growthRateToPriceFactors(rate, 3)).toNumber();
   return pf;
 };
 
@@ -96,7 +96,7 @@ contract('Rise', async accounts => {
       assert.deepEqual(await getFGRPriceFactors(riseToken, 101), pf101);
 
       assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'FutureGrowthRateSet');
+      assert.equal(result.logs[0].event, 'PriceFactorSet');
       assert.equal(result.logs[0].args.growthRate, 101);
       assert.equal(result.logs[0].args.priceFactors[0].toNumber(), 1495449);
       assert.equal(result.logs[0].args.priceFactors[1].toNumber(), 1443881);
@@ -109,7 +109,7 @@ contract('Rise', async accounts => {
       assert.deepEqual(await getFGRPriceFactors(riseToken, 1001), pf1001);
 
       assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'FutureGrowthRateSet');
+      assert.equal(result.logs[0].event, 'PriceFactorSet');
       assert.equal(result.logs[0].args.growthRate, 1001);
       assert.equal(result.logs[0].args.priceFactors[0].toNumber(), 14197598);
       assert.equal(result.logs[0].args.priceFactors[1].toNumber(), 13707992);
@@ -218,13 +218,13 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
 
       assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'FutureGrowthRateUpdated');
-      assert.equal(result.logs[0].args.oldValue, 0);
-      assert.equal(result.logs[0].args.newValue, 101);
-      assert.equal(result.logs[0].args.newPriceFactors[0].toNumber(), 1495449);
-      assert.equal(result.logs[0].args.newPriceFactors[1].toNumber(), 1443881);
-      assert.equal(result.logs[0].args.newPriceFactors[2].toNumber(), 1395751);
-      assert.equal(result.logs[0].args.newPriceFactors[3].toNumber(), 1350727);
+      assert.equal(result.logs[0].event, 'GrowthRateUpdated');
+      assert.equal(result.logs[0].args.oldGrowthRate, 0);
+      assert.equal(result.logs[0].args.futureGrowthRate, 101);
+      assert.equal(result.logs[0].args.futurePriceFactors[0].toNumber(), 1495449);
+      assert.equal(result.logs[0].args.futurePriceFactors[1].toNumber(), 1443881);
+      assert.equal(result.logs[0].args.futurePriceFactors[2].toNumber(), 1395751);
+      assert.equal(result.logs[0].args.futurePriceFactors[3].toNumber(), 1350727);
     });
 
     it('should be possible to update with current rate from owner', async () => {
@@ -239,13 +239,13 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.futureGrowthRate()).toString(), '1001');
 
       assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'FutureGrowthRateUpdated');
-      assert.equal(result.logs[0].args.oldValue, 101);
-      assert.equal(result.logs[0].args.newValue, 1001);
-      assert.equal(result.logs[0].args.newPriceFactors[0].toNumber(), 14197598);
-      assert.equal(result.logs[0].args.newPriceFactors[1].toNumber(), 13707992);
-      assert.equal(result.logs[0].args.newPriceFactors[2].toNumber(), 13251029);
-      assert.equal(result.logs[0].args.newPriceFactors[3].toNumber(), 12823549);
+      assert.equal(result.logs[0].event, 'GrowthRateUpdated');
+      assert.equal(result.logs[0].args.oldGrowthRate, 101);
+      assert.equal(result.logs[0].args.futureGrowthRate, 1001);
+      assert.equal(result.logs[0].args.futurePriceFactors[0].toNumber(), 14197598);
+      assert.equal(result.logs[0].args.futurePriceFactors[1].toNumber(), 13707992);
+      assert.equal(result.logs[0].args.futurePriceFactors[2].toNumber(), 13251029);
+      assert.equal(result.logs[0].args.futurePriceFactors[3].toNumber(), 12823549);
     });
 
     it('should not be possible to update with valid values not from owner', async () => {
@@ -278,7 +278,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
       assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.growthRate.toString(), '101');
       assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
     });
@@ -295,7 +295,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
       assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.growthRate.toString(), '101');
       assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
     });
@@ -312,7 +312,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
       assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.growthRate.toString(), '101');
       assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
     });
@@ -329,7 +329,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
       assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.growthRate.toString(), '101');
       assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
     });
@@ -345,7 +345,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
       assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.growthRate.toString(), '101');
       assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
 
@@ -360,7 +360,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
 
       assert.equal(result1.logs[0].args.risePrice.toString(), '889027548');
-      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.growthRate.toString(), '1001');
       assert.equal(result1.logs[0].args.change.toString(), '12824');
       assert.equal(result1.logs[0].args.created.toString(), '2');
     });
@@ -376,7 +376,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
       assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.growthRate.toString(), '101');
       assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
 
@@ -392,7 +392,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
 
       assert.equal(result1.logs[0].args.risePrice.toString(), '889027548');
-      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.growthRate.toString(), '1001');
       assert.equal(result1.logs[0].args.change.toString(), '12824');
       assert.equal(result1.logs[0].args.created.toString(), '2');
     });
@@ -408,7 +408,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
       assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.growthRate.toString(), '101');
       assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
 
@@ -424,7 +424,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
 
       assert.equal(result1.logs[0].args.risePrice.toString(), '889027548');
-      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.growthRate.toString(), '1001');
       assert.equal(result1.logs[0].args.change.toString(), '12824');
       assert.equal(result1.logs[0].args.created.toString(), '2');
     });
@@ -441,7 +441,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(2)).created.toString(), '1');
 
       assert.equal(result.logs[0].args.risePrice.toString(), '888913557');
-      assert.equal(result.logs[0].args.futureGrowthRate.toString(), '101');
+      assert.equal(result.logs[0].args.growthRate.toString(), '101');
       assert.equal(result.logs[0].args.change.toString(), '1351');
       assert.equal(result.logs[0].args.created.toString(), '1');
 
@@ -457,7 +457,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(3)).created.toString(), '2');
 
       assert.equal(result1.logs[0].args.risePrice.toString(), '889027548');
-      assert.equal(result1.logs[0].args.futureGrowthRate.toString(), '1001');
+      assert.equal(result1.logs[0].args.growthRate.toString(), '1001');
       assert.equal(result1.logs[0].args.change.toString(), '12824');
       assert.equal(result1.logs[0].args.created.toString(), '2');
     });

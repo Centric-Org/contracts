@@ -28,7 +28,7 @@ contract Rise is TRC20Detailed {
     uint256 public lastBlockNumber;
     uint256 public lastCalledHour;
 
-    // FutureGrowthRate applied to Price Block creation
+    // futureGrowthRate applied to Price Block creation
     // percentage (fraction of 1, e.g.: 0.3)
     // presented as integer with base of GROWTH_RATE_BASE (to be divided by GROWTH_RATE_BASE to get a fraction of 1)
     uint256 public futureGrowthRate;
@@ -63,7 +63,7 @@ contract Rise is TRC20Detailed {
      * e.g.: for futureGrowthRate=2850=(2850/GROWTH_RATE_BASE)=0.285=28.5%
      * price factors are (considering PRICE_FACTOR_BASE): [37322249, 36035043, 34833666, 33709810]
      */
-    mapping(uint256 => uint256[4]) public futureGrowthRateToPriceFactors;
+    mapping(uint256 => uint256[4]) public growthRateToPriceFactors;
     uint256 public PRICE_FACTOR_BASE = 10**11;
     bool priceFactorsLocked = false;
 
@@ -85,14 +85,18 @@ contract Rise is TRC20Detailed {
 
     event BurnCash(uint256 amountBurnt);
 
-    event FutureGrowthRateUpdated(uint256 oldValue, uint256 newValue, uint256[4] newPriceFactors);
+    event GrowthRateUpdated(
+        uint256 oldGrowthRate,
+        uint256 futureGrowthRate,
+        uint256[4] futurePriceFactors
+    );
 
-    event FutureGrowthRateSet(uint256 growthRate, uint256[4] priceFactors);
+    event PriceFactorSet(uint256 growthRate, uint256[4] priceFactors);
 
     event BlockCreated(
         uint256 blockNumber,
         uint256 risePrice,
-        uint256 futureGrowthRate,
+        uint256 growthRate,
         uint256 change,
         uint256 created
     );
@@ -166,8 +170,8 @@ contract Rise is TRC20Detailed {
     }
 
     /**
-     * set futureGrowthRateToPriceFactors
-     * _priceFactors - see comments for mapping futureGrowthRateToPriceFactors
+     * set growthRateToPriceFactors
+     * _priceFactors - see comments for mapping growthRateToPriceFactors
      */
     function setPriceFactors(uint256 _growthRate, uint256[4] _priceFactors)
         external
@@ -195,21 +199,19 @@ contract Rise is TRC20Detailed {
             'PRICE_FACTORS_ARE_NOT_VALID'
         );
 
-        futureGrowthRateToPriceFactors[_growthRate] = _priceFactors;
+        growthRateToPriceFactors[_growthRate] = _priceFactors;
 
-        emit FutureGrowthRateSet(_growthRate, _priceFactors);
+        emit PriceFactorSet(_growthRate, _priceFactors);
         return true;
     }
 
     function lockPriceFactors() external onlyAdmin() returns (bool _success) {
         priceFactorsLocked = true;
-
-        // emit FutureGrowthRateSet(_growthRate, _priceFactors);
         return true;
     }
 
     /**
-     * Updates the value of current futureGrowthRate
+     * Updates the value of futureGrowthRate
      */
     function updateFutureGrowthRate(uint256 _newGrowthRate)
         external
@@ -219,16 +221,12 @@ contract Rise is TRC20Detailed {
         require(priceFactorsLocked, 'priceFactorsLocked_MUST_BE_TRUE');
         require(_newGrowthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
         require(_newGrowthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
-        require(futureGrowthRateToPriceFactors[_newGrowthRate][0] > 0, 'WRONG_GROWTH_RATE');
+        require(growthRateToPriceFactors[_newGrowthRate][0] > 0, 'WRONG_GROWTH_RATE');
 
         uint256 _oldRate = futureGrowthRate;
         futureGrowthRate = _newGrowthRate;
 
-        emit FutureGrowthRateUpdated(
-            _oldRate,
-            _newGrowthRate,
-            futureGrowthRateToPriceFactors[_newGrowthRate]
-        );
+        emit GrowthRateUpdated(_oldRate, _newGrowthRate, growthRateToPriceFactors[_newGrowthRate]);
         return true;
     }
 
@@ -370,13 +368,13 @@ contract Rise is TRC20Detailed {
 
         uint256 _risePriceFactor;
         if (_monthBlocks == 28 * 24)
-            _risePriceFactor = futureGrowthRateToPriceFactors[futureGrowthRate][0];
+            _risePriceFactor = growthRateToPriceFactors[futureGrowthRate][0];
         else if (_monthBlocks == 29 * 24)
-            _risePriceFactor = futureGrowthRateToPriceFactors[futureGrowthRate][1];
+            _risePriceFactor = growthRateToPriceFactors[futureGrowthRate][1];
         else if (_monthBlocks == 30 * 24)
-            _risePriceFactor = futureGrowthRateToPriceFactors[futureGrowthRate][2];
+            _risePriceFactor = growthRateToPriceFactors[futureGrowthRate][2];
         else if (_monthBlocks == 31 * 24)
-            _risePriceFactor = futureGrowthRateToPriceFactors[futureGrowthRate][3];
+            _risePriceFactor = growthRateToPriceFactors[futureGrowthRate][3];
         else require(false, 'WRONG_MONTH_BLOCKS');
 
         uint256 _risePrice = (

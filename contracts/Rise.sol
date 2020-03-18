@@ -65,6 +65,7 @@ contract Rise is TRC20Detailed {
      */
     mapping(uint256 => uint256[4]) public futureGrowthRateToPriceFactors;
     uint256 public PRICE_FACTOR_BASE = 10**11;
+    bool priceFactorsLocked = false;
 
     event DoBalance(uint256 indexed currentHour, uint256 riseAmountBurnt);
 
@@ -84,11 +85,9 @@ contract Rise is TRC20Detailed {
 
     event BurnCash(uint256 amountBurnt);
 
-    event FutureGrowthRateUpdated(
-        uint256 _oldValue,
-        uint256 _newValue,
-        uint256[4] _newPriceFactors
-    );
+    event FutureGrowthRateUpdated(uint256 oldValue, uint256 newValue, uint256[4] newPriceFactors);
+
+    event FutureGrowthRateSet(uint256 growthRate, uint256[4] priceFactors);
 
     event BlockCreated(
         uint256 blockNumber,
@@ -167,16 +166,17 @@ contract Rise is TRC20Detailed {
     }
 
     /**
-     * Updates the value of futureGrowthRate
+     * set futureGrowthRateToPriceFactors
      * _priceFactors - see comments for mapping futureGrowthRateToPriceFactors
      */
-    function updateFutureGrowthRate(uint256 _newGrowthRate, uint256[4] _priceFactors)
+    function setPriceFactors(uint256 _growthRate, uint256[4] _priceFactors)
         external
         onlyAdmin()
         returns (bool _success)
     {
-        require(_newGrowthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
-        require(_newGrowthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
+        require(priceFactorsLocked == false, 'priceFactorsLocked');
+        require(_growthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
+        require(_growthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
         require(_priceFactors.length == 4, 'WRONG_NUMBER_OF_PRICE_FACTORS');
 
         for (uint8 i = 0; i < _priceFactors.length; i++) {
@@ -195,12 +195,40 @@ contract Rise is TRC20Detailed {
             'PRICE_FACTORS_ARE_NOT_VALID'
         );
 
+        futureGrowthRateToPriceFactors[_growthRate] = _priceFactors;
+
+        emit FutureGrowthRateSet(_growthRate, _priceFactors);
+        return true;
+    }
+
+    function lockPriceFactors() external onlyAdmin() returns (bool _success) {
+        priceFactorsLocked = true;
+
+        // emit FutureGrowthRateSet(_growthRate, _priceFactors);
+        return true;
+    }
+
+    /**
+     * Updates the value of current futureGrowthRate
+     */
+    function updateFutureGrowthRate(uint256 _newGrowthRate)
+        external
+        onlyAdmin()
+        returns (bool _success)
+    {
+        require(priceFactorsLocked, 'priceFactorsLocked_MUST_BE_TRUE');
+        require(_newGrowthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
+        require(_newGrowthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
+        require(futureGrowthRateToPriceFactors[_newGrowthRate][0] > 0, 'WRONG_GROWTH_RATE');
+
         uint256 _oldRate = futureGrowthRate;
         futureGrowthRate = _newGrowthRate;
 
-        futureGrowthRateToPriceFactors[_newGrowthRate] = _priceFactors;
-
-        emit FutureGrowthRateUpdated(_oldRate, _newGrowthRate, _priceFactors);
+        emit FutureGrowthRateUpdated(
+            _oldRate,
+            _newGrowthRate,
+            futureGrowthRateToPriceFactors[_newGrowthRate]
+        );
         return true;
     }
 

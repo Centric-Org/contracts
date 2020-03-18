@@ -28,12 +28,6 @@ contract Rise is TRC20Detailed {
     uint256 public lastBlockNumber;
     uint256 public lastCalledHour;
 
-    // futureGrowthRate applied to Price Block creation
-    // percentage (fraction of 1, e.g.: 0.3)
-    // presented as integer with base of GROWTH_RATE_BASE (to be divided by GROWTH_RATE_BASE to get a fraction of 1)
-    uint256 public futureGrowthRate;
-    uint256 public GROWTH_RATE_BASE = 10000;
-
     // Price of Rise in USD has base of PRICE_BASE
     uint256 public PRICE_BASE = 10**8;
 
@@ -54,17 +48,19 @@ contract Rise is TRC20Detailed {
     /**
      * Price factors for months with [28, 29, 30, 31] days,
      * price factors determine compounding hourly growth
-     * from the headling monthly futureGrowthRate,
+     * from the headling monthly growthRate,
      * calculated as (1+r)^(1/t)-1
      * where:
-     * r - futureGrowthRate,
+     * r - growthRate,
      * t - number of hours in a given month
      * PRICE_FACTOR_BASE = 10**11
-     * e.g.: for futureGrowthRate=2850=(2850/GROWTH_RATE_BASE)=0.285=28.5%
+     * e.g.: for growthRate=2850=(2850/GROWTH_RATE_BASE)=0.285=28.5%
      * price factors are (considering PRICE_FACTOR_BASE): [37322249, 36035043, 34833666, 33709810]
      */
     mapping(uint256 => uint256[4]) public growthRateToPriceFactors;
+    uint256 public GROWTH_RATE_BASE = 10000;
     uint256 public PRICE_FACTOR_BASE = 10**11;
+
     bool priceFactorsLocked = false;
 
     event DoBalance(uint256 indexed currentHour, uint256 riseAmountBurnt);
@@ -84,12 +80,6 @@ contract Rise is TRC20Detailed {
     event MintCash(address receiver, uint256 amount);
 
     event BurnCash(uint256 amountBurnt);
-
-    event GrowthRateUpdated(
-        uint256 oldGrowthRate,
-        uint256 futureGrowthRate,
-        uint256[4] futurePriceFactors
-    );
 
     event PriceFactorSet(uint256 growthRate, uint256[4] priceFactors);
 
@@ -160,12 +150,22 @@ contract Rise is TRC20Detailed {
      * and if not - create it. Otherwise users will not be able to switch tokens
      * until a new block is created.
      * _blockNumber - always has to be lastBlockNumber + 1 (works only as a security check)
+     * _growthRate applied to Price Block creation
+     * percentage (fraction of 1, e.g.: 0.3)
+     * presented as integer with base of GROWTH_RATE_BASE (to be divided by GROWTH_RATE_BASE to get a fraction of 1)
      */
-    function doCreateBlock(uint256 _blockNumber) external onlyAdmin() returns (bool _success) {
-        require(futureGrowthRate != 0, 'WRONG_FUTURE_GROWTH_RATE');
+    function doCreateBlock(uint256 _blockNumber, uint256 _growthRate)
+        external
+        onlyAdmin()
+        returns (bool _success)
+    {
+        require(priceFactorsLocked, 'PRICE_FACTORS_MUST_BE_LOCKED');
 
-        require(createBlock(_blockNumber), 'FAILED_TO_CREATE_BLOCK');
+        require(_growthRate != 0, 'WRONG_GROWTH_RATE');
+        require(_growthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
+        require(growthRateToPriceFactors[_growthRate][0] > 0, 'WRONG_GROWTH_RATE');
 
+        require(createBlock(_blockNumber, _growthRate), 'FAILED_TO_CREATE_BLOCK');
         return true;
     }
 
@@ -178,7 +178,7 @@ contract Rise is TRC20Detailed {
         onlyAdmin()
         returns (bool _success)
     {
-        require(priceFactorsLocked == false, 'priceFactorsLocked');
+        require(priceFactorsLocked == false, 'PRICE_FACTORS_ALREADY_LOCKED');
         require(_growthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
         require(_growthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
         require(_priceFactors.length == 4, 'WRONG_NUMBER_OF_PRICE_FACTORS');
@@ -207,26 +207,6 @@ contract Rise is TRC20Detailed {
 
     function lockPriceFactors() external onlyAdmin() returns (bool _success) {
         priceFactorsLocked = true;
-        return true;
-    }
-
-    /**
-     * Updates the value of futureGrowthRate
-     */
-    function updateFutureGrowthRate(uint256 _newGrowthRate)
-        external
-        onlyAdmin()
-        returns (bool _success)
-    {
-        require(priceFactorsLocked, 'priceFactorsLocked_MUST_BE_TRUE');
-        require(_newGrowthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
-        require(_newGrowthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
-        require(growthRateToPriceFactors[_newGrowthRate][0] > 0, 'WRONG_GROWTH_RATE');
-
-        uint256 _oldRate = futureGrowthRate;
-        futureGrowthRate = _newGrowthRate;
-
-        emit GrowthRateUpdated(_oldRate, _newGrowthRate, growthRateToPriceFactors[_newGrowthRate]);
         return true;
     }
 
@@ -349,7 +329,10 @@ contract Rise is TRC20Detailed {
     /**
      * Internal function for creating a new Price Block.
      */
-    function createBlock(uint256 _expectedBlockNumber) internal returns (bool _success) {
+    function createBlock(uint256 _expectedBlockNumber, uint256 _growthRate)
+        internal
+        returns (bool _success)
+    {
         uint256 _lastPrice;
         uint256 _nextBlockNumber;
 
@@ -367,14 +350,13 @@ contract Rise is TRC20Detailed {
         uint256 _monthBlocks = (_nextBlockNumber * 60 * 60 * 1000).getHoursInMonth();
 
         uint256 _risePriceFactor;
-        if (_monthBlocks == 28 * 24)
-            _risePriceFactor = growthRateToPriceFactors[futureGrowthRate][0];
+        if (_monthBlocks == 28 * 24) _risePriceFactor = growthRateToPriceFactors[_growthRate][0];
         else if (_monthBlocks == 29 * 24)
-            _risePriceFactor = growthRateToPriceFactors[futureGrowthRate][1];
+            _risePriceFactor = growthRateToPriceFactors[_growthRate][1];
         else if (_monthBlocks == 30 * 24)
-            _risePriceFactor = growthRateToPriceFactors[futureGrowthRate][2];
+            _risePriceFactor = growthRateToPriceFactors[_growthRate][2];
         else if (_monthBlocks == 31 * 24)
-            _risePriceFactor = growthRateToPriceFactors[futureGrowthRate][3];
+            _risePriceFactor = growthRateToPriceFactors[_growthRate][3];
         else require(false, 'WRONG_MONTH_BLOCKS');
 
         uint256 _risePrice = (
@@ -387,14 +369,14 @@ contract Rise is TRC20Detailed {
 
         hoursToBlock[_nextBlockNumber] = Block({
             risePrice: _risePrice,
-            growthRate: futureGrowthRate,
+            growthRate: _growthRate,
             change: _change,
             created: _created
         });
 
         lastBlockNumber = _nextBlockNumber;
 
-        emit BlockCreated(_nextBlockNumber, _risePrice, futureGrowthRate, _change, _created);
+        emit BlockCreated(_nextBlockNumber, _risePrice, _growthRate, _change, _created);
         return true;
     }
 

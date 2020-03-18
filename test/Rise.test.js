@@ -48,11 +48,10 @@ contract('Rise', async accounts => {
     beforeEach('setup growth rate', async () => {
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
     });
 
     it('getCurrentPrice() should return a valid value', async () => {
-      await riseToken.createBlockMock(2);
+      await riseToken.createBlockMock(2, 101);
       await riseToken.setCurrentTime(7201);
 
       assert.equal((await riseToken.getCurrentPrice()).toString(), 888913557);
@@ -64,7 +63,7 @@ contract('Rise', async accounts => {
     });
 
     it('getPrice() should return a valid value', async () => {
-      await riseToken.createBlockMock(2);
+      await riseToken.createBlockMock(2, 101);
       assert.equal((await riseToken.getPrice(2)).toString(), 888913557);
     });
 
@@ -73,7 +72,7 @@ contract('Rise', async accounts => {
     });
 
     it('getBlockData() should return a valid value', async () => {
-      await riseToken.createBlockMock(2);
+      await riseToken.createBlockMock(2, 101);
       assert.equal((await riseToken.getBlockData(2))._risePrice, 888913557);
     });
 
@@ -198,67 +197,6 @@ contract('Rise', async accounts => {
     });
   });
 
-  describe('updateFutureGrowthRate()', async () => {
-    beforeEach('set up stable contract', async () => {
-      await riseToken.setPriceFactors(101, pf101);
-    });
-
-    it('should fail with invalid', async () => {
-      await assertReverts(riseToken.updateFutureGrowthRate(0));
-      await assertReverts(riseToken.updateFutureGrowthRate(1));
-      await assertReverts(riseToken.updateFutureGrowthRate(100));
-      await assertReverts(riseToken.updateFutureGrowthRate(102));
-      await assertReverts(riseToken.updateFutureGrowthRate(10001));
-    });
-
-    it('should be possible to update with valid arguments from owner', async () => {
-      await riseToken.lockPriceFactors();
-      const result = await riseToken.updateFutureGrowthRate(101);
-
-      assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
-
-      assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'GrowthRateUpdated');
-      assert.equal(result.logs[0].args.oldGrowthRate, 0);
-      assert.equal(result.logs[0].args.futureGrowthRate, 101);
-      assert.equal(result.logs[0].args.futurePriceFactors[0].toNumber(), 1495449);
-      assert.equal(result.logs[0].args.futurePriceFactors[1].toNumber(), 1443881);
-      assert.equal(result.logs[0].args.futurePriceFactors[2].toNumber(), 1395751);
-      assert.equal(result.logs[0].args.futurePriceFactors[3].toNumber(), 1350727);
-    });
-
-    it('should be possible to update with current rate from owner', async () => {
-      await riseToken.setPriceFactors(1001, pf1001);
-      await riseToken.lockPriceFactors();
-
-      await riseToken.updateFutureGrowthRate(101);
-
-      assert.equal((await riseToken.futureGrowthRate()).toString(), '101');
-      const result = await riseToken.updateFutureGrowthRate(1001);
-
-      assert.equal((await riseToken.futureGrowthRate()).toString(), '1001');
-
-      assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'GrowthRateUpdated');
-      assert.equal(result.logs[0].args.oldGrowthRate, 101);
-      assert.equal(result.logs[0].args.futureGrowthRate, 1001);
-      assert.equal(result.logs[0].args.futurePriceFactors[0].toNumber(), 14197598);
-      assert.equal(result.logs[0].args.futurePriceFactors[1].toNumber(), 13707992);
-      assert.equal(result.logs[0].args.futurePriceFactors[2].toNumber(), 13251029);
-      assert.equal(result.logs[0].args.futurePriceFactors[3].toNumber(), 12823549);
-    });
-
-    it('should not be possible to update with valid values not from owner', async () => {
-      await assertReverts(
-        riseToken.updateFutureGrowthRate(101, {
-          from: ANYBODY,
-        }),
-      );
-
-      assert.equal((await riseToken.futureGrowthRate()).toString(), '0');
-    });
-  });
-
   describe('createBlock()', async () => {
     beforeEach('set up stable contract', async () => {
       await riseToken.setPriceFactors(101, pf101);
@@ -266,11 +204,19 @@ contract('Rise', async accounts => {
       await riseToken.lockPriceFactors();
     });
 
+    it('should fail with invalid', async () => {
+      assert.isTrue(await riseToken.doCreateBlock.call(2, 101));
+      await assertReverts(riseToken.doCreateBlock(2, 0));
+      await assertReverts(riseToken.doCreateBlock(2, 1));
+      await assertReverts(riseToken.doCreateBlock(2, 100));
+      await assertReverts(riseToken.doCreateBlock(2, 102));
+      await assertReverts(riseToken.doCreateBlock(2, 10001));
+    });
+
     it('should be possible to create first block with valid future growth rate values and price factors case 1', async () => {
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
 
-      const result = await riseToken.createBlockMock(2);
+      const result = await riseToken.createBlockMock(2, 101);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -285,9 +231,8 @@ contract('Rise', async accounts => {
 
     it('should be possible to create first block with valid future growth rate values and price factors case 2', async () => {
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
 
-      const result = await riseToken.createBlockMock(2);
+      const result = await riseToken.createBlockMock(2, 101);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -302,9 +247,8 @@ contract('Rise', async accounts => {
 
     it('should be possible to create first block with valid future growth rate values and price factors case 3', async () => {
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
 
-      const result = await riseToken.createBlockMock(2);
+      const result = await riseToken.createBlockMock(2, 101);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -319,9 +263,8 @@ contract('Rise', async accounts => {
 
     it('should be possible to create first block with valid future growth rate values and price factors case 4', async () => {
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
 
-      const result = await riseToken.createBlockMock(2);
+      const result = await riseToken.createBlockMock(2, 101);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -335,9 +278,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to create second block with valid future growth rate values and price factors case 1', async () => {
-      await riseToken.updateFutureGrowthRate(101);
-
-      const result = await riseToken.createBlockMock(2);
+      const result = await riseToken.createBlockMock(2, 101);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -351,8 +292,7 @@ contract('Rise', async accounts => {
 
       await riseToken.setCurrentTime(7201);
 
-      await riseToken.updateFutureGrowthRate(1001);
-      const result1 = await riseToken.createBlockMock(3);
+      const result1 = await riseToken.createBlockMock(3, 1001);
 
       assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '889027548');
       assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
@@ -366,9 +306,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to create second block with valid future growth rate values and price factors case 2', async () => {
-      await riseToken.updateFutureGrowthRate(101);
-
-      const result = await riseToken.createBlockMock(2);
+      const result = await riseToken.createBlockMock(2, 101);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -382,9 +320,7 @@ contract('Rise', async accounts => {
 
       await riseToken.setCurrentTime(7201);
 
-      await riseToken.updateFutureGrowthRate(1001);
-
-      const result1 = await riseToken.createBlockMock(3);
+      const result1 = await riseToken.createBlockMock(3, 1001);
 
       assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '889027548');
       assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
@@ -398,9 +334,7 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to create second block with valid future growth rate values and price factors case 3', async () => {
-      await riseToken.updateFutureGrowthRate(101);
-
-      const result = await riseToken.createBlockMock(2);
+      const result = await riseToken.createBlockMock(2, 101);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -414,9 +348,7 @@ contract('Rise', async accounts => {
 
       await riseToken.setCurrentTime(7201);
 
-      await riseToken.updateFutureGrowthRate(1001);
-
-      const result1 = await riseToken.createBlockMock(3);
+      const result1 = await riseToken.createBlockMock(3, 1001);
 
       assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '889027548');
       assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
@@ -431,9 +363,8 @@ contract('Rise', async accounts => {
 
     it('should be possible to create second block with valid future growth rate values and price factors case 4', async () => {
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
 
-      const result = await riseToken.createBlockMock(2);
+      const result = await riseToken.createBlockMock(2, 101);
 
       assert.equal((await riseToken.hoursToBlock(2)).risePrice.toString(), '888913557');
       assert.equal((await riseToken.hoursToBlock(2)).growthRate.toString(), '101');
@@ -447,9 +378,7 @@ contract('Rise', async accounts => {
 
       await riseToken.setCurrentTime(7201);
 
-      await riseToken.updateFutureGrowthRate(1001);
-
-      const result1 = await riseToken.createBlockMock(3);
+      const result1 = await riseToken.createBlockMock(3, 1001);
 
       assert.equal((await riseToken.hoursToBlock(3)).risePrice.toString(), '889027548');
       assert.equal((await riseToken.hoursToBlock(3)).growthRate.toString(), '1001');
@@ -463,10 +392,8 @@ contract('Rise', async accounts => {
     });
 
     it('should not be possible to create block with wrong expectedBlockNumber', async () => {
-      await riseToken.updateFutureGrowthRate(101);
-
-      await riseToken.createBlockMock(2);
-      await assertReverts(riseToken.createBlockMock(4));
+      await riseToken.createBlockMock(2, 101);
+      await assertReverts(riseToken.createBlockMock(4, 101));
 
       assert.equal((await riseToken.hoursToBlock(4)).risePrice.toString(), '0');
       assert.equal((await riseToken.hoursToBlock(4)).growthRate.toString(), '0');
@@ -483,13 +410,12 @@ contract('Rise', async accounts => {
 
       await riseToken.setPriceFactors(1001, pf1001);
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(1001);
     });
 
     it('should be possible to convertToCash with suficient balance case 1', async () => {
       await riseToken.transfer(SOMEBODY, 1000);
 
-      await riseToken.doCreateBlock(2);
+      await riseToken.doCreateBlock(2, 1001);
       await riseToken.setCurrentTime(7200);
       await riseToken.doBalance();
 
@@ -514,7 +440,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 1001);
       }
       await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
@@ -540,7 +466,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 1001);
       }
       await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
@@ -566,7 +492,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 800);
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 1001);
       }
       await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
@@ -583,7 +509,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 1001);
       }
       await riseToken.setCurrentTime(144001);
 
@@ -603,8 +529,8 @@ contract('Rise', async accounts => {
       await cashToken.setRiseContract(riseToken.address);
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
-      await riseToken.doCreateBlock(2);
+
+      await riseToken.doCreateBlock(2, 101);
       await riseToken.setCurrentTime(7200);
       await riseToken.transfer(SOMEBODY, 100000);
     });
@@ -613,7 +539,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(26000, { from: SOMEBODY });
 
       for (let i = 3; i < 63; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(50 * 3600);
 
@@ -635,7 +561,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(50000, { from: SOMEBODY });
 
       for (let i = 3; i < 24; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
@@ -657,7 +583,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(50000, { from: SOMEBODY });
 
       for (let i = 3; i <= 30; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(30 * 3600);
 
@@ -679,7 +605,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(50000, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(10 * 3600);
 
@@ -701,7 +627,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(1800, { from: SOMEBODY });
 
       for (let i = 3; i < 63; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(50 * 3600);
 
@@ -724,7 +650,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(5000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 23; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
@@ -747,7 +673,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(5000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 53; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(51 * 3600);
 
@@ -770,7 +696,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(9000000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(5 * 3600);
 
@@ -793,7 +719,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(140086, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(5 * 3600);
 
@@ -816,7 +742,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(140086, { from: SOMEBODY });
 
       for (let i = 3; i < 103; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(10 * 36000);
 
@@ -838,7 +764,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(1, { from: SOMEBODY });
 
       for (let i = 3; i < 103; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(10 * 36000);
 
@@ -881,14 +807,13 @@ contract('Rise', async accounts => {
 
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
     });
 
     it('should be possible to convertToRise with sufficient funds', async () => {
       await riseToken.transfer(SOMEBODY, 2000);
 
       for (let i = 2; i < 30; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
@@ -919,7 +844,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 900);
 
       for (let i = 2; i < 30; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
@@ -942,7 +867,7 @@ contract('Rise', async accounts => {
       await riseToken.transfer(SOMEBODY, 2000);
 
       for (let i = 2; i < 30; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
       await riseToken.setCurrentTime(20 * 3600);
 
@@ -972,8 +897,8 @@ contract('Rise', async accounts => {
 
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
-      await riseToken.doCreateBlock(2);
+
+      await riseToken.doCreateBlock(2, 101);
       await riseToken.setCurrentTime(7200);
     });
 
@@ -983,7 +908,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1008,7 +933,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1029,7 +954,7 @@ contract('Rise', async accounts => {
 
     it('should be possible to doBalance if quarantine balance is 0', async () => {
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1054,7 +979,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1091,7 +1016,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1111,7 +1036,7 @@ contract('Rise', async accounts => {
       await riseToken.convertToCash(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
 
       await riseToken.setCurrentTime(20 * 3600);
@@ -1144,13 +1069,12 @@ contract('Rise', async accounts => {
 
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
     });
 
     it('should be possible to doCreateBlock first block from owner', async () => {
       await assertReverts(riseToken.getBlockData(2));
 
-      await riseToken.doCreateBlock(2);
+      await riseToken.doCreateBlock(2, 101);
 
       assert.equal((await riseToken.getBlockData(2))._risePrice, 888913557);
     });
@@ -1159,20 +1083,20 @@ contract('Rise', async accounts => {
       await assertReverts(riseToken.getBlockData(2));
 
       await riseToken.appointAdmin(SOMEBODY);
-      await riseToken.doCreateBlock(2, { from: SOMEBODY });
+      await riseToken.doCreateBlock(2, 101, { from: SOMEBODY });
 
       assert.equal((await riseToken.getBlockData(2))._risePrice, 888913557);
     });
 
     it('should be possible to doCreateBlock not a first block from admin', async () => {
       for (let i = 2; i < 30; i++) {
-        await riseToken.doCreateBlock(i);
+        await riseToken.doCreateBlock(i, 101);
       }
 
       await assertReverts(riseToken.getBlockData(30));
 
       await riseToken.appointAdmin(SOMEBODY);
-      await riseToken.doCreateBlock(30, { from: SOMEBODY });
+      await riseToken.doCreateBlock(30, 101, { from: SOMEBODY });
 
       assert.equal(Number((await riseToken.getBlockData(30))._risePrice), 889249819);
     });
@@ -1180,7 +1104,7 @@ contract('Rise', async accounts => {
     it('should not be possible to doCreateBlock from not owner or admin', async () => {
       await assertReverts(riseToken.getBlockData(2));
 
-      await assertReverts(riseToken.doCreateBlock(2, { from: ANYBODY }));
+      await assertReverts(riseToken.doCreateBlock(2, 101, { from: ANYBODY }));
 
       await assertReverts(riseToken.getBlockData(2));
     });
@@ -1194,12 +1118,11 @@ contract('Rise', async accounts => {
 
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
-      await riseToken.updateFutureGrowthRate(101);
     });
 
     it('should be possible to burn lost tokens by owner', async () => {
       await riseToken.transfer(SOMEBODY, 10000);
-      await riseToken.doCreateBlock(2);
+      await riseToken.doCreateBlock(2, 101);
       await riseToken.setCurrentTime(7201);
       await riseToken.convertToCash(9000, { from: SOMEBODY });
 
@@ -1219,7 +1142,7 @@ contract('Rise', async accounts => {
 
     it('should be possible to burn lost tokens by owner if quarantine balance is 0', async () => {
       await riseToken.transfer(SOMEBODY, 100);
-      await riseToken.doCreateBlock(2);
+      await riseToken.doCreateBlock(2, 101);
       await riseToken.setCurrentTime(7201);
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 0);
@@ -1238,7 +1161,7 @@ contract('Rise', async accounts => {
 
     it('should not be possible to burn lost tokens by not owner', async () => {
       await riseToken.transfer(SOMEBODY, 10000);
-      await riseToken.doCreateBlock(2);
+      await riseToken.doCreateBlock(2, 101);
       await riseToken.setCurrentTime(7201);
       await riseToken.convertToCash(9000, { from: SOMEBODY });
 

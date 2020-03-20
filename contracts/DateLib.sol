@@ -1,7 +1,7 @@
 pragma solidity 0.4.25;
 
 
-library MonthLib {
+library DateLib {
     uint256 constant DAY_IN_SECONDS = 86400;
     uint256 constant YEAR_IN_SECONDS = 31536000;
     uint256 constant LEAP_YEAR_IN_SECONDS = 31622400;
@@ -28,7 +28,7 @@ library MonthLib {
         // Month
         uint256 secondsInMonth;
         for (i = 1; i <= 12; i++) {
-            secondsInMonth = DAY_IN_SECONDS * getDaysInMonth(i, year);
+            secondsInMonth = DAY_IN_SECONDS * _getDaysInMonth(i, year);
             if (secondsInMonth + secondsAccountedFor > timestamp) {
                 month = i;
                 break;
@@ -36,10 +36,10 @@ library MonthLib {
             secondsAccountedFor += secondsInMonth;
         }
 
-        return (getDaysInMonth(month, year) * 24);
+        return (_getDaysInMonth(month, year) * 24);
     }
 
-    function getDaysInMonth(uint8 _month, uint16 _year) internal pure returns (uint256) {
+    function _getDaysInMonth(uint8 _month, uint16 _year) private pure returns (uint256) {
         if (
             _month == 1 ||
             _month == 3 ||

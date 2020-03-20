@@ -2,7 +2,7 @@ pragma solidity 0.4.25;
 
 import './TRC20.sol';
 import './RoundMath.sol';
-import './MonthLib.sol';
+import './DateLib.sol';
 
 contract CashInterface {
     function totalSupply() public view returns (uint256);
@@ -16,7 +16,7 @@ contract CashInterface {
 
 contract Rise is TRC20Detailed {
     using RoundMath for uint256;
-    using MonthLib for uint256;
+    using DateLib for uint256;
 
     /**
      * STATE VARIABLES

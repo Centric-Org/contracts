@@ -73,7 +73,7 @@ contract TRC20 is ITRC20, Administrable {
     }
 
     function approve(address spender, uint256 value) public returns (bool) {
-        require(spender != address(0), 'Spender is invalid');
+        require(spender != address(0), 'spender cannot be address(0)');
 
         _allowed[msg.sender][spender] = value;
         emit Approval(msg.sender, spender, value);
@@ -90,6 +90,7 @@ contract TRC20 is ITRC20, Administrable {
     {
         _allowed[from][msg.sender] = _allowed[from][msg.sender].sub(value);
         _transfer(from, to, value);
+        emit Approval(from, msg.sender, _allowed[from][msg.sender]);
         return true;
     }
 
@@ -100,7 +101,7 @@ contract TRC20 is ITRC20, Administrable {
     public
     returns (bool)
     {
-        require(spender != address(0), 'Spender is invalid');
+        require(spender != address(0), 'spender cannot be address(0)');
 
         _allowed[msg.sender][spender] = (
         _allowed[msg.sender][spender].add(addedValue));
@@ -115,7 +116,7 @@ contract TRC20 is ITRC20, Administrable {
     public
     returns (bool)
     {
-        require(spender != address(0), 'Spender is invalid');
+        require(spender != address(0), 'spender cannot be address(0)');
 
         _allowed[msg.sender][spender] = (
         _allowed[msg.sender][spender].sub(subtractedValue));
@@ -124,6 +125,7 @@ contract TRC20 is ITRC20, Administrable {
     }
 
     function _transfer(address from, address to, uint256 value) internal {
+        require(from != address(0), 'from cannot be address(0)');
         require(to != address(0), 'to cannot be address(0)');
 
         _balances[from] = _balances[from].sub(value);

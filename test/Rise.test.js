@@ -1,19 +1,22 @@
 const Rise = artifacts.require('RiseMock');
 const Cash = artifacts.require('Cash');
+
 const Reverter = require('./helpers/reverter');
-const { assertReverts } = require('./helpers/assertThrows');
+const { assertReverts, assertError } = require('./helpers/assertThrows');
+const { expectEvent } = require('@openzeppelin/test-helpers');
 
 getFGRPriceFactors = async (token, rate) => {
-  const pf = [];
-  pf[0] = (await token.growthRateToPriceFactors(rate, 0)).toNumber();
-  pf[1] = (await token.growthRateToPriceFactors(rate, 1)).toNumber();
-  pf[2] = (await token.growthRateToPriceFactors(rate, 2)).toNumber();
-  pf[3] = (await token.growthRateToPriceFactors(rate, 3)).toNumber();
-  return pf;
+  const pf = [
+    token.growthRateToPriceFactors(rate, 0),
+    token.growthRateToPriceFactors(rate, 1),
+    token.growthRateToPriceFactors(rate, 2),
+    token.growthRateToPriceFactors(rate, 3),
+  ];
+  return (await Promise.all(pf)).map(f => f.toString());
 };
 
-const pf101 = [1495449, 1443881, 1395751, 1350727];
-const pf1001 = [14197598, 13707992, 13251029, 12823549];
+const pf101 = ['1495449', '1443881', '1395751', '1350727'];
+const pf1001 = ['14197598', '13707992', '13251029', '12823549'];
 
 contract('Rise', async accounts => {
   const reverter = new Reverter(web3);
@@ -87,33 +90,33 @@ contract('Rise', async accounts => {
 
   describe('setPriceFactors()', async () => {
     it('should be possible to set with valid arguments from owner', async () => {
-      assert.deepEqual(await getFGRPriceFactors(riseToken, 101), [0, 0, 0, 0]);
+      assert.deepEqual(await getFGRPriceFactors(riseToken, 101), ['0', '0', '0', '0']);
 
       assert.isTrue(await riseToken.setPriceFactors.call(101, pf101));
-      let result = await riseToken.setPriceFactors(101, pf101);
+      const result = await riseToken.setPriceFactors(101, pf101);
 
       assert.deepEqual(await getFGRPriceFactors(riseToken, 101), pf101);
 
-      assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'PriceFactorSet');
-      assert.equal(result.logs[0].args.growthRate, 101);
-      assert.equal(result.logs[0].args.priceFactors[0].toNumber(), 1495449);
-      assert.equal(result.logs[0].args.priceFactors[1].toNumber(), 1443881);
-      assert.equal(result.logs[0].args.priceFactors[2].toNumber(), 1395751);
-      assert.equal(result.logs[0].args.priceFactors[3].toNumber(), 1350727);
+      expectEvent.inLogs(result.logs, 'PriceFactorSet', {
+        growthRate: '101',
+        priceFactor0: pf101[0],
+        priceFactor1: pf101[1],
+        priceFactor2: pf101[2],
+        priceFactor3: pf101[3],
+      });
 
       assert.isTrue(await riseToken.setPriceFactors.call(1001, pf1001));
-      result = await riseToken.setPriceFactors(1001, pf1001);
+      const result2 = await riseToken.setPriceFactors(1001, pf1001);
 
       assert.deepEqual(await getFGRPriceFactors(riseToken, 1001), pf1001);
 
-      assert.equal(result.logs.length, 1);
-      assert.equal(result.logs[0].event, 'PriceFactorSet');
-      assert.equal(result.logs[0].args.growthRate, 1001);
-      assert.equal(result.logs[0].args.priceFactors[0].toNumber(), 14197598);
-      assert.equal(result.logs[0].args.priceFactors[1].toNumber(), 13707992);
-      assert.equal(result.logs[0].args.priceFactors[2].toNumber(), 13251029);
-      assert.equal(result.logs[0].args.priceFactors[3].toNumber(), 12823549);
+      expectEvent.inLogs(result2.logs, 'PriceFactorSet', {
+        growthRate: '1001',
+        priceFactor0: pf1001[0],
+        priceFactor1: pf1001[1],
+        priceFactor2: pf1001[2],
+        priceFactor3: pf1001[3],
+      });
     });
 
     it('should not be possible to set with zero rate from owner', async () => {
@@ -121,7 +124,7 @@ contract('Rise', async accounts => {
 
       assert.deepEqual(await getFGRPriceFactors(riseToken, 101), pf101);
 
-      await assertReverts(riseToken.setPriceFactors(0, [14197598, 13707992, 13251029, 12823549]));
+      await assertReverts(riseToken.setPriceFactors(0, pf1001));
 
       assert.deepEqual(await getFGRPriceFactors(riseToken, 101), pf101);
     });
@@ -142,7 +145,7 @@ contract('Rise', async accounts => {
       await riseToken.setPriceFactors(101, pf101);
       assert.deepEqual(await getFGRPriceFactors(riseToken, 101), pf101);
 
-      await assertReverts(riseToken.setPriceFactors(201, [0, 0, 0, 0]));
+      await assertReverts(riseToken.setPriceFactors(201, ['0', '0', '0', '0']));
 
       assert.deepEqual(await getFGRPriceFactors(riseToken, 101), pf101);
     });
@@ -150,17 +153,17 @@ contract('Rise', async accounts => {
     it('should not be possible to set with value less than next one in priceFactors case 1 from owner', async () => {
       await riseToken.setPriceFactors(101, pf101);
       await assertReverts(riseToken.setPriceFactors(201, [10000, 37703, 36446, 35270]));
-      assert.deepEqual(await getFGRPriceFactors(riseToken, 201), [0, 0, 0, 0]);
+      assert.deepEqual(await getFGRPriceFactors(riseToken, 201), ['0', '0', '0', '0']);
     });
 
     it('should not be possible to set with value less than next one in priceFactors case 2 from owner', async () => {
       await assertReverts(riseToken.setPriceFactors(201, [39050, 10000, 36446, 35270]));
-      assert.deepEqual(await getFGRPriceFactors(riseToken, 101), [0, 0, 0, 0]);
+      assert.deepEqual(await getFGRPriceFactors(riseToken, 101), ['0', '0', '0', '0']);
     });
 
     it('should not be possible to set with value less than next one in priceFactors case 3 from owner', async () => {
       await assertReverts(riseToken.setPriceFactors(201, [39050, 37703, 10000, 35270]));
-      assert.deepEqual(await getFGRPriceFactors(riseToken, 201), [0, 0, 0, 0]);
+      assert.deepEqual(await getFGRPriceFactors(riseToken, 201), ['0', '0', '0', '0']);
     });
 
     it('should not be possible to set with valid values not from owner', async () => {
@@ -170,19 +173,13 @@ contract('Rise', async accounts => {
         }),
       );
 
-      assert.deepEqual(await getFGRPriceFactors(riseToken, 201), [0, 0, 0, 0]);
+      assert.deepEqual(await getFGRPriceFactors(riseToken, 201), ['0', '0', '0', '0']);
     });
 
     it('should not be possible to set with only 3 price factors', async () => {
-      let error = false;
-      await riseToken.setPriceFactors
-        .call(101, [1495449, 1443881, 1395751])
-        .catch(e => {
-          error = true;
-        })
-        .finally(() => {
-          assert.equal(error, true);
-        });
+      await assertError('too many arguments')(
+        riseToken.setPriceFactors(101, [1495449, 1443881, 1395751]),
+      );
     });
 
     it('should be possible to set with max price factors', async () => {
@@ -426,14 +423,13 @@ contract('Rise', async accounts => {
       assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8001);
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 100);
 
-      assert.equal(result.logs.length, 4);
-      assert.equal(result.logs[3].event, 'ConvertToCash');
-      assert.equal(result.logs[3].args.converter, SOMEBODY);
-      assert.equal(result.logs[3].args.riseAmountSent, 900);
-      assert.equal(result.logs[3].args.cashAmountReceived, 8001);
-      assert.equal(result.logs[2].event, 'MintCash');
-      assert.equal(result.logs[2].args.receiver, SOMEBODY);
-      assert.equal(result.logs[2].args.amount, 8001);
+      expectEvent.inLogs(result.logs, 'ConvertToCash', {
+        converter: SOMEBODY,
+        riseAmountSent: '900',
+        cashAmountReceived: '8001',
+      });
+
+      expectEvent.inLogs(result.logs, 'MintCash', { receiver: SOMEBODY, amount: '8001' });
     });
 
     it('should be possible to convertToCash with suficient balance case 2', async () => {
@@ -452,14 +448,13 @@ contract('Rise', async accounts => {
       assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8018);
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 100);
 
-      assert.equal(result.logs.length, 4);
-      assert.equal(result.logs[3].event, 'ConvertToCash');
-      assert.equal(result.logs[3].args.converter, SOMEBODY);
-      assert.equal(result.logs[3].args.riseAmountSent, 900);
-      assert.equal(result.logs[3].args.cashAmountReceived, 8018);
-      assert.equal(result.logs[2].event, 'MintCash');
-      assert.equal(result.logs[2].args.receiver, SOMEBODY);
-      assert.equal(result.logs[2].args.amount, 8018);
+      expectEvent.inLogs(result.logs, 'ConvertToCash', {
+        converter: SOMEBODY,
+        riseAmountSent: '900',
+        cashAmountReceived: '8018',
+      });
+
+      expectEvent.inLogs(result.logs, 'MintCash', { receiver: SOMEBODY, amount: '8018' });
     });
 
     it('should be possible to convertToCash with suficient balance case 3', async () => {
@@ -478,14 +473,12 @@ contract('Rise', async accounts => {
       assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 0);
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 1000);
 
-      assert.equal(result.logs.length, 4);
-      assert.equal(result.logs[3].event, 'ConvertToCash');
-      assert.equal(result.logs[3].args.converter, SOMEBODY);
-      assert.equal(result.logs[3].args.riseAmountSent, 0);
-      assert.equal(result.logs[3].args.cashAmountReceived, 0);
-      assert.equal(result.logs[2].event, 'MintCash');
-      assert.equal(result.logs[2].args.receiver, SOMEBODY);
-      assert.equal(result.logs[2].args.amount, 0);
+      expectEvent.inLogs(result.logs, 'ConvertToCash', {
+        converter: SOMEBODY,
+        riseAmountSent: '0',
+        cashAmountReceived: '0',
+      });
+      expectEvent.inLogs(result.logs, 'MintCash', { receiver: SOMEBODY, amount: '0' });
     });
 
     it('should not be possible to convertToCash with insufficient balance', async () => {
@@ -552,9 +545,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '25984');
       assert.equal((await riseToken.quarantineBalance()).toString(), '25984');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 16);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '16' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 2', async () => {
@@ -574,9 +565,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '49988');
       assert.equal((await riseToken.quarantineBalance()).toString(), '49988');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 12);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '12' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 3', async () => {
@@ -596,9 +585,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '49982');
       assert.equal((await riseToken.quarantineBalance()).toString(), '49982');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 18);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '18' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 4', async () => {
@@ -618,9 +605,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '49995');
       assert.equal((await riseToken.quarantineBalance()).toString(), '49995');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 5);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '5' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 5', async () => {
@@ -640,9 +625,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '1799');
       assert.equal((await riseToken.quarantineBalance()).toString(), '1799');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 1);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '1' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 6', async () => {
@@ -663,9 +646,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4998784464');
       assert.equal((await riseToken.quarantineBalance()).toString(), '4998784464');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 1215536);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '1215536' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 7', async () => {
@@ -686,9 +667,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4996691728');
       assert.equal((await riseToken.quarantineBalance()).toString(), '4996691728');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 3308272);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '3308272' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 8', async () => {
@@ -709,9 +688,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '8999635302151');
       assert.equal((await riseToken.quarantineBalance()).toString(), '8999635302151');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 364697849);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '364697849' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 9', async () => {
@@ -732,9 +709,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '140081');
       assert.equal((await riseToken.quarantineBalance()).toString(), '140081');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 5);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '5' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 10', async () => {
@@ -755,9 +730,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '139901');
       assert.equal((await riseToken.quarantineBalance()).toString(), '139901');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 185);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '185' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 11', async () => {
@@ -777,9 +750,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '1');
       assert.equal((await riseToken.quarantineBalance()).toString(), '1');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 0);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '0' });
     });
 
     it('should be possible to burnQuarantined with quarantine wallet empty', async () => {
@@ -792,9 +763,7 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '0');
       assert.equal((await riseToken.quarantineBalance()).toString(), '0');
 
-      assert.equal(result.logs.length, 2);
-      assert.equal(result.logs[1].event, 'QuarantineBalanceBurnt');
-      assert.equal(result.logs[1].args.amount, 0);
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '0' });
     });
   });
 
@@ -831,13 +800,12 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.quarantineBalance()).toString(), 1);
       assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 0);
 
-      assert.equal(result.logs.length, 4);
-      assert.equal(result.logs[1].event, 'BurnCash');
-      assert.equal(result.logs[3].event, 'ConvertToRise');
-      assert.equal(result.logs[1].args.amountBurnt, 8891);
-      assert.equal(result.logs[3].args.converter, SOMEBODY);
-      assert.equal(result.logs[3].args.cashAmountSent, 8891);
-      assert.equal(result.logs[3].args.riseAmountReceived, 999);
+      expectEvent.inLogs(result.logs, 'BurnCash', { amountBurnt: '8891' });
+      expectEvent.inLogs(result.logs, 'ConvertToRise', {
+        converter: SOMEBODY,
+        cashAmountSent: '8891',
+        riseAmountReceived: '999',
+      });
     });
 
     it('should not be possible to convertToRise with insufficient funds', async () => {
@@ -919,12 +887,9 @@ contract('Rise', async accounts => {
       const result = await riseToken.doBalance({ from: SOMEBODY });
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
-      assert.equal((await riseToken.lastCalledHour()).toString(), 20);
+      assert.equal((await riseToken.lastBalancedHour()).toString(), 20);
 
-      assert.equal(result.logs.length, 3);
-      assert.equal(result.logs[2].event, 'DoBalance');
-      assert.equal(result.logs[2].args.currentHour, 20);
-      assert.equal(result.logs[2].args.riseAmountBurnt, 218);
+      expectEvent.inLogs(result.logs, 'DoBalance', { currentHour: '20', riseAmountBurnt: '218' });
     });
 
     it('should be possible to doBalance from owner', async () => {
@@ -944,12 +909,9 @@ contract('Rise', async accounts => {
       const result = await riseToken.doBalance();
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
-      assert.equal((await riseToken.lastCalledHour()).toString(), 20);
+      assert.equal((await riseToken.lastBalancedHour()).toString(), 20);
 
-      assert.equal(result.logs.length, 3);
-      assert.equal(result.logs[2].event, 'DoBalance');
-      assert.equal(result.logs[2].args.currentHour, 20);
-      assert.equal(result.logs[2].args.riseAmountBurnt, 218);
+      expectEvent.inLogs(result.logs, 'DoBalance', { currentHour: '20', riseAmountBurnt: '218' });
     });
 
     it('should be possible to doBalance if quarantine balance is 0', async () => {
@@ -965,12 +927,9 @@ contract('Rise', async accounts => {
       const result = await riseToken.doBalance();
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 0);
-      assert.equal((await riseToken.lastCalledHour()).toString(), 20);
+      assert.equal((await riseToken.lastBalancedHour()).toString(), 20);
 
-      assert.equal(result.logs.length, 3);
-      assert.equal(result.logs[2].event, 'DoBalance');
-      assert.equal(result.logs[2].args.currentHour, 20);
-      assert.equal(result.logs[2].args.riseAmountBurnt, 0);
+      expectEvent.inLogs(result.logs, 'DoBalance', { currentHour: '20', riseAmountBurnt: '0' });
     });
 
     it('should be possible to doBalance second time in the next hour', async () => {
@@ -990,24 +949,18 @@ contract('Rise', async accounts => {
       const result = await riseToken.doBalance();
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
-      assert.equal((await riseToken.lastCalledHour()).toString(), 20);
+      assert.equal((await riseToken.lastBalancedHour()).toString(), 20);
 
-      assert.equal(result.logs.length, 3);
-      assert.equal(result.logs[2].event, 'DoBalance');
-      assert.equal(result.logs[2].args.currentHour, 20);
-      assert.equal(Number(result.logs[2].args.riseAmountBurnt), 218);
+      expectEvent.inLogs(result.logs, 'DoBalance', { currentHour: '20', riseAmountBurnt: '218' });
 
       await riseToken.setCurrentTime(75601);
       assert.equal(await riseToken.doBalance.call(), true);
-      const result1 = await riseToken.doBalance();
+      const result2 = await riseToken.doBalance();
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899770);
-      assert.equal((await riseToken.lastCalledHour()).toString(), 21);
+      assert.equal((await riseToken.lastBalancedHour()).toString(), 21);
 
-      assert.equal(result1.logs.length, 3);
-      assert.equal(result1.logs[2].event, 'DoBalance');
-      assert.equal(result1.logs[2].args.currentHour, 21);
-      assert.equal(Number(result1.logs[2].args.riseAmountBurnt), 12);
+      expectEvent.inLogs(result2.logs, 'DoBalance', { currentHour: '21', riseAmountBurnt: '12' });
     });
 
     it('should not be possible to doBalance if current block is empty', async () => {
@@ -1027,7 +980,7 @@ contract('Rise', async accounts => {
       await assertReverts(riseToken.doBalance());
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 900000);
-      assert.equal((await riseToken.lastCalledHour()).toString(), 0);
+      assert.equal((await riseToken.lastBalancedHour()).toString(), 0);
     });
 
     it('should not be possible to doBalance second time in the same hour', async () => {
@@ -1047,17 +1000,14 @@ contract('Rise', async accounts => {
       const result = await riseToken.doBalance({ from: SOMEBODY });
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
-      assert.equal((await riseToken.lastCalledHour()).toString(), 20);
+      assert.equal((await riseToken.lastBalancedHour()).toString(), 20);
 
-      assert.equal(result.logs.length, 3);
-      assert.equal(result.logs[2].event, 'DoBalance');
-      assert.equal(result.logs[2].args.currentHour, 20);
-      assert.equal(Number(result.logs[2].args.riseAmountBurnt), 218);
+      expectEvent.inLogs(result.logs, 'DoBalance', { currentHour: '20', riseAmountBurnt: '218' });
 
       await assertReverts(riseToken.doBalance());
 
       assert.equal((await riseToken.quarantineBalance()).toString(), 899782);
-      assert.equal((await riseToken.lastCalledHour()).toString(), 20);
+      assert.equal((await riseToken.lastBalancedHour()).toString(), 20);
     });
   });
 
@@ -1098,7 +1048,7 @@ contract('Rise', async accounts => {
       await riseToken.appointAdmin(SOMEBODY);
       await riseToken.doCreateBlock(30, 101, { from: SOMEBODY });
 
-      assert.equal(Number((await riseToken.getBlockData(30))._risePrice), 889249819);
+      assert.equal((await riseToken.getBlockData(30))._risePrice, 889249819);
     });
 
     it('should not be possible to doCreateBlock from not owner or admin', async () => {

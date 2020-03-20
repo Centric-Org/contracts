@@ -11,5 +11,6 @@ const expectThrow = text => async promise => {
 module.exports = {
   assertOutOfGas: expectThrow('out of gas'),
   assertReverts: expectThrow('revert'),
+  assertError: expectThrow,
   assertInvalidJump: expectThrow('invalid JUMP'),
 };

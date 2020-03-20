@@ -4,6 +4,7 @@
   "rules": {
     "quotes": ["error", "single"],
     "indentation": ["error", 4],
+    "security/no-block-members": ["off"],
     "linebreak-style": ["error", "unix"],
     "max-len": ["error", 100]
   }

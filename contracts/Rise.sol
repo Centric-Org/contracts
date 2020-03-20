@@ -4,6 +4,7 @@ import './TRC20.sol';
 import './RoundMath.sol';
 import './DateLib.sol';
 
+
 contract CashInterface {
     function totalSupply() public view returns (uint256);
 
@@ -13,6 +14,7 @@ contract CashInterface {
 
     function burnFromRise(address tokensOwner, uint256 value) external returns (bool);
 }
+
 
 contract Rise is TRC20Detailed {
     using RoundMath for uint256;
@@ -80,7 +82,13 @@ contract Rise is TRC20Detailed {
 
     event BurnCash(uint256 amountBurnt);
 
-    event PriceFactorSet(uint256 growthRate, uint256[4] priceFactors);
+    event PriceFactorSet(
+        uint256 growthRate,
+        uint256 priceFactor0,
+        uint256 priceFactor1,
+        uint256 priceFactor2,
+        uint256 priceFactor3
+    );
 
     event BlockCreated(
         uint256 blockNumber,
@@ -201,7 +209,13 @@ contract Rise is TRC20Detailed {
 
         growthRateToPriceFactors[_growthRate] = _priceFactors;
 
-        emit PriceFactorSet(_growthRate, _priceFactors);
+        emit PriceFactorSet(
+            _growthRate,
+            _priceFactors[0],
+            _priceFactors[1],
+            _priceFactors[2],
+            _priceFactors[3]
+        );
         return true;
     }
 

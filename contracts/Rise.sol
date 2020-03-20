@@ -4,7 +4,6 @@ import './TRC20.sol';
 import './RoundMath.sol';
 import './MonthLib.sol';
 
-
 contract CashInterface {
     function totalSupply() public view returns (uint256);
 
@@ -15,7 +14,6 @@ contract CashInterface {
     function burnFromRise(address tokensOwner, uint256 value) external returns (bool);
 }
 
-
 contract Rise is TRC20Detailed {
     using RoundMath for uint256;
     using MonthLib for uint256;
@@ -25,8 +23,8 @@ contract Rise is TRC20Detailed {
      */
     address public cashContract;
     uint256 public quarantineBalance;
-    uint256 public lastBlockNumber;
-    uint256 public lastCalledHour;
+    uint256 public lastBlockNumber; // number of last created block
+    uint256 public lastBalancedHour;
 
     // Price of Rise in USD has base of PRICE_BASE
     uint256 public PRICE_BASE = 10**8;
@@ -43,6 +41,7 @@ contract Rise is TRC20Detailed {
         uint256 created; // hours, Unix epoch time
     }
 
+    // Price Blocks for a given hour (number of hours since epoch time)
     mapping(uint256 => Block) public hoursToBlock;
 
     /**
@@ -53,12 +52,12 @@ contract Rise is TRC20Detailed {
      * where:
      * r - growthRate,
      * t - number of hours in a given month
-     * PRICE_FACTOR_BASE = 10**11
-     * e.g.: for growthRate=2850=(2850/GROWTH_RATE_BASE)=0.285=28.5%
+     *
+     * e.g.: for growthRate=2850 (2850/GROWTH_RATE_BASE=0.285=28.5%)
      * price factors are (considering PRICE_FACTOR_BASE): [37322249, 36035043, 34833666, 33709810]
      */
     mapping(uint256 => uint256[4]) public growthRateToPriceFactors;
-    uint256 public GROWTH_RATE_BASE = 10000;
+    uint256 public GROWTH_RATE_BASE = 10**4;
     uint256 public PRICE_FACTOR_BASE = 10**11;
 
     bool priceFactorsLocked = false;
@@ -123,7 +122,7 @@ contract Rise is TRC20Detailed {
     /**
      *  Returns Price Block data
      *  uint256 risePrice;     // USD price of Rise for the block
-     *  uint256 growthRate;    // FutureGrowthRate value at the time of block creation
+     *  uint256 growthRate;    // growthRate value of the risePrice
      *  uint256 change;        // percentage (base of PRICE_BASE), RisePrice change relative to prev. block
      *  uint256 created;       // hours, unix epoch time
      */
@@ -144,13 +143,13 @@ contract Rise is TRC20Detailed {
     }
 
     /**
-     * Single call creates ONE Price Block.
+     * Single call creates ONE Price Block with specified monthly _growthRate.
      * For creating a batch of blocks function needs to be run according amount of times.
      * Admin should always make sure that there is a block for the currentHour
-     * and if not - create it. Otherwise users will not be able to switch tokens
+     * and if not - create it. Otherwise users will not be able to convert tokens
      * until a new block is created.
      * _blockNumber - always has to be lastBlockNumber + 1 (works only as a security check)
-     * _growthRate applied to Price Block creation
+     * _growthRate - must be specified in growthRateToPriceFactors
      * percentage (fraction of 1, e.g.: 0.3)
      * presented as integer with base of GROWTH_RATE_BASE (to be divided by GROWTH_RATE_BASE to get a fraction of 1)
      */
@@ -161,9 +160,9 @@ contract Rise is TRC20Detailed {
     {
         require(priceFactorsLocked, 'PRICE_FACTORS_MUST_BE_LOCKED');
 
-        require(_growthRate != 0, 'WRONG_GROWTH_RATE');
-        require(_growthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
-        require(growthRateToPriceFactors[_growthRate][0] > 0, 'WRONG_GROWTH_RATE');
+        require(_growthRate != 0, 'GROWTH_RATE_CAN_NOT_BE_ZERO');
+        require(_growthRate < GROWTH_RATE_BASE, 'GROWTH_RATE_IS_GREATER_THAN_GROWTH_RATE_BASE');
+        require(growthRateToPriceFactors[_growthRate][0] > 0, 'GROWTH_RATE_IS_NOT_SPECIFIED');
 
         require(createBlock(_blockNumber, _growthRate), 'FAILED_TO_CREATE_BLOCK');
         return true;
@@ -179,18 +178,19 @@ contract Rise is TRC20Detailed {
         returns (bool _success)
     {
         require(priceFactorsLocked == false, 'PRICE_FACTORS_ALREADY_LOCKED');
-        require(_growthRate != 0, 'CANNOT_APPROVE_ZERO_RATE');
-        require(_growthRate < GROWTH_RATE_BASE, 'WRONG_GROWTH_RATE');
+
+        require(_growthRate != 0, 'GROWTH_RATE_CAN_NOT_BE_ZERO');
+        require(_growthRate < GROWTH_RATE_BASE, 'GROWTH_RATE_IS_GREATER_THAN_GROWTH_RATE_BASE');
+
         require(_priceFactors.length == 4, 'WRONG_NUMBER_OF_PRICE_FACTORS');
-
-        for (uint8 i = 0; i < _priceFactors.length; i++) {
-            require(_priceFactors[i] != 0, 'ZERO_PRICE_FACTOR');
-        }
-
-        require(_priceFactors[0] < 103200117, 'PRICE_FACTORS_ARE_NOT_VALID');
-        require(_priceFactors[1] < 99639720, 'PRICE_FACTORS_ARE_NOT_VALID');
-        require(_priceFactors[2] < 96316797, 'PRICE_FACTORS_ARE_NOT_VALID');
-        require(_priceFactors[3] < 93208356, 'PRICE_FACTORS_ARE_NOT_VALID');
+        require(_priceFactors[0] > 0, 'PRICE_FACTOR_0_CAN_NOT_BE_ZERO');
+        require(_priceFactors[0] < 103200117, 'PRICE_FACTOR_0_IS_TOO_BIG');
+        require(_priceFactors[1] > 0, 'PRICE_FACTOR_1_CAN_NOT_BE_ZERO');
+        require(_priceFactors[1] < 99639720, 'PRICE_FACTOR_1_IS_TOO_BIG');
+        require(_priceFactors[2] > 0, 'PRICE_FACTOR_2_CAN_NOT_BE_ZERO');
+        require(_priceFactors[2] < 96316797, 'PRICE_FACTOR_2_IS_TOO_BIG');
+        require(_priceFactors[3] > 0, 'PRICE_FACTOR_3_CAN_NOT_BE_ZERO');
+        require(_priceFactors[3] < 93208356, 'PRICE_FACTOR_3_IS_TOO_BIG');
 
         require(
             _priceFactors[0] > _priceFactors[1] &&
@@ -216,10 +216,10 @@ contract Rise is TRC20Detailed {
      * Needed for economic logic of Rise token.
      */
     function doBalance() external returns (bool _success) {
-        require(hoursToBlock[getCurrentHour()].risePrice != 0, 'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
-        require(lastCalledHour < getCurrentHour(), 'CHANGE_IS_ALREADY_BURNT_IN_THIS_HOUR');
+        require(hoursToBlock[getCurrentHour()].risePrice != 0, 'CURRENT_PRICE_BLOCK_NOT_DEFINED');
+        require(lastBalancedHour < getCurrentHour(), 'CHANGE_IS_ALREADY_BURNT_IN_THIS_HOUR');
 
-        lastCalledHour = getCurrentHour();
+        lastBalancedHour = getCurrentHour();
 
         uint256 _riseBurnt = burnQuarantined();
 
@@ -232,7 +232,7 @@ contract Rise is TRC20Detailed {
      * Amount of received Rise tokens depends on the risePrice of the current block.
      */
     function convertToRise(uint256 _cashAmount) external returns (bool _success) {
-        require(hoursToBlock[getCurrentHour()].risePrice != 0, 'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
+        require(hoursToBlock[getCurrentHour()].risePrice != 0, 'CURRENT_PRICE_BLOCK_NOT_DEFINED');
 
         require(
             CashInterface(cashContract).balanceOf(msg.sender) >= _cashAmount,
@@ -262,8 +262,9 @@ contract Rise is TRC20Detailed {
      * Amount of received Cash tokens depends on the risePrice of a current block.
      */
     function convertToCash(uint256 _riseAmount) external returns (uint256) {
-        require(balanceOf(msg.sender) >= _riseAmount, 'INSUFFICIENT_BALANCE');
-        require(hoursToBlock[getCurrentHour()].risePrice != 0, 'RISE_PRICE_MUST_BE_POSITIVE_VALUE');
+        require(hoursToBlock[getCurrentHour()].risePrice != 0, 'CURRENT_PRICE_BLOCK_NOT_DEFINED');
+
+        require(balanceOf(msg.sender) >= _riseAmount, 'INSUFFICIENT_RISE_BALANCE');
 
         quarantineBalance = quarantineBalance.add(_riseAmount);
         require(transfer(address(this), _riseAmount), 'RISE_TRANSFER_FAILED');
@@ -299,7 +300,7 @@ contract Rise is TRC20Detailed {
     /**
      * Internal function that implements logic to burn a part of Rise tokens on quarantine.
      * Formula is based on network capitalization rules -
-     * Network capitalization of quarantined Rise must equal
+     * Network capitalization of quarantined Rise must be equal to
      * network capitalization of Cash
      * calculated as (q * pRISE - c * pCASH) / pRISE
      * where:
@@ -307,7 +308,6 @@ contract Rise is TRC20Detailed {
      * pRISE - current risePrice
      * c - current cash supply
      * pCash - Cash pegged price ($1 USD fixed conversion price)
-     * PRICE_FACTOR_BASE = 10**8
      */
     function burnQuarantined() internal returns (uint256) {
         uint256 _quarantined = quarantineBalance;
@@ -347,9 +347,9 @@ contract Rise is TRC20Detailed {
 
         require(_nextBlockNumber == _expectedBlockNumber, 'WRONG_BLOCK_NUMBER');
 
-        uint256 _monthBlocks = (_nextBlockNumber * 60 * 60 * 1000).getHoursInMonth();
-
         uint256 _risePriceFactor;
+
+        uint256 _monthBlocks = (_nextBlockNumber * 60 * 60 * 1000).getHoursInMonth();
         if (_monthBlocks == 28 * 24) _risePriceFactor = growthRateToPriceFactors[_growthRate][0];
         else if (_monthBlocks == 29 * 24)
             _risePriceFactor = growthRateToPriceFactors[_growthRate][1];
@@ -385,7 +385,7 @@ contract Rise is TRC20Detailed {
         return now;
     }
 
-    // Helper function only
+    // Helper function
     function getCurrentHour() public view returns (uint256) {
         return getCurrentTime().div(1 hours);
     }

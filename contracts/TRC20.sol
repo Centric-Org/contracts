@@ -9,36 +9,26 @@ interface ITRC20 {
 
     function balanceOf(address who) external view returns (uint256);
 
-    function allowance(address owner, address spender)
-    external view returns (uint256);
+    function allowance(address owner, address spender) external view returns (uint256);
 
     function transfer(address to, uint256 value) external returns (bool);
 
-    function approve(address spender, uint256 value)
-    external returns (bool);
+    function approve(address spender, uint256 value) external returns (bool);
 
-    function transferFrom(address from, address to, uint256 value)
-    external returns (bool);
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
 
-    event Transfer(
-        address indexed from,
-        address indexed to,
-        uint256 value
-    );
+    event Transfer(address indexed from, address indexed to, uint256 value);
 
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 }
+
 
 contract TRC20 is ITRC20, Administrable {
     using SafeMath for uint256;
 
-    mapping (address => uint256) private _balances;
+    mapping(address => uint256) private _balances;
 
-    mapping (address => mapping (address => uint256)) private _allowed;
+    mapping(address => mapping(address => uint256)) private _allowed;
 
     uint256 private _totalSupply;
 
@@ -56,14 +46,7 @@ contract TRC20 is ITRC20, Administrable {
         return _balances[owner];
     }
 
-    function allowance(
-        address owner,
-        address spender
-    )
-    public
-    view
-    returns (uint256)
-    {
+    function allowance(address owner, address spender) public view returns (uint256) {
         return _allowed[owner][spender];
     }
 
@@ -80,46 +63,25 @@ contract TRC20 is ITRC20, Administrable {
         return true;
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    )
-    public
-    returns (bool)
-    {
+    function transferFrom(address from, address to, uint256 value) public returns (bool) {
         _allowed[from][msg.sender] = _allowed[from][msg.sender].sub(value);
         _transfer(from, to, value);
         emit Approval(from, msg.sender, _allowed[from][msg.sender]);
         return true;
     }
 
-    function increaseAllowance(
-        address spender,
-        uint256 addedValue
-    )
-    public
-    returns (bool)
-    {
+    function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
         require(spender != address(0), 'spender cannot be address(0)');
 
-        _allowed[msg.sender][spender] = (
-        _allowed[msg.sender][spender].add(addedValue));
+        _allowed[msg.sender][spender] = (_allowed[msg.sender][spender].add(addedValue));
         emit Approval(msg.sender, spender, _allowed[msg.sender][spender]);
         return true;
     }
 
-    function decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    )
-    public
-    returns (bool)
-    {
+    function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
         require(spender != address(0), 'spender cannot be address(0)');
 
-        _allowed[msg.sender][spender] = (
-        _allowed[msg.sender][spender].sub(subtractedValue));
+        _allowed[msg.sender][spender] = (_allowed[msg.sender][spender].sub(subtractedValue));
         emit Approval(msg.sender, spender, _allowed[msg.sender][spender]);
         return true;
     }
@@ -164,7 +126,7 @@ contract TRC20Detailed is TRC20 {
     string private _symbol;
     uint8 private _decimals;
 
-    constructor (string name, string symbol, uint8 decimals) public {
+    constructor(string name, string symbol, uint8 decimals) public {
         _name = name;
         _symbol = symbol;
         _decimals = decimals;

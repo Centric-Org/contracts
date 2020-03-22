@@ -19,4 +19,8 @@ contract TRC20Mock is TRC20 {
     function transferInternal(address from, address to, uint256 value) public {
         _transfer(from, to, value);
     }
+
+    function burnFrom(address account, uint256 value) public {
+        _burnFrom(account, value);
+    }
 }

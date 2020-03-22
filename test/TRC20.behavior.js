@@ -1,10 +1,18 @@
 const { constants, expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
 const { ZERO_ADDRESS } = constants;
 
-function shouldBehaveLikeERC20(initialSupply, initialHolder, recipient, anotherAccount) {
+function shouldBehaveLikeTRC20(initialSupply, initialHolder, recipient, anotherAccount) {
   describe('total supply', async () => {
     it('returns the total amount of tokens', async () => {
       assert.equal(await this.token.totalSupply(), initialSupply);
+    });
+  });
+
+  describe('total burnt', async () => {
+    it('returns the total amount of burnt tokens', async () => {
+      await this.token.burn(initialHolder, initialSupply / 2);
+      await this.token.burn(initialHolder, initialSupply / 2);
+      assert.equal(await this.token.totalBurnt(), initialSupply);
     });
   });
 
@@ -23,7 +31,7 @@ function shouldBehaveLikeERC20(initialSupply, initialHolder, recipient, anotherA
   });
 
   describe('transfer', async () => {
-    shouldBehaveLikeERC20Transfer.bind(this)(
+    shouldBehaveLikeTRC20Transfer.bind(this)(
       initialHolder,
       recipient,
       initialSupply,
@@ -162,7 +170,7 @@ function shouldBehaveLikeERC20(initialSupply, initialHolder, recipient, anotherA
   });
 
   describe('approve', async () => {
-    shouldBehaveLikeERC20Approve.bind(this)(initialHolder, recipient, initialSupply, function(
+    shouldBehaveLikeTRC20Approve.bind(this)(initialHolder, recipient, initialSupply, function(
       owner,
       spender,
       amount,
@@ -172,7 +180,7 @@ function shouldBehaveLikeERC20(initialSupply, initialHolder, recipient, anotherA
   });
 }
 
-function shouldBehaveLikeERC20Transfer(from, to, balance, transfer) {
+function shouldBehaveLikeTRC20Transfer(from, to, balance, transfer) {
   describe('when the recipient is not the zero address', async () => {
     describe('when the sender does not have enough balance', async () => {
       const amount = balance + 1;
@@ -237,7 +245,7 @@ function shouldBehaveLikeERC20Transfer(from, to, balance, transfer) {
   });
 }
 
-function shouldBehaveLikeERC20Approve(owner, spender, supply, approve) {
+function shouldBehaveLikeTRC20Approve(owner, spender, supply, approve) {
   describe('when the spender is not the zero address', async () => {
     describe('when the sender has enough balance', async () => {
       const amount = supply;
@@ -319,7 +327,7 @@ function shouldBehaveLikeERC20Approve(owner, spender, supply, approve) {
 }
 
 module.exports = {
-  shouldBehaveLikeERC20,
-  shouldBehaveLikeERC20Transfer,
-  shouldBehaveLikeERC20Approve,
+  shouldBehaveLikeTRC20,
+  shouldBehaveLikeTRC20Transfer,
+  shouldBehaveLikeTRC20Approve,
 };

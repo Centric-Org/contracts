@@ -8,6 +8,7 @@
   "scripts": {
     "private-network": "ganache-cli --time 1970-01-01T00:00:00Z",
     "test": "truffle test",
+    "coverage": "truffle run coverage",
     "compile": "truffle compile",
     "validate-tests": "eslint test/*.js test/helpers/*.js --fix",
     "validate-sol": "solium --dir contracts --fix",

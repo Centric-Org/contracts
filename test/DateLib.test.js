@@ -17,10 +17,12 @@ describe('DateLib', async () => {
   describe('getHoursInMonth::', function() {
     it('Should successfully getHoursInMonth', async () => {
       assert.equal(await dLib.getHoursInMonth(1584257000000), 31 * 24);
-      assert.equal(await dLib.getHoursInMonth(1581000000000), 29 * 24);
       assert.equal(await dLib.getHoursInMonth(1 * 60 * 60 * 1000), 31 * 24);
       assert.equal(await dLib.getHoursInMonth(2 * 60 * 60 * 1000), 31 * 24);
       assert.equal(await dLib.getHoursInMonth(31 * 24 * 60 * 60 * 1000), 28 * 24);
+      assert.equal(Number(await dLib.getHoursInMonth(Date.UTC(2020, 1))), 29 * 24);
+      assert.equal(Number(await dLib.getHoursInMonth(Date.UTC(2021, 1))), 28 * 24);
+      assert.equal(Number(await dLib.getHoursInMonth(Date.UTC(2022, 1))), 28 * 24);
     });
   });
 });

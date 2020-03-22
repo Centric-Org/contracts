@@ -60,4 +60,18 @@ describe('SafeMath', async () => {
       await assertReverts(sMath.mul(maxUint, maxUint));
     });
   });
+
+  describe('Modulo::', function() {
+    it('Should successfully mod', async () => {
+      assert.equal(Number(await sMath.mod(1, 1)), 0, '1 mod by 1 failed');
+      assert.equal(Number(await sMath.mod(2, 1)), 0, '2 mod by 1 failed');
+      assert.equal(Number(await sMath.mod(3, 2)), 1, '3 mod by 2 failed');
+      assert.equal(Number(await sMath.mod(4, 2)), 0, '4 mod by 2 failed');
+      assert.equal(Number(await sMath.mod(5, 2)), 1, '5 mod by 2 failed');
+    });
+
+    it('Should Fail to mod - 0', async () => {
+      await assertReverts(sMath.mod(2, 0));
+    });
+  });
 });

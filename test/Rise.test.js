@@ -640,13 +640,13 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '5000000000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '5000000000');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 1215536);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), '1215548');
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4998784464');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '4998784464');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4998784452');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '4998784452');
 
-      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '1215536' });
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '1215548' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 7', async () => {
@@ -661,13 +661,13 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '5000000000');
       assert.equal((await riseToken.quarantineBalance()).toString(), '5000000000');
 
-      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), 3308272);
+      assert.equal((await riseToken.burnQuarantinedMock.call()).toString(), '3308300');
       const result = await riseToken.burnQuarantinedMock();
 
-      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4996691728');
-      assert.equal((await riseToken.quarantineBalance()).toString(), '4996691728');
+      assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), '4996691700');
+      assert.equal((await riseToken.quarantineBalance()).toString(), '4996691700');
 
-      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '3308272' });
+      expectEvent.inLogs(result.logs, 'QuarantineBalanceBurnt', { amount: '3308300' });
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 8', async () => {
@@ -1048,7 +1048,7 @@ contract('Rise', async accounts => {
       await riseToken.appointAdmin(SOMEBODY);
       await riseToken.doCreateBlock(30, 101, { from: SOMEBODY });
 
-      assert.equal((await riseToken.getBlockData(30))._risePrice, 889249819);
+      assert.equal((await riseToken.getBlockData(30))._risePrice.toString(), '889249823');
     });
 
     it('should not be possible to doCreateBlock from not owner or admin', async () => {

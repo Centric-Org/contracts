@@ -2,9 +2,9 @@ const { constants, expectEvent, expectRevert } = require('@openzeppelin/test-hel
 const { ZERO_ADDRESS } = constants;
 
 const {
-  shouldBehaveLikeERC20,
-  shouldBehaveLikeERC20Transfer,
-  shouldBehaveLikeERC20Approve,
+  shouldBehaveLikeTRC20,
+  shouldBehaveLikeTRC20Transfer,
+  shouldBehaveLikeTRC20Approve,
 } = require('./TRC20.behavior');
 
 const TRC20 = artifacts.require('TRC20Mock');
@@ -18,7 +18,7 @@ contract('TRC20', async accounts => {
     this.token = await TRC20.new(initialHolder, initialSupply);
   });
 
-  shouldBehaveLikeERC20.bind(this)(initialSupply, initialHolder, recipient, anotherAccount);
+  shouldBehaveLikeTRC20.bind(this)(initialSupply, initialHolder, recipient, anotherAccount);
 
   describe('decrease allowance', async () => {
     describe('when the spender is not the zero address', async () => {
@@ -269,8 +269,49 @@ contract('TRC20', async accounts => {
     });
   });
 
+  describe('_burnFrom', async () => {
+    it('rejects not apporved amount', async () => {
+      await expectRevert(
+        this.token.burnFrom(initialHolder, 1, { from: anotherAccount }),
+        'SUB_ERROR',
+      );
+    });
+
+    it('rejects a null account', async () => {
+      await expectRevert(
+        this.token.approve(anotherAccount, 1, { from: ZERO_ADDRESS }),
+        'sender account not recognized',
+      );
+      await expectRevert(
+        this.token.burnFrom(ZERO_ADDRESS, 1, { from: anotherAccount }),
+        'SUB_ERROR',
+      );
+    });
+
+    it('rejects burning more than balance', async () => {
+      await this.token.approve(anotherAccount, initialSupply + 1);
+      await expectRevert(
+        this.token.burnFrom(initialHolder, initialSupply + 1, { from: anotherAccount }),
+        'SUB_ERROR',
+      );
+    });
+
+    it('burning', async () => {
+      await this.token.approve(anotherAccount, 1);
+      const { logs } = await this.token.burnFrom(initialHolder, 1, { from: anotherAccount });
+
+      expectEvent.inLogs(logs, 'Transfer', {
+        from: initialHolder,
+        to: ZERO_ADDRESS,
+        value: '1',
+      });
+
+      assert.equal(await this.token.balanceOf(initialHolder), initialSupply - 1);
+    });
+  });
+
   describe('_transfer', async () => {
-    shouldBehaveLikeERC20Transfer.bind(this)(
+    shouldBehaveLikeTRC20Transfer.bind(this)(
       initialHolder,
       recipient,
       initialSupply,
@@ -290,7 +331,7 @@ contract('TRC20', async accounts => {
   });
 
   describe('approve', async () => {
-    shouldBehaveLikeERC20Approve.bind(this)(
+    shouldBehaveLikeTRC20Approve.bind(this)(
       initialHolder,
       recipient,
       initialSupply,

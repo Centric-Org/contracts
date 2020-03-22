@@ -22,15 +22,18 @@ example:
 cashContract.setRiseContract(RISE_CONTRACT_ADDRESS).send();
 ```
 
-# Mint Block
-### Call updateFutureGrowthRate on Rise contract
+# Set Growth Rates and Price Factors
+### Call setPriceFactors on Rise contract
 function:
 ```
-updateFutureGrowthRate(uint256 _growthRate, uint256[4] _priceFactors)
+function setPriceFactors(uint256 _growthRate, uint256[4] _priceFactors)
 ```
 example: 
 ```js
-riseContract.updateFutureGrowthRate(1000, [14184069, 13694930, 13238402, 12811329]).send();
+riseContract.setPriceFactors(10, [148736, 143607, 138820, 134342]).send();
+riseContract.setPriceFactors(11, [163601, 157960, 152694, 147769]).send();
+...
+riseContract.setPriceFactors(3000, [39049924, 37703121, 36446122, 35270233]).send();
 ```
 supporting JS code:
 ```js
@@ -45,20 +48,29 @@ const priceFactors = [
 
 function getNthRootPowered(growthRate, n) {
   const a = 1 + (growthRate / 10000);
-
   const powered = (a ** (1 / n)) * 10 ** 11;
   return Math.ceil(powered - 1 * 10 ** 11);
 }
 ```
 
+# Mint Block
+### Call lockPriceFactors to freeze growth rates
+function:
+```
+function lockPriceFactors()
+```
+example: 
+```js
+riseContract.lockPriceFactors().send();
+```
 ### Call doCreateBlock on Rise contract
 function:
 ```
-doCreateBlock(uint256 _monthBlocks, uint256 _blockNumber)
+function doCreateBlock(uint256 _blockNumber, uint256 _growthRate)
 ```
 example:
 ```js
-riseContract.doCreateBlock(30 * 24, 447792).send();
+riseContract.doCreateBlock(447792, 101).send();
 ```
 supporting JS code:
 ```js

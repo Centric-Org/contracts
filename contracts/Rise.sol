@@ -219,6 +219,10 @@ contract Rise is TRC20Detailed {
         return true;
     }
 
+    /**
+     * Call only after all priceFactors have been set
+     * Call before creatign first block
+     */
     function lockPriceFactors() external onlyAdmin() returns (bool _success) {
         priceFactorsLocked = true;
         return true;

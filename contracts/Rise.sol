@@ -29,10 +29,10 @@ contract Rise is TRC20Detailed {
     uint256 public lastBalancedHour;
 
     // Price of Rise in USD has base of PRICE_BASE
-    uint256 public PRICE_BASE = 10**8;
+    uint256 constant PRICE_BASE = 10**8;
 
     // Inital price of Rise in USD has base of PRICE_BASE
-    uint256 public initialPrice = 888901550;
+    uint256 constant initialPrice = 888901550;
 
     // Structure of a Price Block
     struct Block {
@@ -59,10 +59,10 @@ contract Rise is TRC20Detailed {
      * price factors are (considering PRICE_FACTOR_BASE): [37322249, 36035043, 34833666, 33709810]
      */
     mapping(uint256 => uint256[4]) public growthRateToPriceFactors;
-    uint256 public GROWTH_RATE_BASE = 10**4;
-    uint256 public PRICE_FACTOR_BASE = 10**11;
+    uint256 constant GROWTH_RATE_BASE = 10**4;
+    uint256 constant PRICE_FACTOR_BASE = 10**11;
 
-    bool priceFactorsLocked = false;
+    bool public priceFactorsLocked = false;
 
     event DoBalance(uint256 indexed currentHour, uint256 riseAmountBurnt);
 
@@ -219,6 +219,10 @@ contract Rise is TRC20Detailed {
         return true;
     }
 
+    /**
+     * Call only after all priceFactors have been set
+     * Call before creating first block
+     */
     function lockPriceFactors() external onlyAdmin() returns (bool _success) {
         priceFactorsLocked = true;
         return true;

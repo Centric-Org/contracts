@@ -32,7 +32,7 @@ contract Rise is TRC20Detailed {
     uint256 constant PRICE_BASE = 10**8;
 
     // Inital price of Rise in USD has base of PRICE_BASE
-    uint256 constant initialPrice = 888901550;
+    uint256 constant INITIAL_PRICE = 888901550;
 
     // Structure of a Price Block
     struct Block {
@@ -356,7 +356,7 @@ contract Rise is TRC20Detailed {
 
         if (lastBlockNumber == 0) {
             require(_expectedBlockNumber > getCurrentHour(), 'FIRST_BLOCK_MUST_BE_IN_THE_FUTURE');
-            _lastPrice = initialPrice;
+            _lastPrice = INITIAL_PRICE;
             _nextBlockNumber = _expectedBlockNumber;
         } else {
             _lastPrice = hoursToBlock[lastBlockNumber].risePrice;

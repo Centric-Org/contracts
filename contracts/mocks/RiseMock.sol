@@ -23,10 +23,10 @@ contract RiseMock is Rise {
 
     function createBlockMock(uint256 _expectedBlockNumber, uint256 _growthRate)
     public returns(bool _isSuccess) {
-        return createBlock(_expectedBlockNumber, _growthRate);
+        return _createBlock(_expectedBlockNumber, _growthRate);
     }
 
     function burnQuarantinedMock() public returns(uint256) {
-        return burnQuarantined();
+        return _burnQuarantined();
     }
 }

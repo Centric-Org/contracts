@@ -31,7 +31,7 @@ contract Rise is TRC20Detailed {
     // Price of Rise in USD has base of PRICE_BASE
     uint256 constant PRICE_BASE = 10**8;
 
-    // Inital price of Rise in USD has base of PRICE_BASE
+    // Inital price of Rise in USD
     uint256 constant INITIAL_PRICE = 888901550;
 
     // Structure of a Price Block
@@ -172,7 +172,7 @@ contract Rise is TRC20Detailed {
         require(_growthRate < GROWTH_RATE_BASE, 'GROWTH_RATE_IS_GREATER_THAN_GROWTH_RATE_BASE');
         require(growthRateToPriceFactors[_growthRate][0] > 0, 'GROWTH_RATE_IS_NOT_SPECIFIED');
 
-        require(createBlock(_blockNumber, _growthRate), 'FAILED_TO_CREATE_BLOCK');
+        require(_createBlock(_blockNumber, _growthRate), 'FAILED_TO_CREATE_BLOCK');
         return true;
     }
 
@@ -239,7 +239,7 @@ contract Rise is TRC20Detailed {
 
         lastBalancedHour = getCurrentHour();
 
-        uint256 _riseBurnt = burnQuarantined();
+        uint256 _riseBurnt = _burnQuarantined();
 
         emit DoBalance(getCurrentHour(), _riseBurnt);
         return true;
@@ -327,7 +327,7 @@ contract Rise is TRC20Detailed {
      * c - current cash supply
      * pCash - Cash pegged price ($1 USD fixed conversion price)
      */
-    function burnQuarantined() internal returns (uint256) {
+    function _burnQuarantined() internal returns (uint256) {
         uint256 _quarantined = quarantineBalance;
         uint256 _currentPrice = hoursToBlock[getCurrentHour()].risePrice;
         uint256 _cashSupply = CashInterface(cashContract).totalSupply();
@@ -347,7 +347,7 @@ contract Rise is TRC20Detailed {
     /**
      * Internal function for creating a new Price Block.
      */
-    function createBlock(uint256 _expectedBlockNumber, uint256 _growthRate)
+    function _createBlock(uint256 _expectedBlockNumber, uint256 _growthRate)
         internal
         returns (bool _success)
     {

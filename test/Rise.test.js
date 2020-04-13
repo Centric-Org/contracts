@@ -210,6 +210,7 @@ contract('Rise', async accounts => {
       await assertReverts(riseToken.doCreateBlock(2, 10001));
     });
 
+    it('should fail with invalid first price block number', async () => {
     it('should be possible to create first block with valid future growth rate values and price factors case 1', async () => {
       await riseToken.lockPriceFactors();
 

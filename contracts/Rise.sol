@@ -356,6 +356,10 @@ contract Rise is TRC20Detailed {
 
         if (lastBlockNumber == 0) {
             require(_expectedBlockNumber > getCurrentHour(), 'FIRST_BLOCK_MUST_BE_IN_THE_FUTURE');
+            require(
+                _expectedBlockNumber < getCurrentHour() + 365 * 24,
+                'FIRST_BLOCK_MUST_BE_WITHIN_ONE_YEAR'
+            );
             _lastPrice = INITIAL_PRICE;
             _nextBlockNumber = _expectedBlockNumber;
         } else {

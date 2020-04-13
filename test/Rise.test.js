@@ -223,12 +223,20 @@ contract('Rise', async accounts => {
       await assertReverts(riseToken.doCreateBlock(2, 10001));
     });
 
-    it('should work', async () => {
+    it('should fail with invalid first price block number', async () => {
+      assert.isTrue(await riseToken.doCreateBlock.call(2, 101));
+      await assertReverts(riseToken.doCreateBlock(1 + 365 * 24, 101));
+    });
+
+    it('should work for different month lengths', async () => {
       assert.isTrue(
-        await riseToken.doCreateBlock.call(Date.UTC(2020, 1, 29) / (60 * 60 * 1000), 101),
+        await riseToken.doCreateBlock.call(Date.UTC(1970, 1, 29) / (60 * 60 * 1000), 101),
       );
       assert.isTrue(
-        await riseToken.doCreateBlock.call(Date.UTC(2021, 3, 30) / (60 * 60 * 1000), 101),
+        await riseToken.doCreateBlock.call(Date.UTC(1970, 3, 30) / (60 * 60 * 1000), 101),
+      );
+      assert.isTrue(
+        await riseToken.doCreateBlock.call(Date.UTC(1970, 1, 31) / (60 * 60 * 1000), 101),
       );
     });
 

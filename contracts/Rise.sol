@@ -190,7 +190,6 @@ contract Rise is TRC20Detailed {
         require(_growthRate != 0, 'GROWTH_RATE_CAN_NOT_BE_ZERO');
         require(_growthRate < GROWTH_RATE_BASE, 'GROWTH_RATE_IS_GREATER_THAN_GROWTH_RATE_BASE');
 
-        require(_priceFactors.length == 4, 'WRONG_NUMBER_OF_PRICE_FACTORS');
         require(_priceFactors[0] > 0, 'PRICE_FACTOR_0_CAN_NOT_BE_ZERO');
         require(_priceFactors[0] < 103200117, 'PRICE_FACTOR_0_IS_TOO_BIG');
         require(_priceFactors[1] > 0, 'PRICE_FACTOR_1_CAN_NOT_BE_ZERO');
@@ -377,9 +376,7 @@ contract Rise is TRC20Detailed {
             _risePriceFactor = growthRateToPriceFactors[_growthRate][1];
         else if (_monthBlocks == 30 * 24)
             _risePriceFactor = growthRateToPriceFactors[_growthRate][2];
-        else if (_monthBlocks == 31 * 24)
-            _risePriceFactor = growthRateToPriceFactors[_growthRate][3];
-        else require(false, 'WRONG_MONTH_BLOCKS');
+        else _risePriceFactor = growthRateToPriceFactors[_growthRate][3];
 
         uint256 _risePrice = (
             (_risePriceFactor.mul(_lastPrice)).add(_lastPrice.mul(PRICE_FACTOR_BASE))

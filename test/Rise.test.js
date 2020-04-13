@@ -1,4 +1,7 @@
 const Rise = artifacts.require('RiseMock');
+const RiseTransferMock = artifacts.require('RiseTransferMock');
+const CashBurnFromRiseMock = artifacts.require('CashBurnFromRiseMock');
+const RiseOriginal = artifacts.require('Rise');
 const Cash = artifacts.require('Cash');
 
 const Reverter = require('./helpers/reverter');
@@ -17,6 +20,18 @@ getFGRPriceFactors = async (token, rate) => {
 
 const pf101 = ['1495449', '1443881', '1395751', '1350727'];
 const pf1001 = ['14197598', '13707992', '13251029', '12823549'];
+
+contract('RiseOriginal', async accounts => {
+  describe('getCurrentTime', async () => {
+    it('should return correct time', async () => {
+      const OWNER = accounts[0];
+      const riseToken = await RiseOriginal.new(OWNER, OWNER);
+      const time = await riseToken.getCurrentTime();
+      assert.equal(time > 0, true);
+      assert.equal(time < Date.now(), true);
+    });
+  });
+});
 
 contract('Rise', async accounts => {
   const reverter = new Reverter(web3);
@@ -81,6 +96,10 @@ contract('Rise', async accounts => {
 
     it('getBlockData() should throw on non existent price', async () => {
       await assertReverts(riseToken.getBlockData(2));
+    });
+
+    it('getBlockData() should throw on non existent price', async () => {
+      await assertReverts(riseToken.getBlockData(0));
     });
 
     it('getCurrentTime() should return a valid value', async () => {
@@ -183,14 +202,50 @@ contract('Rise', async accounts => {
     });
 
     it('should be possible to set with max price factors', async () => {
-      const maxValues = [103200116, 99639719, 96316796, 93208355];
-      assert.isTrue(await riseToken.setPriceFactors.call(101, maxValues));
+      const maxVal = [103200116, 99639719, 96316796, 93208355];
+      assert.isTrue(await riseToken.setPriceFactors.call(101, maxVal));
     });
 
     it('should not be possible to set with too big price factors', async () => {
-      const maxValues = [103200116, 99639719, 96316796, 93208355];
-      maxValues[0]++;
-      await assertReverts(riseToken.setPriceFactors.call(101, maxValues));
+      const maxVal = [103200116, 99639719, 96316796, 93208355];
+
+      let invalidVal = [0, maxVal[0], maxVal[0], maxVal[0]];
+      await assertReverts(riseToken.setPriceFactors.call(101, invalidVal));
+      invalidVal[0] = maxVal[0] + 1;
+      await assertReverts(riseToken.setPriceFactors.call(101, invalidVal));
+
+      invalidVal = [maxVal[0], 0, maxVal[2], maxVal[3]];
+      await assertReverts(riseToken.setPriceFactors.call(101, invalidVal));
+      invalidVal[1] = maxVal[1] + 1;
+      await assertReverts(riseToken.setPriceFactors.call(101, invalidVal));
+
+      invalidVal = [maxVal[0], maxVal[1], 0, maxVal[3]];
+      await assertReverts(riseToken.setPriceFactors.call(101, invalidVal));
+      invalidVal[2] = maxVal[2] + 1;
+      await assertReverts(riseToken.setPriceFactors.call(101, invalidVal));
+
+      invalidVal = [maxVal[0], maxVal[1], maxVal[2], 0];
+      await assertReverts(riseToken.setPriceFactors.call(101, invalidVal));
+      invalidVal[3] = maxVal[3] + 1;
+      await assertReverts(riseToken.setPriceFactors.call(101, invalidVal));
+    });
+  });
+
+  describe('lockPriceFactors()', async () => {
+    it('can not setPriceFactors after locked', async () => {
+      await riseToken.setPriceFactors(101, pf101);
+      await riseToken.lockPriceFactors();
+      await assertReverts(riseToken.setPriceFactors(1001, pf1001));
+    });
+    it('doCreateBlock should not work without locked', async () => {
+      await riseToken.setPriceFactors(101, pf101);
+      await assertReverts(riseToken.doCreateBlock(2, 101));
+    });
+
+    it('doCreateBlock should work when locked', async () => {
+      await riseToken.setPriceFactors(101, pf101);
+      await riseToken.lockPriceFactors();
+      assert.isTrue(await riseToken.doCreateBlock.call(2, 101));
     });
   });
 
@@ -201,7 +256,7 @@ contract('Rise', async accounts => {
       await riseToken.lockPriceFactors();
     });
 
-    it('should fail with invalid', async () => {
+    it('should fail with invalid growth rate', async () => {
       assert.isTrue(await riseToken.doCreateBlock.call(2, 101));
       await assertReverts(riseToken.doCreateBlock(2, 0));
       await assertReverts(riseToken.doCreateBlock(2, 1));
@@ -211,6 +266,26 @@ contract('Rise', async accounts => {
     });
 
     it('should fail with invalid first price block number', async () => {
+      await assertReverts(riseToken.doCreateBlock(1, 101));
+    });
+
+    it('should fail with invalid first price block number', async () => {
+      assert.isTrue(await riseToken.doCreateBlock.call(2, 101));
+      await assertReverts(riseToken.doCreateBlock(1 + 365 * 24, 101));
+    });
+
+    it('should work for different month lengths', async () => {
+      const HOUR = 60 * 60 * 1000;
+      assert.isTrue(await riseToken.doCreateBlock.call(Date.UTC(1970, 1, 28) / HOUR, 101));
+
+      await riseToken.setCurrentTime(Date.UTC(1972) / 1000);
+      assert.isTrue(await riseToken.doCreateBlock.call(Date.UTC(1972, 1, 29) / HOUR, 101));
+      await riseToken.setCurrentTime(3600);
+
+      assert.isTrue(await riseToken.doCreateBlock.call(Date.UTC(1970, 3, 30) / HOUR, 101));
+      assert.isTrue(await riseToken.doCreateBlock.call(Date.UTC(1970, 1, 31) / HOUR, 101));
+    });
+
     it('should be possible to create first block with valid future growth rate values and price factors case 1', async () => {
       await riseToken.lockPriceFactors();
 
@@ -397,6 +472,72 @@ contract('Rise', async accounts => {
       assert.equal((await riseToken.hoursToBlock(4)).growthRate.toString(), '0');
       assert.equal((await riseToken.hoursToBlock(4)).change.toString(), '0');
       assert.equal((await riseToken.hoursToBlock(4)).created.toString(), '0');
+    });
+  });
+
+  describe('invalid conversions - forced errors', async () => {
+    it('fails transfer in convertToCash', async () => {
+      cashToken = await Cash.new(SOMEBODY);
+      riseToken = await RiseTransferMock.new(SOMEBODY, cashToken.address);
+      await cashToken.setRiseContract(riseToken.address);
+
+      await riseToken.setPriceFactors(1001, pf1001);
+      await riseToken.lockPriceFactors();
+
+      await riseToken.doCreateBlock(2, 1001);
+      await riseToken.setCurrentTime(7200);
+
+      await assertError('RISE_TRANSFER_FAILED')(
+        riseToken.convertToCash.call(100, { from: SOMEBODY }),
+      );
+    });
+
+    it('fails mintFromRise in convertToCash', async () => {
+      cashToken = await Cash.new(SOMEBODY);
+      riseToken = await Rise.new(SOMEBODY, cashToken.address);
+      await cashToken.setRiseContract('0x0000000000000000000000000000000000000001');
+
+      await riseToken.setPriceFactors(1001, pf1001);
+      await riseToken.lockPriceFactors();
+
+      await riseToken.doCreateBlock(2, 1001);
+      await riseToken.setCurrentTime(7200);
+
+      await assertReverts(riseToken.convertToCash.call(100, { from: SOMEBODY }));
+    });
+
+    it('fails transfer in convertToRise', async () => {
+      cashToken = await Cash.new(SOMEBODY);
+      riseToken = await Rise.new(SOMEBODY, cashToken.address);
+      await cashToken.setRiseContract(riseToken.address);
+
+      await riseToken.setPriceFactors(1001, pf1001);
+      await riseToken.lockPriceFactors();
+
+      await riseToken.doCreateBlock(2, 1001);
+      await riseToken.setCurrentTime(7200);
+
+      await riseToken.convertToCash(900, { from: SOMEBODY });
+      await riseToken.zeroeQuarantineMock(); // dirty override
+
+      await assertReverts(riseToken.convertToRise.call(10, { from: SOMEBODY }));
+    });
+
+    it('fails burnFromRise in convertToRise', async () => {
+      cashToken = await CashBurnFromRiseMock.new(SOMEBODY);
+      riseToken = await Rise.new(SOMEBODY, cashToken.address);
+      await cashToken.setRiseContract(riseToken.address);
+
+      await riseToken.setPriceFactors(1001, pf1001);
+      await riseToken.lockPriceFactors();
+
+      await riseToken.doCreateBlock(2, 1001);
+      await riseToken.setCurrentTime(7200);
+
+      await riseToken.convertToCash(900, { from: SOMEBODY });
+      await assertError('BURNING_CASH_FAILED')(
+        riseToken.convertToRise.call(10, { from: SOMEBODY }),
+      );
     });
   });
 

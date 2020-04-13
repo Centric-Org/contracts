@@ -1,4 +1,5 @@
 const RoundMath = artifacts.require('RoundMathContract.sol');
+const { assertReverts } = require('./helpers/assertThrows');
 
 describe('RoundMath', async () => {
   let rMath;
@@ -34,6 +35,10 @@ describe('RoundMath', async () => {
 
       assert.notEqual(Number(await rMath.roundDiv(maxUint, 2)), maxUint);
     });
+
+    it('Should Fail with 0', async () => {
+      await assertReverts(rMath.roundDiv(1, 0));
+    });
   });
 
   describe('ceilDiv::', function() {
@@ -60,6 +65,10 @@ describe('RoundMath', async () => {
       assert.equal(Number(await rMath.ceilDiv(maxUint, 2)), halfMax, 'max ceilDiv 2 failed');
 
       assert.notEqual(Number(await rMath.ceilDiv(maxUint, 2)), maxUint);
+    });
+
+    it('Should Fail with 0', async () => {
+      await assertReverts(rMath.ceilDiv(1, 0));
     });
   });
 });

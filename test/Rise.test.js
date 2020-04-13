@@ -1,4 +1,5 @@
 const Rise = artifacts.require('RiseMock');
+const RiseOriginal = artifacts.require('Rise');
 const Cash = artifacts.require('Cash');
 
 const Reverter = require('./helpers/reverter');
@@ -17,6 +18,18 @@ getFGRPriceFactors = async (token, rate) => {
 
 const pf101 = ['1495449', '1443881', '1395751', '1350727'];
 const pf1001 = ['14197598', '13707992', '13251029', '12823549'];
+
+contract('RiseOriginal', async accounts => {
+  describe('getCurrentTime', async () => {
+    it('should return correct time', async () => {
+      const OWNER = accounts[0];
+      const riseToken = await RiseOriginal.new(OWNER, OWNER);
+      const time = await riseToken.getCurrentTime();
+      assert.equal(time > 0, true);
+      assert.equal(time < Date.now(), true);
+    });
+  });
+});
 
 contract('Rise', async accounts => {
   const reverter = new Reverter(web3);
@@ -201,13 +214,22 @@ contract('Rise', async accounts => {
       await riseToken.lockPriceFactors();
     });
 
-    it('should fail with invalid', async () => {
+    it('should fail with invalid growth rate', async () => {
       assert.isTrue(await riseToken.doCreateBlock.call(2, 101));
       await assertReverts(riseToken.doCreateBlock(2, 0));
       await assertReverts(riseToken.doCreateBlock(2, 1));
       await assertReverts(riseToken.doCreateBlock(2, 100));
       await assertReverts(riseToken.doCreateBlock(2, 102));
       await assertReverts(riseToken.doCreateBlock(2, 10001));
+    });
+
+    it('should work', async () => {
+      assert.isTrue(
+        await riseToken.doCreateBlock.call(Date.UTC(2020, 1, 29) / (60 * 60 * 1000), 101),
+      );
+      assert.isTrue(
+        await riseToken.doCreateBlock.call(Date.UTC(2021, 3, 30) / (60 * 60 * 1000), 101),
+      );
     });
 
     it('should be possible to create first block with valid future growth rate values and price factors case 1', async () => {

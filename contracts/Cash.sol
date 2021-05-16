@@ -1,13 +1,16 @@
-pragma solidity 0.4.25;
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.7.6;
 
 import './SafeMath.sol';
 import './TRC20.sol';
 
 
 contract Cash is TRC20Detailed {
+    using SafeMath for uint256;
+
     address public riseContract;
 
-    constructor(address _mintSaver) public TRC20Detailed('Centric CASH', 'CNS', 8) {
+    constructor(address _mintSaver) TRC20Detailed('Centric CASH', 'CNS', 8) {
         _mint(_mintSaver, 0);
     }
 
@@ -28,7 +31,7 @@ contract Cash is TRC20Detailed {
     }
 
     function burnFromRise(address tokensOwner, uint256 value)
-        external
+        external virtual
         onlyRise
         returns (bool _success)
     {

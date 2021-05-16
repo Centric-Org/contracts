@@ -1,4 +1,5 @@
-pragma solidity 0.4.25;
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.7.6;
 
 
 /// @dev Math operations with safety checks that revert on error

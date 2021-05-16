@@ -1,4 +1,5 @@
-pragma solidity 0.4.25;
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.7.6;
 
 import './Claimable.sol';
 
@@ -8,7 +9,7 @@ contract Administrable is Claimable {
     event AdminAppointed(address admin);
     event AdminDismissed(address admin);
 
-    constructor() public {
+    constructor() {
         isAdmin[owner] = true;
 
         emit AdminAppointed(owner);

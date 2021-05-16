@@ -1,24 +1,27 @@
-pragma solidity 0.4.25;
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.7.6;
 
 import './TRC20.sol';
 import './RoundMath.sol';
 import './DateLib.sol';
+import './SafeMath.sol';
 
 
-contract CashInterface {
-    function totalSupply() public view returns (uint256);
+abstract contract CashInterface {
+    function totalSupply() public view virtual returns (uint256);
 
-    function balanceOf(address who) external view returns (uint256);
+    function balanceOf(address who) external view virtual returns (uint256);
 
-    function mintFromRise(address to, uint256 value) public returns (bool);
+    function mintFromRise(address to, uint256 value) public virtual returns (bool);
 
-    function burnFromRise(address tokensOwner, uint256 value) external returns (bool);
+    function burnFromRise(address tokensOwner, uint256 value) external virtual returns (bool);
 }
 
 
 contract Rise is TRC20Detailed {
     using RoundMath for uint256;
     using DateLib for uint256;
+    using SafeMath for uint256;
 
     /**
      * STATE VARIABLES
@@ -107,10 +110,7 @@ contract Rise is TRC20Detailed {
      * to the contract storage to be able to interact with it.
      * Mints 1 billion tokens to _mintSaver address.
      */
-    constructor(address _mintSaver, address _cashContract)
-        public
-        TRC20Detailed('Centric RISE', 'CNR', 8)
-    {
+    constructor(address _mintSaver, address _cashContract) TRC20Detailed('Centric RISE', 'CNR', 8) {
         _mint(_mintSaver, 100000000000000000); // 1 Billion
         cashContract = _cashContract;
     }
@@ -180,7 +180,7 @@ contract Rise is TRC20Detailed {
      * set growthRateToPriceFactors
      * _priceFactors - see comments for mapping growthRateToPriceFactors
      */
-    function setPriceFactors(uint256 _growthRate, uint256[4] _priceFactors)
+    function setPriceFactors(uint256 _growthRate, uint256[4] memory _priceFactors)
         external
         onlyAdmin()
         returns (bool _success)
@@ -308,7 +308,7 @@ contract Rise is TRC20Detailed {
     function burnLostTokens() external onlyContractOwner() returns (bool _success) {
         uint256 _amount = balanceOf(address(this)).sub(quarantineBalance);
 
-        _burn(this, _amount);
+        _burn(address(this), _amount);
 
         emit LostTokensBurnt(_amount);
         return true;
@@ -337,7 +337,7 @@ contract Rise is TRC20Detailed {
             .div(_currentPrice);
 
         quarantineBalance = quarantineBalance.sub(_riseToBurn);
-        _burn(this, _riseToBurn);
+        _burn(address(this), _riseToBurn);
 
         emit QuarantineBalanceBurnt(_riseToBurn);
         return _riseToBurn;
@@ -400,8 +400,8 @@ contract Rise is TRC20Detailed {
     }
 
     // For testing purposes
-    function getCurrentTime() public view returns (uint256) {
-        return now;
+    function getCurrentTime() public virtual view returns (uint256) {
+        return block.timestamp;
     }
 
     // Helper function

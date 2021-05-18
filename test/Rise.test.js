@@ -196,7 +196,7 @@ contract('Rise', async accounts => {
     });
 
     it('should not be possible to set with only 3 price factors', async () => {
-      await assertError('too many arguments')(
+      await assertError('missing argument')(
         riseToken.setPriceFactors(101, [1495449, 1443881, 1395751]),
       );
     });

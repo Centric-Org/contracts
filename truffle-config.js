@@ -50,6 +50,7 @@ module.exports = {
       gas: 6000000,
       gasLimit: 6000000, // <-- Use this high gas value
       gasPrice: 1,
+      disableConfirmationListener: true // fix https://github.com/trufflesuite/truffle/issues/2688#issuecomment-736639231
     },
     coverage: {
       host: 'localhost',

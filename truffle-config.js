@@ -59,6 +59,7 @@ module.exports = {
       gas: 0xfffffffffff, // <-- Use this high gas value
       gasLimit: 0xfffffffffff, // <-- Use this high gas value
       gasPrice: 0x01, // <-- Use this low gas price
+      disableConfirmationListener: true // fix https://github.com/trufflesuite/truffle/issues/2688#issuecomment-736639231
     },
 
     // Another network with more advanced options...

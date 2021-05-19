@@ -9,7 +9,7 @@ describe('SafeMath', async () => {
     sMath = await SafeMath.new();
   });
 
-  describe('Subtraction::', function() {
+  describe('Subtraction::', function () {
     it('Should fail Subtraction - Minus', async () => {
       await assertReverts(sMath.sub(0, 1));
     });
@@ -23,7 +23,7 @@ describe('SafeMath', async () => {
     });
   });
 
-  describe('Addition::', function() {
+  describe('Addition::', function () {
     it('Should successfully Add', async () => {
       assert.equal(Number(await sMath.add(1, 1)), 2, '1 plus 1 failed');
     });
@@ -38,7 +38,7 @@ describe('SafeMath', async () => {
     });
   });
 
-  describe('Division::', function() {
+  describe('Division::', function () {
     it('Should fail Division - Zero division', async () => {
       await assertReverts(sMath.div(1, 0));
     });
@@ -53,7 +53,7 @@ describe('SafeMath', async () => {
     });
   });
 
-  describe('Multiplication::', function() {
+  describe('Multiplication::', function () {
     it('Should successfully Multiply', async () => {
       assert.equal(Number(await sMath.mul(1, 0)), 0, '1 multiplied by 0 failed');
       assert.equal(Number(await sMath.mul(0, 1)), 0, '0 multiplied by 1 failed');
@@ -68,7 +68,7 @@ describe('SafeMath', async () => {
     });
   });
 
-  describe('Modulo::', function() {
+  describe('Modulo::', function () {
     it('Should successfully mod', async () => {
       assert.equal(Number(await sMath.mod(1, 1)), 0, '1 mod by 1 failed');
       assert.equal(Number(await sMath.mod(2, 1)), 0, '2 mod by 1 failed');

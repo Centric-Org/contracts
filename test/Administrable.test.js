@@ -3,7 +3,7 @@ const Reverter = require('./helpers/reverter');
 const { assertReverts } = require('./helpers/assertThrows');
 const truffleAssert = require('truffle-assertions');
 
-contract('Administrable', async accounts => {
+contract('Administrable', async (accounts) => {
   const reverter = new Reverter(web3);
 
   let administrable;

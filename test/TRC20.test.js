@@ -9,7 +9,7 @@ const {
 
 const TRC20 = artifacts.require('TRC20Mock');
 
-contract('TRC20', async accounts => {
+contract('TRC20', async (accounts) => {
   const [initialHolder, recipient, anotherAccount] = accounts;
 
   const initialSupply = 100;

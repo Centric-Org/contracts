@@ -3,7 +3,7 @@ const Rise = artifacts.require('RiseMock');
 const Reverter = require('./helpers/reverter');
 const { assertReverts } = require('./helpers/assertThrows');
 
-contract('Cash', async accounts => {
+contract('Cash', async (accounts) => {
   const reverter = new Reverter(web3);
 
   let riseToken;

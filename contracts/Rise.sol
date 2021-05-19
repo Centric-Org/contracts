@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity 0.7.6;
 
-import './TRC20.sol';
+import './BEP20.sol';
 import './RoundMath.sol';
 import './DateLib.sol';
 import './SafeMath.sol';
@@ -16,7 +16,7 @@ abstract contract CashInterface {
     function burnFromRise(address tokensOwner, uint256 value) external virtual returns (bool);
 }
 
-contract Rise is TRC20Detailed {
+contract Rise is BEP20 {
     using RoundMath for uint256;
     using DateLib for uint256;
     using SafeMath for uint256;
@@ -108,7 +108,7 @@ contract Rise is TRC20Detailed {
      * to the contract storage to be able to interact with it.
      * Mints 1 billion tokens to _mintSaver address.
      */
-    constructor(address _mintSaver, address _cashContract) TRC20Detailed('Centric RISE', 'CNR', 8) {
+    constructor(address _mintSaver, address _cashContract) BEP20('Centric RISE', 'CNR', 8) {
         _mint(_mintSaver, 100000000000000000); // 1 Billion
         cashContract = _cashContract;
     }

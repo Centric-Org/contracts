@@ -2,14 +2,14 @@
 pragma solidity 0.7.6;
 
 import './SafeMath.sol';
-import './TRC20.sol';
+import './BEP20.sol';
 
-contract Cash is TRC20Detailed {
+contract Cash is BEP20 {
     using SafeMath for uint256;
 
     address public riseContract;
 
-    constructor(address _mintSaver) TRC20Detailed('Centric CASH', 'CNS', 8) {
+    constructor(address _mintSaver) BEP20('Centric CASH', 'CNS', 8) {
         _mint(_mintSaver, 0);
     }
 

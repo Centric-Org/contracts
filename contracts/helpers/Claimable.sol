@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity 0.7.6;
 
-contract Ownable {
+abstract contract Ownable {
     address public owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);

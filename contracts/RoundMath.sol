@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity 0.7.6;
 
-
 /// @dev Math operations with safety checks that revert on error
 library RoundMath {
     /// @dev Integer division of two numbers rounding the quotient, reverts on division by zero.

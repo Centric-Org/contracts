@@ -4,7 +4,6 @@ pragma solidity 0.7.6;
 import './SafeMath.sol';
 import './helpers/Administrable.sol';
 
-
 interface ITRC20 {
     function totalSupply() external view returns (uint256);
 
@@ -16,13 +15,16 @@ interface ITRC20 {
 
     function approve(address spender, uint256 value) external returns (bool);
 
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) external returns (bool);
 
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
-
 
 contract TRC20 is ITRC20, Administrable {
     using SafeMath for uint256;
@@ -64,7 +66,11 @@ contract TRC20 is ITRC20, Administrable {
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 value) public override returns (bool) {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) public override returns (bool) {
         _allowed[from][msg.sender] = _allowed[from][msg.sender].sub(value);
         _transfer(from, to, value);
         emit Approval(from, msg.sender, _allowed[from][msg.sender]);
@@ -87,7 +93,11 @@ contract TRC20 is ITRC20, Administrable {
         return true;
     }
 
-    function _transfer(address from, address to, uint256 value) internal {
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal {
         require(from != address(0), 'from cannot be address(0)');
         require(to != address(0), 'to cannot be address(0)');
 
@@ -120,7 +130,6 @@ contract TRC20 is ITRC20, Administrable {
         _burn(account, value);
     }
 }
-
 
 contract TRC20Detailed is TRC20 {
     string private _name;

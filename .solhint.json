@@ -1,4 +1,12 @@
 {
-  "solidity.linter": "solium",
-  "solidity.soliumRules": {}
+  "extends": "solhint:recommended",
+  "plugins": [],
+  "rules": {
+    "compiler-version": ["error", "^0.7.6"],
+    "quotes": ["error", "single"],
+    "reason-string": ["warn", { "maxLength": 50 }],
+    "state-visibility": "off",
+    "func-visibility": ["warn", { "ignoreConstructors": true }],
+    "not-rely-on-time": "off"
+  }
 }

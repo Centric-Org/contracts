@@ -11,7 +11,7 @@
     "coverage": "truffle run coverage --network coverage",
     "compile": "truffle compile",
     "validate-tests": "eslint test/*.js test/helpers/*.js --fix",
-    "validate-sol": "solium --dir contracts --fix",
+    "validate-sol": "solhint 'contracts/**/*.sol' --fix",
     "format": "prettier --write **/*.js & prettier --write **/*.sol"
   },
   "author": "",
@@ -31,9 +31,9 @@
   "devDependencies": {
     "@openzeppelin/test-helpers": "^0.5.11",
     "eslint": "^7.26.0",
-    "ethlint": "^1.2.5",
     "prettier": "^2.3.0",
     "prettier-plugin-solidity": "^1.0.0-beta.10",
+    "solhint": "^3.3.4",
     "solidity-coverage": "^0.7.16"
   }
 }

@@ -3,7 +3,7 @@ const { assertReverts, assertInvalidArgument } = require('./helpers/assertThrows
 
 describe('SafeMath', async () => {
   let sMath;
-  const maxUint = '1000000000000000000000000000000000000000';
+  const maxUint = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
   before('setup contract', async () => {
     sMath = await SafeMath.new();
@@ -26,6 +26,10 @@ describe('SafeMath', async () => {
   describe('Addition::', function () {
     it('Should successfully Add', async () => {
       assert.equal(Number(await sMath.add(1, 1)), 2, '1 plus 1 failed');
+    });
+
+    it('Should fail Addition - on overflow', async () => {
+      await assertReverts(sMath.add(maxUint, maxUint));
     });
 
     it('Should fail Addition - +int to Minus (Adding to > -1 )', async () => {

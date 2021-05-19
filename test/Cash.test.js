@@ -21,6 +21,30 @@ contract('Cash', async (accounts) => {
     await reverter.snapshot();
   });
 
+  describe('name()', async () => {
+    it('should return token name', async () => {
+      assert.equal((await cashToken.name()).toString(), 'Centric CASH');
+    });
+  });
+
+  describe('symbol()', async () => {
+    it('should return token symbol', async () => {
+      assert.equal((await cashToken.symbol()).toString(), 'CNS');
+    });
+  });
+
+  describe('decimals()', async () => {
+    it('should return token decimals', async () => {
+      assert.equal((await cashToken.decimals()).toString(), 8);
+    });
+  });
+
+  describe('getOwner()', async () => {
+    it('should return owner', async () => {
+      assert.equal((await cashToken.getOwner()).toString(), OWNER);
+    });
+  });
+
   describe('setRiseContract()', async () => {
     it('should be possible to set Rise contract address to a new one by owner', async () => {
       assert.equal(await cashToken.riseContract(), ADDRESS_NULL);

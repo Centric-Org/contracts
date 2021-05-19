@@ -6,7 +6,6 @@ import './RoundMath.sol';
 import './DateLib.sol';
 import './SafeMath.sol';
 
-
 abstract contract CashInterface {
     function totalSupply() public view virtual returns (uint256);
 
@@ -16,7 +15,6 @@ abstract contract CashInterface {
 
     function burnFromRise(address tokensOwner, uint256 value) external virtual returns (bool);
 }
-
 
 contract Rise is TRC20Detailed {
     using RoundMath for uint256;
@@ -137,7 +135,12 @@ contract Rise is TRC20Detailed {
     function getBlockData(uint256 _hoursEpoch)
         external
         view
-        returns (uint256 _risePrice, uint256 _growthRate, uint256 _change, uint256 _created)
+        returns (
+            uint256 _risePrice,
+            uint256 _growthRate,
+            uint256 _change,
+            uint256 _created
+        )
     {
         require(_hoursEpoch > 0, 'EMPTY_HOURS_VALUE');
         require(hoursToBlock[_hoursEpoch].risePrice > 0, 'BLOCK_NOT_DEFINED');
@@ -263,9 +266,8 @@ contract Rise is TRC20Detailed {
 
         emit BurnCash(_cashAmount);
 
-        uint256 _riseToDequarantine = (_cashAmount.mul(PRICE_BASE)).div(
-            hoursToBlock[getCurrentHour()].risePrice
-        );
+        uint256 _riseToDequarantine =
+            (_cashAmount.mul(PRICE_BASE)).div(hoursToBlock[getCurrentHour()].risePrice);
 
         quarantineBalance = quarantineBalance.sub(_riseToDequarantine);
         require(this.transfer(msg.sender, _riseToDequarantine), 'CONVERT_TO_RISE_FAILED');
@@ -286,9 +288,8 @@ contract Rise is TRC20Detailed {
         quarantineBalance = quarantineBalance.add(_riseAmount);
         require(transfer(address(this), _riseAmount), 'RISE_TRANSFER_FAILED');
 
-        uint256 _cashToIssue = (_riseAmount.mul(hoursToBlock[getCurrentHour()].risePrice)).div(
-            PRICE_BASE
-        );
+        uint256 _cashToIssue =
+            (_riseAmount.mul(hoursToBlock[getCurrentHour()].risePrice)).div(PRICE_BASE);
 
         require(
             CashInterface(cashContract).mintFromRise(msg.sender, _cashToIssue),
@@ -331,10 +332,9 @@ contract Rise is TRC20Detailed {
         uint256 _currentPrice = hoursToBlock[getCurrentHour()].risePrice;
         uint256 _cashSupply = CashInterface(cashContract).totalSupply();
 
-        uint256 _riseToBurn = (
-            (((_quarantined.mul(_currentPrice)).div(PRICE_BASE)).sub(_cashSupply)).mul(PRICE_BASE)
-        )
-            .div(_currentPrice);
+        uint256 _riseToBurn =
+            ((((_quarantined.mul(_currentPrice)).div(PRICE_BASE)).sub(_cashSupply)).mul(PRICE_BASE))
+                .div(_currentPrice);
 
         quarantineBalance = quarantineBalance.sub(_riseToBurn);
         _burn(address(this), _riseToBurn);
@@ -378,10 +378,10 @@ contract Rise is TRC20Detailed {
             _risePriceFactor = growthRateToPriceFactors[_growthRate][2];
         else _risePriceFactor = growthRateToPriceFactors[_growthRate][3];
 
-        uint256 _risePrice = (
-            (_risePriceFactor.mul(_lastPrice)).add(_lastPrice.mul(PRICE_FACTOR_BASE))
-        )
-            .ceilDiv(PRICE_FACTOR_BASE);
+        uint256 _risePrice =
+            ((_risePriceFactor.mul(_lastPrice)).add(_lastPrice.mul(PRICE_FACTOR_BASE))).ceilDiv(
+                PRICE_FACTOR_BASE
+            );
 
         uint256 _change = (_risePrice.sub(_lastPrice)).mul(PRICE_BASE).roundDiv(_lastPrice);
         uint256 _created = getCurrentHour();
@@ -400,7 +400,7 @@ contract Rise is TRC20Detailed {
     }
 
     // For testing purposes
-    function getCurrentTime() public virtual view returns (uint256) {
+    function getCurrentTime() public view virtual returns (uint256) {
         return block.timestamp;
     }
 

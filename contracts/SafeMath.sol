@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity 0.7.6;
 
-
 /// @dev Math operations with safety checks that revert on error
 library SafeMath {
     /// @dev Multiplies two numbers, reverts on overflow.

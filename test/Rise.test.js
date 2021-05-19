@@ -15,13 +15,13 @@ getFGRPriceFactors = async (token, rate) => {
     token.growthRateToPriceFactors(rate, 2),
     token.growthRateToPriceFactors(rate, 3),
   ];
-  return (await Promise.all(pf)).map(f => f.toString());
+  return (await Promise.all(pf)).map((f) => f.toString());
 };
 
 const pf101 = ['1495449', '1443881', '1395751', '1350727'];
 const pf1001 = ['14197598', '13707992', '13251029', '12823549'];
 
-contract('RiseOriginal', async accounts => {
+contract('RiseOriginal', async (accounts) => {
   describe('getCurrentTime', async () => {
     it('should return correct time', async () => {
       const OWNER = accounts[0];
@@ -33,7 +33,7 @@ contract('RiseOriginal', async accounts => {
   });
 });
 
-contract('Rise', async accounts => {
+contract('Rise', async (accounts) => {
   const reverter = new Reverter(web3);
 
   let riseToken;

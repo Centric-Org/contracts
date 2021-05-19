@@ -170,13 +170,14 @@ function shouldBehaveLikeTRC20(initialSupply, initialHolder, recipient, anotherA
   });
 
   describe('approve', async () => {
-    shouldBehaveLikeTRC20Approve.bind(this)(initialHolder, recipient, initialSupply, function(
-      owner,
-      spender,
-      amount,
-    ) {
-      return this.token.approve(spender, amount, { from: owner });
-    });
+    shouldBehaveLikeTRC20Approve.bind(this)(
+      initialHolder,
+      recipient,
+      initialSupply,
+      function (owner, spender, amount) {
+        return this.token.approve(spender, amount, { from: owner });
+      },
+    );
   });
 }
 

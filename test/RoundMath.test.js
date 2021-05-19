@@ -10,7 +10,7 @@ describe('RoundMath', async () => {
     rMath = await RoundMath.new();
   });
 
-  describe('roundDiv::', function() {
+  describe('roundDiv::', function () {
     it('Should successfully roundDiv', async () => {
       assert.equal(Number(await rMath.roundDiv(1, 1)), 1, '1 roundDiv 1 failed');
       assert.equal(Number(await rMath.roundDiv(1, 2)), 1, '1 roundDiv 2 failed');
@@ -41,7 +41,7 @@ describe('RoundMath', async () => {
     });
   });
 
-  describe('ceilDiv::', function() {
+  describe('ceilDiv::', function () {
     it('Should fail Addition - Minus', async () => {
       assert.equal(Number(await rMath.ceilDiv(1, 1)), 1, '1 ceilDiv 1 failed');
       assert.equal(Number(await rMath.ceilDiv(1, 2)), 1, '1 ceilDiv 2 failed');

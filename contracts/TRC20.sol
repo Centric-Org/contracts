@@ -2,7 +2,7 @@
 pragma solidity 0.7.6;
 
 import './SafeMath.sol';
-import './helpers/Administrable.sol';
+import './Administrable.sol';
 
 interface ITRC20 {
     function totalSupply() external view returns (uint256);

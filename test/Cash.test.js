@@ -23,7 +23,7 @@ contract('Cash', async (accounts) => {
 
   describe('name()', async () => {
     it('should return token name', async () => {
-      assert.equal((await cashToken.name()).toString(), 'Centric CASH');
+      assert.equal((await cashToken.name()).toString(), 'Centric SWAP');
     });
   });
 

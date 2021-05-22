@@ -9,7 +9,7 @@ contract Cash is BEP20 {
 
     address public riseContract;
 
-    constructor(address _mintSaver) BEP20('Centric CASH', 'CNS', 8) {
+    constructor(address _mintSaver) BEP20('Centric SWAP', 'CNS', 8) {
         _mint(_mintSaver, 0);
     }
 

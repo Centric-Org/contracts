@@ -2,7 +2,10 @@ const expectThrow = text => async promise => {
   try {
     await promise;
   } catch (error) {
-    assert(error.message.search(text) >= 0, 'Expected throw, got \'' + error + '\' instead');
+    assert(
+      error.message.search(text) >= 0 || error.reason.search(text) >= 0,
+      `Expected '${text}', got '${error}' instead`,
+    );
     return;
   }
   assert.fail('Expected throw not received');
@@ -13,4 +16,5 @@ module.exports = {
   assertReverts: expectThrow('revert'),
   assertError: expectThrow,
   assertInvalidJump: expectThrow('invalid JUMP'),
+  assertInvalidArgument: expectThrow('INVALID_ARGUMENT'),
 };

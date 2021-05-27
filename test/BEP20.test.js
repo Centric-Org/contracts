@@ -2,23 +2,23 @@ const { constants, expectEvent, expectRevert } = require('@openzeppelin/test-hel
 const { ZERO_ADDRESS } = constants;
 
 const {
-  shouldBehaveLikeTRC20,
-  shouldBehaveLikeTRC20Transfer,
-  shouldBehaveLikeTRC20Approve,
-} = require('./TRC20.behavior');
+  shouldBehaveLikeBEP20,
+  shouldBehaveLikeBEP20Transfer,
+  shouldBehaveLikeBEP20Approve,
+} = require('./BEP20.behavior');
 
-const TRC20 = artifacts.require('TRC20Mock');
+const BEP20 = artifacts.require('BEP20Mock');
 
-contract('TRC20', async (accounts) => {
+contract('BEP20', async (accounts) => {
   const [initialHolder, recipient, anotherAccount] = accounts;
 
   const initialSupply = 100;
 
   beforeEach('set', async () => {
-    this.token = await TRC20.new(initialHolder, initialSupply);
+    this.token = await BEP20.new(initialHolder, initialSupply);
   });
 
-  shouldBehaveLikeTRC20.bind(this)(initialSupply, initialHolder, recipient, anotherAccount);
+  shouldBehaveLikeBEP20.bind(this)(initialSupply, initialHolder, recipient, anotherAccount);
 
   describe('decrease allowance', async () => {
     describe('when the spender is not the zero address', async () => {
@@ -311,7 +311,7 @@ contract('TRC20', async (accounts) => {
   });
 
   describe('_transfer', async () => {
-    shouldBehaveLikeTRC20Transfer.bind(this)(
+    shouldBehaveLikeBEP20Transfer.bind(this)(
       initialHolder,
       recipient,
       initialSupply,
@@ -331,7 +331,7 @@ contract('TRC20', async (accounts) => {
   });
 
   describe('approve', async () => {
-    shouldBehaveLikeTRC20Approve.bind(this)(
+    shouldBehaveLikeBEP20Approve.bind(this)(
       initialHolder,
       recipient,
       initialSupply,

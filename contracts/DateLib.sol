@@ -1,5 +1,5 @@
-pragma solidity 0.4.25;
-
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.7.6;
 
 library DateLib {
     uint256 constant DAY_IN_SECONDS = 86400;

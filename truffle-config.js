@@ -50,6 +50,7 @@ module.exports = {
       gas: 6000000,
       gasLimit: 6000000, // <-- Use this high gas value
       gasPrice: 1,
+      disableConfirmationListener: true // fix https://github.com/trufflesuite/truffle/issues/2688#issuecomment-736639231
     },
     coverage: {
       host: 'localhost',
@@ -58,6 +59,7 @@ module.exports = {
       gas: 0xfffffffffff, // <-- Use this high gas value
       gasLimit: 0xfffffffffff, // <-- Use this high gas value
       gasPrice: 0x01, // <-- Use this low gas price
+      disableConfirmationListener: true // fix https://github.com/trufflesuite/truffle/issues/2688#issuecomment-736639231
     },
 
     // Another network with more advanced options...
@@ -125,7 +127,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: '0.4.25',
+      version: '0.7.6',
       settings: {
         optimizer: {
           enabled: true,

@@ -1,7 +1,7 @@
 const { constants, expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
 const { ZERO_ADDRESS } = constants;
 
-function shouldBehaveLikeTRC20(initialSupply, initialHolder, recipient, anotherAccount) {
+function shouldBehaveLikeBEP20(initialSupply, initialHolder, recipient, anotherAccount) {
   describe('total supply', async () => {
     it('returns the total amount of tokens', async () => {
       assert.equal(await this.token.totalSupply(), initialSupply);
@@ -31,7 +31,7 @@ function shouldBehaveLikeTRC20(initialSupply, initialHolder, recipient, anotherA
   });
 
   describe('transfer', async () => {
-    shouldBehaveLikeTRC20Transfer.bind(this)(
+    shouldBehaveLikeBEP20Transfer.bind(this)(
       initialHolder,
       recipient,
       initialSupply,
@@ -170,7 +170,7 @@ function shouldBehaveLikeTRC20(initialSupply, initialHolder, recipient, anotherA
   });
 
   describe('approve', async () => {
-    shouldBehaveLikeTRC20Approve.bind(this)(
+    shouldBehaveLikeBEP20Approve.bind(this)(
       initialHolder,
       recipient,
       initialSupply,
@@ -181,7 +181,7 @@ function shouldBehaveLikeTRC20(initialSupply, initialHolder, recipient, anotherA
   });
 }
 
-function shouldBehaveLikeTRC20Transfer(from, to, balance, transfer) {
+function shouldBehaveLikeBEP20Transfer(from, to, balance, transfer) {
   describe('when the recipient is not the zero address', async () => {
     describe('when the sender does not have enough balance', async () => {
       const amount = balance + 1;
@@ -246,7 +246,7 @@ function shouldBehaveLikeTRC20Transfer(from, to, balance, transfer) {
   });
 }
 
-function shouldBehaveLikeTRC20Approve(owner, spender, supply, approve) {
+function shouldBehaveLikeBEP20Approve(owner, spender, supply, approve) {
   describe('when the spender is not the zero address', async () => {
     describe('when the sender has enough balance', async () => {
       const amount = supply;
@@ -328,7 +328,7 @@ function shouldBehaveLikeTRC20Approve(owner, spender, supply, approve) {
 }
 
 module.exports = {
-  shouldBehaveLikeTRC20,
-  shouldBehaveLikeTRC20Transfer,
-  shouldBehaveLikeTRC20Approve,
+  shouldBehaveLikeBEP20,
+  shouldBehaveLikeBEP20Transfer,
+  shouldBehaveLikeBEP20Approve,
 };

@@ -1,6 +1,7 @@
-pragma solidity 0.4.25;
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.7.6;
 
-contract Ownable {
+abstract contract Ownable {
     address public owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -9,7 +10,7 @@ contract Ownable {
      * @dev The Ownable constructor sets the original `owner` of the contract to the sender
      * account.
      */
-    constructor() public {
+    constructor() {
         owner = msg.sender;
         emit OwnershipTransferred(address(0), owner);
     }

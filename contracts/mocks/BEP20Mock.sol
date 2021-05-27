@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity 0.7.6;
 
-import '../TRC20.sol';
+import '../BEP20.sol';
 
 // mock class using TRC20
-contract TRC20Mock is TRC20 {
-    constructor (address initialAccount, uint256 initialBalance) {
+contract BEP20Mock is BEP20 {
+    constructor (address initialAccount, uint256 initialBalance) BEP20('BEP20Mock', 'BEPM', 8) {
         _mint(initialAccount, initialBalance);
     }
 

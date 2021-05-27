@@ -14,7 +14,7 @@ describe('DateLib', async () => {
   //   });
   // });
 
-  describe('getHoursInMonth::', function() {
+  describe('getHoursInMonth::', function () {
     it('Should successfully getHoursInMonth', async () => {
       assert.equal(Number(await dLib.getHoursInMonth(Date.UTC(2000, 2, 15))), 31 * 24);
       assert.equal(Number(await dLib.getHoursInMonth(Date.UTC(1970, 0, 1, 1))), 31 * 24);

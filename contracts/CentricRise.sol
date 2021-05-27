@@ -1,29 +1,30 @@
-pragma solidity 0.4.25;
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.7.6;
 
-import './TRC20.sol';
+import './BEP20.sol';
 import './RoundMath.sol';
 import './DateLib.sol';
+import './SafeMath.sol';
 
+abstract contract SwapInterface {
+    function totalSupply() public view virtual returns (uint256);
 
-contract CashInterface {
-    function totalSupply() public view returns (uint256);
+    function balanceOf(address who) external view virtual returns (uint256);
 
-    function balanceOf(address who) external view returns (uint256);
+    function mintFromRise(address to, uint256 value) public virtual returns (bool);
 
-    function mintFromRise(address to, uint256 value) public returns (bool);
-
-    function burnFromRise(address tokensOwner, uint256 value) external returns (bool);
+    function burnFromRise(address tokensOwner, uint256 value) external virtual returns (bool);
 }
 
-
-contract Rise is TRC20Detailed {
+contract CentricRise is BEP20 {
     using RoundMath for uint256;
     using DateLib for uint256;
+    using SafeMath for uint256;
 
     /**
      * STATE VARIABLES
      */
-    address public cashContract;
+    address public swapContract;
     uint256 public quarantineBalance;
     uint256 public lastBlockNumber; // number of last created block
     uint256 public lastBalancedHour;
@@ -66,21 +67,21 @@ contract Rise is TRC20Detailed {
 
     event DoBalance(uint256 indexed currentHour, uint256 riseAmountBurnt);
 
-    event ConvertToCash(
+    event ConvertToSwap(
         address indexed converter,
         uint256 riseAmountSent,
-        uint256 cashAmountReceived
+        uint256 swapAmountReceived
     );
 
     event ConvertToRise(
         address indexed converter,
-        uint256 cashAmountSent,
+        uint256 swapAmountSent,
         uint256 riseAmountReceived
     );
 
-    event MintCash(address receiver, uint256 amount);
+    event MintSwap(address receiver, uint256 amount);
 
-    event BurnCash(uint256 amountBurnt);
+    event BurnSwap(uint256 amountBurnt);
 
     event PriceFactorSet(
         uint256 growthRate,
@@ -103,16 +104,13 @@ contract Rise is TRC20Detailed {
     event LostTokensBurnt(uint256 amount);
 
     /**
-     * Creates Rise contract. Also sets the Cash address
+     * Creates Rise contract. Also sets the Swap address
      * to the contract storage to be able to interact with it.
      * Mints 1 billion tokens to _mintSaver address.
      */
-    constructor(address _mintSaver, address _cashContract)
-        public
-        TRC20Detailed('Centric RISE', 'CNR', 8)
-    {
+    constructor(address _mintSaver, address _swapContract) BEP20('Centric RISE', 'CNR', 8) {
         _mint(_mintSaver, 100000000000000000); // 1 Billion
-        cashContract = _cashContract;
+        swapContract = _swapContract;
     }
 
     // Returns price of Rise for the current hour
@@ -137,7 +135,12 @@ contract Rise is TRC20Detailed {
     function getBlockData(uint256 _hoursEpoch)
         external
         view
-        returns (uint256 _risePrice, uint256 _growthRate, uint256 _change, uint256 _created)
+        returns (
+            uint256 _risePrice,
+            uint256 _growthRate,
+            uint256 _change,
+            uint256 _created
+        )
     {
         require(_hoursEpoch > 0, 'EMPTY_HOURS_VALUE');
         require(hoursToBlock[_hoursEpoch].risePrice > 0, 'BLOCK_NOT_DEFINED');
@@ -180,7 +183,7 @@ contract Rise is TRC20Detailed {
      * set growthRateToPriceFactors
      * _priceFactors - see comments for mapping growthRateToPriceFactors
      */
-    function setPriceFactors(uint256 _growthRate, uint256[4] _priceFactors)
+    function setPriceFactors(uint256 _growthRate, uint256[4] memory _priceFactors)
         external
         onlyAdmin()
         returns (bool _success)
@@ -245,40 +248,39 @@ contract Rise is TRC20Detailed {
     }
 
     /**
-     * Public function that allows users to convert Cash tokens to Rise ones.
+     * Public function that allows users to convert Swap tokens to Rise ones.
      * Amount of received Rise tokens depends on the risePrice of the current block.
      */
-    function convertToRise(uint256 _cashAmount) external returns (bool _success) {
+    function convertToRise(uint256 _swapAmount) external returns (bool _success) {
         require(hoursToBlock[getCurrentHour()].risePrice != 0, 'CURRENT_PRICE_BLOCK_NOT_DEFINED');
 
         require(
-            CashInterface(cashContract).balanceOf(msg.sender) >= _cashAmount,
-            'INSUFFICIENT_CASH_BALANCE'
+            SwapInterface(swapContract).balanceOf(msg.sender) >= _swapAmount,
+            'INSUFFICIENT_SWAP_BALANCE'
         );
 
         require(
-            CashInterface(cashContract).burnFromRise(msg.sender, _cashAmount),
-            'BURNING_CASH_FAILED'
+            SwapInterface(swapContract).burnFromRise(msg.sender, _swapAmount),
+            'BURNING_SWAP_FAILED'
         );
 
-        emit BurnCash(_cashAmount);
+        emit BurnSwap(_swapAmount);
 
-        uint256 _riseToDequarantine = (_cashAmount.mul(PRICE_BASE)).div(
-            hoursToBlock[getCurrentHour()].risePrice
-        );
+        uint256 _riseToDequarantine =
+            (_swapAmount.mul(PRICE_BASE)).div(hoursToBlock[getCurrentHour()].risePrice);
 
         quarantineBalance = quarantineBalance.sub(_riseToDequarantine);
         require(this.transfer(msg.sender, _riseToDequarantine), 'CONVERT_TO_RISE_FAILED');
 
-        emit ConvertToRise(msg.sender, _cashAmount, _riseToDequarantine);
+        emit ConvertToRise(msg.sender, _swapAmount, _riseToDequarantine);
         return true;
     }
 
     /**
-     * Public function that allows users to convert Rise tokens to Cash ones.
-     * Amount of received Cash tokens depends on the risePrice of a current block.
+     * Public function that allows users to convert Rise tokens to Swap ones.
+     * Amount of received Swap tokens depends on the risePrice of a current block.
      */
-    function convertToCash(uint256 _riseAmount) external returns (uint256) {
+    function convertToSwap(uint256 _riseAmount) external returns (uint256) {
         require(hoursToBlock[getCurrentHour()].risePrice != 0, 'CURRENT_PRICE_BLOCK_NOT_DEFINED');
 
         require(balanceOf(msg.sender) >= _riseAmount, 'INSUFFICIENT_RISE_BALANCE');
@@ -286,19 +288,18 @@ contract Rise is TRC20Detailed {
         quarantineBalance = quarantineBalance.add(_riseAmount);
         require(transfer(address(this), _riseAmount), 'RISE_TRANSFER_FAILED');
 
-        uint256 _cashToIssue = (_riseAmount.mul(hoursToBlock[getCurrentHour()].risePrice)).div(
-            PRICE_BASE
-        );
+        uint256 _swapToIssue =
+            (_riseAmount.mul(hoursToBlock[getCurrentHour()].risePrice)).div(PRICE_BASE);
 
         require(
-            CashInterface(cashContract).mintFromRise(msg.sender, _cashToIssue),
-            'CASH_MINT_FAILED'
+            SwapInterface(swapContract).mintFromRise(msg.sender, _swapToIssue),
+            'SWAP_MINT_FAILED'
         );
 
-        emit MintCash(msg.sender, _cashToIssue);
+        emit MintSwap(msg.sender, _swapToIssue);
 
-        emit ConvertToCash(msg.sender, _riseAmount, _cashToIssue);
-        return _cashToIssue;
+        emit ConvertToSwap(msg.sender, _riseAmount, _swapToIssue);
+        return _swapToIssue;
     }
 
     /**
@@ -308,7 +309,7 @@ contract Rise is TRC20Detailed {
     function burnLostTokens() external onlyContractOwner() returns (bool _success) {
         uint256 _amount = balanceOf(address(this)).sub(quarantineBalance);
 
-        _burn(this, _amount);
+        _burn(address(this), _amount);
 
         emit LostTokensBurnt(_amount);
         return true;
@@ -318,26 +319,25 @@ contract Rise is TRC20Detailed {
      * Internal function that implements logic to burn a part of Rise tokens on quarantine.
      * Formula is based on network capitalization rules -
      * Network capitalization of quarantined Rise must be equal to
-     * network capitalization of Cash
-     * calculated as (q * pRISE - c * pCASH) / pRISE
+     * network capitalization of Swap
+     * calculated as (q * pRISE - c * pSWAP) / pRISE
      * where:
      * q - quarantined Rise,
      * pRISE - current risePrice
-     * c - current cash supply
-     * pCash - Cash pegged price ($1 USD fixed conversion price)
+     * c - current swap supply
+     * pSwap - Swap pegged price ($1 USD fixed conversion price)
      */
     function _burnQuarantined() internal returns (uint256) {
         uint256 _quarantined = quarantineBalance;
         uint256 _currentPrice = hoursToBlock[getCurrentHour()].risePrice;
-        uint256 _cashSupply = CashInterface(cashContract).totalSupply();
+        uint256 _swapSupply = SwapInterface(swapContract).totalSupply();
 
-        uint256 _riseToBurn = (
-            (((_quarantined.mul(_currentPrice)).div(PRICE_BASE)).sub(_cashSupply)).mul(PRICE_BASE)
-        )
-            .div(_currentPrice);
+        uint256 _riseToBurn =
+            ((((_quarantined.mul(_currentPrice)).div(PRICE_BASE)).sub(_swapSupply)).mul(PRICE_BASE))
+                .div(_currentPrice);
 
         quarantineBalance = quarantineBalance.sub(_riseToBurn);
-        _burn(this, _riseToBurn);
+        _burn(address(this), _riseToBurn);
 
         emit QuarantineBalanceBurnt(_riseToBurn);
         return _riseToBurn;
@@ -378,10 +378,10 @@ contract Rise is TRC20Detailed {
             _risePriceFactor = growthRateToPriceFactors[_growthRate][2];
         else _risePriceFactor = growthRateToPriceFactors[_growthRate][3];
 
-        uint256 _risePrice = (
-            (_risePriceFactor.mul(_lastPrice)).add(_lastPrice.mul(PRICE_FACTOR_BASE))
-        )
-            .ceilDiv(PRICE_FACTOR_BASE);
+        uint256 _risePrice =
+            ((_risePriceFactor.mul(_lastPrice)).add(_lastPrice.mul(PRICE_FACTOR_BASE))).ceilDiv(
+                PRICE_FACTOR_BASE
+            );
 
         uint256 _change = (_risePrice.sub(_lastPrice)).mul(PRICE_BASE).roundDiv(_lastPrice);
         uint256 _created = getCurrentHour();
@@ -400,8 +400,8 @@ contract Rise is TRC20Detailed {
     }
 
     // For testing purposes
-    function getCurrentTime() public view returns (uint256) {
-        return now;
+    function getCurrentTime() public view virtual returns (uint256) {
+        return block.timestamp;
     }
 
     // Helper function

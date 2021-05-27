@@ -1,14 +1,15 @@
-pragma solidity 0.4.25;
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.7.6;
 
-import '../Rise.sol';
+import '../CentricRise.sol';
 
 
-contract RiseMock is Rise {
+contract RiseMock is CentricRise {
     uint256 currentTime;
 
-    constructor(address _mintSaver, address _cashContract) public Rise(_mintSaver, _cashContract) {}
+    constructor(address _mintSaver, address _swapContract) CentricRise(_mintSaver, _swapContract) {}
 
-    function getCurrentTime() public view returns (uint256) {
+    function getCurrentTime() public override view returns (uint256) {
         if (currentTime == 0) {
             return 3600;
         } else {
@@ -16,7 +17,7 @@ contract RiseMock is Rise {
         }
     }
 
-    function setCurrentTime(uint256 _currentTime) public {
+    function setCurrentTime(uint256 _currentTime) public  {
         currentTime = _currentTime;
     }
 

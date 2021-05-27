@@ -1,8 +1,8 @@
 const Rise = artifacts.require('RiseMock');
 const RiseTransferMock = artifacts.require('RiseTransferMock');
-const CashBurnFromRiseMock = artifacts.require('CashBurnFromRiseMock');
-const RiseOriginal = artifacts.require('Rise');
-const Cash = artifacts.require('Cash');
+const SwapBurnFromRiseMock = artifacts.require('SwapBurnFromRiseMock');
+const RiseOriginal = artifacts.require('CentricRise');
+const Swap = artifacts.require('CentricSwap');
 
 const Reverter = require('./helpers/reverter');
 const { assertReverts, assertError } = require('./helpers/assertThrows');
@@ -37,7 +37,7 @@ contract('Rise', async (accounts) => {
   const reverter = new Reverter(web3);
 
   let riseToken;
-  let cashToken;
+  let swapToken;
 
   const OWNER = accounts[0];
   const SOMEBODY = accounts[1];
@@ -57,7 +57,7 @@ contract('Rise', async (accounts) => {
       const riseTokenLocal = await Rise.new(OWNER, ANYBODY);
 
       assert.equal((await riseTokenLocal.balanceOf(OWNER)).toString(), '100000000000000000');
-      assert.equal(await riseTokenLocal.cashContract(), ANYBODY);
+      assert.equal(await riseTokenLocal.swapContract(), ANYBODY);
       assert.equal((await riseTokenLocal.lastBlockNumber()).toString(), '0');
     });
   });
@@ -476,10 +476,10 @@ contract('Rise', async (accounts) => {
   });
 
   describe('invalid conversions - forced errors', async () => {
-    it('fails transfer in convertToCash', async () => {
-      cashToken = await Cash.new(SOMEBODY);
-      riseToken = await RiseTransferMock.new(SOMEBODY, cashToken.address);
-      await cashToken.setRiseContract(riseToken.address);
+    it('fails transfer in convertToSwap', async () => {
+      swapToken = await Swap.new(SOMEBODY);
+      riseToken = await RiseTransferMock.new(SOMEBODY, swapToken.address);
+      await swapToken.setRiseContract(riseToken.address);
 
       await riseToken.setPriceFactors(1001, pf1001);
       await riseToken.lockPriceFactors();
@@ -488,14 +488,14 @@ contract('Rise', async (accounts) => {
       await riseToken.setCurrentTime(7200);
 
       await assertError('RISE_TRANSFER_FAILED')(
-        riseToken.convertToCash.call(100, { from: SOMEBODY }),
+        riseToken.convertToSwap.call(100, { from: SOMEBODY }),
       );
     });
 
-    it('fails mintFromRise in convertToCash', async () => {
-      cashToken = await Cash.new(SOMEBODY);
-      riseToken = await Rise.new(SOMEBODY, cashToken.address);
-      await cashToken.setRiseContract('0x0000000000000000000000000000000000000001');
+    it('fails mintFromRise in convertToSwap', async () => {
+      swapToken = await Swap.new(SOMEBODY);
+      riseToken = await Rise.new(SOMEBODY, swapToken.address);
+      await swapToken.setRiseContract('0x0000000000000000000000000000000000000001');
 
       await riseToken.setPriceFactors(1001, pf1001);
       await riseToken.lockPriceFactors();
@@ -503,13 +503,13 @@ contract('Rise', async (accounts) => {
       await riseToken.doCreateBlock(2, 1001);
       await riseToken.setCurrentTime(7200);
 
-      await assertReverts(riseToken.convertToCash.call(100, { from: SOMEBODY }));
+      await assertReverts(riseToken.convertToSwap.call(100, { from: SOMEBODY }));
     });
 
     it('fails transfer in convertToRise', async () => {
-      cashToken = await Cash.new(SOMEBODY);
-      riseToken = await Rise.new(SOMEBODY, cashToken.address);
-      await cashToken.setRiseContract(riseToken.address);
+      swapToken = await Swap.new(SOMEBODY);
+      riseToken = await Rise.new(SOMEBODY, swapToken.address);
+      await swapToken.setRiseContract(riseToken.address);
 
       await riseToken.setPriceFactors(1001, pf1001);
       await riseToken.lockPriceFactors();
@@ -517,16 +517,16 @@ contract('Rise', async (accounts) => {
       await riseToken.doCreateBlock(2, 1001);
       await riseToken.setCurrentTime(7200);
 
-      await riseToken.convertToCash(900, { from: SOMEBODY });
+      await riseToken.convertToSwap(900, { from: SOMEBODY });
       await riseToken.zeroeQuarantineMock(); // dirty override
 
       await assertReverts(riseToken.convertToRise.call(10, { from: SOMEBODY }));
     });
 
     it('fails burnFromRise in convertToRise', async () => {
-      cashToken = await CashBurnFromRiseMock.new(SOMEBODY);
-      riseToken = await Rise.new(SOMEBODY, cashToken.address);
-      await cashToken.setRiseContract(riseToken.address);
+      swapToken = await SwapBurnFromRiseMock.new(SOMEBODY);
+      riseToken = await Rise.new(SOMEBODY, swapToken.address);
+      await swapToken.setRiseContract(riseToken.address);
 
       await riseToken.setPriceFactors(1001, pf1001);
       await riseToken.lockPriceFactors();
@@ -534,47 +534,47 @@ contract('Rise', async (accounts) => {
       await riseToken.doCreateBlock(2, 1001);
       await riseToken.setCurrentTime(7200);
 
-      await riseToken.convertToCash(900, { from: SOMEBODY });
-      await assertError('BURNING_CASH_FAILED')(
+      await riseToken.convertToSwap(900, { from: SOMEBODY });
+      await assertError('BURNING_SWAP_FAILED')(
         riseToken.convertToRise.call(10, { from: SOMEBODY }),
       );
     });
   });
 
-  describe('convertToCash()', async () => {
+  describe('convertToSwap()', async () => {
     beforeEach('set up stable contract', async () => {
-      cashToken = await Cash.new(OWNER);
-      riseToken = await Rise.new(OWNER, cashToken.address);
-      await cashToken.setRiseContract(riseToken.address);
+      swapToken = await Swap.new(OWNER);
+      riseToken = await Rise.new(OWNER, swapToken.address);
+      await swapToken.setRiseContract(riseToken.address);
 
       await riseToken.setPriceFactors(1001, pf1001);
       await riseToken.lockPriceFactors();
     });
 
-    it('should be possible to convertToCash with suficient balance case 1', async () => {
+    it('should be possible to convertToSwap with suficient balance case 1', async () => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       await riseToken.doCreateBlock(2, 1001);
       await riseToken.setCurrentTime(7200);
       await riseToken.doBalance();
 
-      const result = await riseToken.convertToCash(900, { from: SOMEBODY });
+      const result = await riseToken.convertToSwap(900, { from: SOMEBODY });
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 900);
       assert.equal((await riseToken.quarantineBalance()).toString(), 900);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8001);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 8001);
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 100);
 
-      expectEvent.inLogs(result.logs, 'ConvertToCash', {
+      expectEvent.inLogs(result.logs, 'ConvertToSwap', {
         converter: SOMEBODY,
         riseAmountSent: '900',
-        cashAmountReceived: '8001',
+        swapAmountReceived: '8001',
       });
 
-      expectEvent.inLogs(result.logs, 'MintCash', { receiver: SOMEBODY, amount: '8001' });
+      expectEvent.inLogs(result.logs, 'MintSwap', { receiver: SOMEBODY, amount: '8001' });
     });
 
-    it('should be possible to convertToCash with suficient balance case 2', async () => {
+    it('should be possible to convertToSwap with suficient balance case 2', async () => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
@@ -583,23 +583,23 @@ contract('Rise', async (accounts) => {
       await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
 
-      const result = await riseToken.convertToCash(900, { from: SOMEBODY });
+      const result = await riseToken.convertToSwap(900, { from: SOMEBODY });
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 900);
       assert.equal((await riseToken.quarantineBalance()).toString(), 900);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8018);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 8018);
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 100);
 
-      expectEvent.inLogs(result.logs, 'ConvertToCash', {
+      expectEvent.inLogs(result.logs, 'ConvertToSwap', {
         converter: SOMEBODY,
         riseAmountSent: '900',
-        cashAmountReceived: '8018',
+        swapAmountReceived: '8018',
       });
 
-      expectEvent.inLogs(result.logs, 'MintCash', { receiver: SOMEBODY, amount: '8018' });
+      expectEvent.inLogs(result.logs, 'MintSwap', { receiver: SOMEBODY, amount: '8018' });
     });
 
-    it('should be possible to convertToCash with suficient balance case 3', async () => {
+    it('should be possible to convertToSwap with suficient balance case 3', async () => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
@@ -608,22 +608,22 @@ contract('Rise', async (accounts) => {
       await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
 
-      const result = await riseToken.convertToCash(0, { from: SOMEBODY });
+      const result = await riseToken.convertToSwap(0, { from: SOMEBODY });
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 0);
       assert.equal((await riseToken.quarantineBalance()).toString(), 0);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 0);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 0);
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 1000);
 
-      expectEvent.inLogs(result.logs, 'ConvertToCash', {
+      expectEvent.inLogs(result.logs, 'ConvertToSwap', {
         converter: SOMEBODY,
         riseAmountSent: '0',
-        cashAmountReceived: '0',
+        swapAmountReceived: '0',
       });
-      expectEvent.inLogs(result.logs, 'MintCash', { receiver: SOMEBODY, amount: '0' });
+      expectEvent.inLogs(result.logs, 'MintSwap', { receiver: SOMEBODY, amount: '0' });
     });
 
-    it('should not be possible to convertToCash with insufficient balance', async () => {
+    it('should not be possible to convertToSwap with insufficient balance', async () => {
       await riseToken.transfer(SOMEBODY, 800);
 
       for (let i = 3; i < 31; i++) {
@@ -632,15 +632,15 @@ contract('Rise', async (accounts) => {
       await riseToken.setCurrentTime(20 * 3600);
       await riseToken.doBalance();
 
-      await assertReverts(riseToken.convertToCash(900, { from: SOMEBODY }));
+      await assertReverts(riseToken.convertToSwap(900, { from: SOMEBODY }));
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 0);
       assert.equal((await riseToken.quarantineBalance()).toString(), 0);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 0);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 0);
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 800);
     });
 
-    it('should not be possible to convertToCash with 0 risePrice', async () => {
+    it('should not be possible to convertToSwap with 0 risePrice', async () => {
       await riseToken.transfer(SOMEBODY, 1000);
 
       for (let i = 3; i < 31; i++) {
@@ -648,20 +648,20 @@ contract('Rise', async (accounts) => {
       }
       await riseToken.setCurrentTime(144001);
 
-      await assertReverts(riseToken.convertToCash(900, { from: SOMEBODY }));
+      await assertReverts(riseToken.convertToSwap(900, { from: SOMEBODY }));
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 0);
       assert.equal((await riseToken.quarantineBalance()).toString(), 0);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 0);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 0);
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 1000);
     });
   });
 
   describe('burnQuarantined()', async () => {
     beforeEach('set up stable contract', async () => {
-      cashToken = await Cash.new(OWNER);
-      riseToken = await Rise.new(OWNER, cashToken.address);
-      await cashToken.setRiseContract(riseToken.address);
+      swapToken = await Swap.new(OWNER);
+      riseToken = await Rise.new(OWNER, swapToken.address);
+      await swapToken.setRiseContract(riseToken.address);
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
 
@@ -671,7 +671,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 1', async () => {
-      await riseToken.convertToCash(26000, { from: SOMEBODY });
+      await riseToken.convertToSwap(26000, { from: SOMEBODY });
 
       for (let i = 3; i < 63; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -691,7 +691,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 2', async () => {
-      await riseToken.convertToCash(50000, { from: SOMEBODY });
+      await riseToken.convertToSwap(50000, { from: SOMEBODY });
 
       for (let i = 3; i < 24; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -711,7 +711,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 3', async () => {
-      await riseToken.convertToCash(50000, { from: SOMEBODY });
+      await riseToken.convertToSwap(50000, { from: SOMEBODY });
 
       for (let i = 3; i <= 30; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -731,7 +731,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 4', async () => {
-      await riseToken.convertToCash(50000, { from: SOMEBODY });
+      await riseToken.convertToSwap(50000, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -751,7 +751,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 5', async () => {
-      await riseToken.convertToCash(1800, { from: SOMEBODY });
+      await riseToken.convertToSwap(1800, { from: SOMEBODY });
 
       for (let i = 3; i < 63; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -772,7 +772,7 @@ contract('Rise', async (accounts) => {
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 6', async () => {
       await riseToken.transfer(SOMEBODY, 5000000000);
-      await riseToken.convertToCash(5000000000, { from: SOMEBODY });
+      await riseToken.convertToSwap(5000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 23; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -793,7 +793,7 @@ contract('Rise', async (accounts) => {
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 7', async () => {
       await riseToken.transfer(SOMEBODY, 5000000000);
-      await riseToken.convertToCash(5000000000, { from: SOMEBODY });
+      await riseToken.convertToSwap(5000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 53; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -814,7 +814,7 @@ contract('Rise', async (accounts) => {
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 8', async () => {
       await riseToken.transfer(SOMEBODY, 9000000000000);
-      await riseToken.convertToCash(9000000000000, { from: SOMEBODY });
+      await riseToken.convertToSwap(9000000000000, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -835,7 +835,7 @@ contract('Rise', async (accounts) => {
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 9', async () => {
       await riseToken.transfer(SOMEBODY, 140086);
-      await riseToken.convertToCash(140086, { from: SOMEBODY });
+      await riseToken.convertToSwap(140086, { from: SOMEBODY });
 
       for (let i = 3; i < 13; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -856,7 +856,7 @@ contract('Rise', async (accounts) => {
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 10', async () => {
       await riseToken.transfer(SOMEBODY, 140086);
-      await riseToken.convertToCash(140086, { from: SOMEBODY });
+      await riseToken.convertToSwap(140086, { from: SOMEBODY });
 
       for (let i = 3; i < 103; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -876,7 +876,7 @@ contract('Rise', async (accounts) => {
     });
 
     it('should be possible to burnQuarantined with sufficient wallet balance case 11', async () => {
-      await riseToken.convertToCash(1, { from: SOMEBODY });
+      await riseToken.convertToSwap(1, { from: SOMEBODY });
 
       for (let i = 3; i < 103; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -911,10 +911,10 @@ contract('Rise', async (accounts) => {
 
   describe('convertToRise()', async () => {
     beforeEach('set up stable contract', async () => {
-      cashToken = await Cash.new(OWNER);
+      swapToken = await Swap.new(OWNER);
       await riseToken.setCurrentTime(20 * 3600);
-      riseToken = await Rise.new(OWNER, cashToken.address);
-      await cashToken.setRiseContract(riseToken.address);
+      riseToken = await Rise.new(OWNER, swapToken.address);
+      await swapToken.setRiseContract(riseToken.address);
 
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
@@ -928,24 +928,24 @@ contract('Rise', async (accounts) => {
       }
       await riseToken.setCurrentTime(20 * 3600);
 
-      await riseToken.convertToCash(1000, { from: SOMEBODY });
+      await riseToken.convertToSwap(1000, { from: SOMEBODY });
 
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 1000);
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 1000);
       assert.equal((await riseToken.quarantineBalance()).toString(), 1000);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8891);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 8891);
 
       const result = await riseToken.convertToRise(8891, { from: SOMEBODY });
 
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 1999);
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 1);
       assert.equal((await riseToken.quarantineBalance()).toString(), 1);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 0);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 0);
 
-      expectEvent.inLogs(result.logs, 'BurnCash', { amountBurnt: '8891' });
+      expectEvent.inLogs(result.logs, 'BurnSwap', { amountBurnt: '8891' });
       expectEvent.inLogs(result.logs, 'ConvertToRise', {
         converter: SOMEBODY,
-        cashAmountSent: '8891',
+        swapAmountSent: '8891',
         riseAmountReceived: '999',
       });
     });
@@ -958,19 +958,19 @@ contract('Rise', async (accounts) => {
       }
       await riseToken.setCurrentTime(20 * 3600);
 
-      await riseToken.convertToCash(900, { from: SOMEBODY });
+      await riseToken.convertToSwap(900, { from: SOMEBODY });
 
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 0);
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 900);
       assert.equal((await riseToken.quarantineBalance()).toString(), 900);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8002);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 8002);
 
       await assertReverts(riseToken.convertToRise(8002 + 1, { from: SOMEBODY }));
 
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 0);
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 900);
       assert.equal((await riseToken.quarantineBalance()).toString(), 900);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8002);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 8002);
     });
 
     it('should not be possible to convertToRise with no block for current hour', async () => {
@@ -981,12 +981,12 @@ contract('Rise', async (accounts) => {
       }
       await riseToken.setCurrentTime(20 * 3600);
 
-      await riseToken.convertToCash(1000, { from: SOMEBODY });
+      await riseToken.convertToSwap(1000, { from: SOMEBODY });
 
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 1000);
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 1000);
       assert.equal((await riseToken.quarantineBalance()).toString(), 1000);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8891);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 8891);
 
       await riseToken.setCurrentTime(120 * 3600);
 
@@ -995,15 +995,15 @@ contract('Rise', async (accounts) => {
       assert.equal((await riseToken.balanceOf(SOMEBODY)).toString(), 1000);
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 1000);
       assert.equal((await riseToken.quarantineBalance()).toString(), 1000);
-      assert.equal((await cashToken.balanceOf(SOMEBODY)).toString(), 8891);
+      assert.equal((await swapToken.balanceOf(SOMEBODY)).toString(), 8891);
     });
   });
 
   describe('doBalance()', async () => {
     beforeEach('set up stable contract', async () => {
-      cashToken = await Cash.new(OWNER);
-      riseToken = await Rise.new(OWNER, cashToken.address);
-      await cashToken.setRiseContract(riseToken.address);
+      swapToken = await Swap.new(OWNER);
+      riseToken = await Rise.new(OWNER, swapToken.address);
+      await swapToken.setRiseContract(riseToken.address);
 
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
@@ -1015,7 +1015,7 @@ contract('Rise', async (accounts) => {
     it('should be possible to doBalance from somebody', async () => {
       await riseToken.transfer(ANYBODY, 1000000);
 
-      await riseToken.convertToCash(900000, { from: ANYBODY });
+      await riseToken.convertToSwap(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -1037,7 +1037,7 @@ contract('Rise', async (accounts) => {
     it('should be possible to doBalance from owner', async () => {
       await riseToken.transfer(ANYBODY, 1000000);
 
-      await riseToken.convertToCash(900000, { from: ANYBODY });
+      await riseToken.convertToSwap(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -1077,7 +1077,7 @@ contract('Rise', async (accounts) => {
     it('should be possible to doBalance second time in the next hour', async () => {
       await riseToken.transfer(ANYBODY, 1000000);
 
-      await riseToken.convertToCash(900000, { from: ANYBODY });
+      await riseToken.convertToSwap(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -1108,7 +1108,7 @@ contract('Rise', async (accounts) => {
     it('should not be possible to doBalance if current block is empty', async () => {
       await riseToken.transfer(ANYBODY, 1000000);
 
-      await riseToken.convertToCash(900000, { from: ANYBODY });
+      await riseToken.convertToSwap(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -1128,7 +1128,7 @@ contract('Rise', async (accounts) => {
     it('should not be possible to doBalance second time in the same hour', async () => {
       await riseToken.transfer(ANYBODY, 1000000);
 
-      await riseToken.convertToCash(900000, { from: ANYBODY });
+      await riseToken.convertToSwap(900000, { from: ANYBODY });
 
       for (let i = 3; i < 31; i++) {
         await riseToken.doCreateBlock(i, 101);
@@ -1155,9 +1155,9 @@ contract('Rise', async (accounts) => {
 
   describe('doCreateBlock()', async () => {
     beforeEach('set up stable contract', async () => {
-      cashToken = await Cash.new(OWNER);
-      riseToken = await Rise.new(OWNER, cashToken.address);
-      await cashToken.setRiseContract(riseToken.address);
+      swapToken = await Swap.new(OWNER);
+      riseToken = await Rise.new(OWNER, swapToken.address);
+      await swapToken.setRiseContract(riseToken.address);
 
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
@@ -1204,9 +1204,9 @@ contract('Rise', async (accounts) => {
 
   describe('burnLostTokens()', async () => {
     beforeEach('set up stable contract', async () => {
-      cashToken = await Cash.new(OWNER);
-      riseToken = await Rise.new(OWNER, cashToken.address);
-      await cashToken.setRiseContract(riseToken.address);
+      swapToken = await Swap.new(OWNER);
+      riseToken = await Rise.new(OWNER, swapToken.address);
+      await swapToken.setRiseContract(riseToken.address);
 
       await riseToken.setPriceFactors(101, pf101);
       await riseToken.lockPriceFactors();
@@ -1216,7 +1216,7 @@ contract('Rise', async (accounts) => {
       await riseToken.transfer(SOMEBODY, 10000);
       await riseToken.doCreateBlock(2, 101);
       await riseToken.setCurrentTime(7201);
-      await riseToken.convertToCash(9000, { from: SOMEBODY });
+      await riseToken.convertToSwap(9000, { from: SOMEBODY });
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 9000);
       assert.equal((await riseToken.quarantineBalance()).toString(), 9000);
@@ -1255,7 +1255,7 @@ contract('Rise', async (accounts) => {
       await riseToken.transfer(SOMEBODY, 10000);
       await riseToken.doCreateBlock(2, 101);
       await riseToken.setCurrentTime(7201);
-      await riseToken.convertToCash(9000, { from: SOMEBODY });
+      await riseToken.convertToSwap(9000, { from: SOMEBODY });
 
       assert.equal((await riseToken.balanceOf(riseToken.address)).toString(), 9000);
       assert.equal((await riseToken.quarantineBalance()).toString(), 9000);

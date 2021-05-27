@@ -1,25 +1,25 @@
 # Deploy
-### Deploy Cash.sol
+### Deploy CentricSwap.sol
 function:
 ```
 constructor(address _mintSaver)
 ```
 
-### Deploy Rise.sol
+### Deploy CentricRise.sol
 function:
 ```
-constructor(address _mintSaver, address _cashContract)
+constructor(address _mintSaver, address _swapContract)
 ```
 
 # Init
-### Call setRiseContract on Cash contract 
+### Call setRiseContract on Swap contract 
 function:
 ```
 setRiseContract(address _riseContractAddress)
 ```
 example: 
 ```js
-cashContract.setRiseContract(RISE_CONTRACT_ADDRESS).send();
+swapContract.setRiseContract(RISE_CONTRACT_ADDRESS).send();
 ```
 
 # Set Growth Rates and Price Factors

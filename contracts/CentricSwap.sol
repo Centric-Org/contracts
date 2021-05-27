@@ -4,7 +4,7 @@ pragma solidity 0.7.6;
 import './SafeMath.sol';
 import './BEP20.sol';
 
-contract Cash is BEP20 {
+contract CentricSwap is BEP20 {
     using SafeMath for uint256;
 
     address public riseContract;
